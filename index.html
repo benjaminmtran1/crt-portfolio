@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BEN — FILM CONSTRUCTION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CRT PORTFOLIO — design tokens
+   tube-black   #0b0e0c   (unlit phosphor)
+   phosphor     #a8bfa0   (muted green glow — primary text)
+   amber        #c2a35c   (muted amber — accents / OSD)
+   ghost-blue   #6e7f8d   (secondary / dimmed UI)
+   burn-white   #d8d4c4   (bright highlights, used sparingly)
+   ============================================================ */
+:root {
+  --tube: #0b0e0c;
+  --phosphor: #a8bfa0;
+  --phosphor-dim: #5f6f5b;
+  --amber: #c2a35c;
+  --ghost: #6e7f8d;
+  --burn: #d8d4c4;
+  --osd-font: 'VT323', monospace;
+  --body-font: 'IBM Plex Mono', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: #050605;
+  overflow: hidden;
+  font-family: var(--body-font);
+}
+
+/* ---------- THE TELEVISION CABINET ---------- */
+.tv-cabinet {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(8px, 2vw, 28px);
+}
+
+.crt {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--tube);
+  border-radius: clamp(18px, 4vw, 48px) / clamp(14px, 3vw, 36px);
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 clamp(60px, 12vw, 180px) rgba(0,0,0,0.85),
+    inset 0 0 12px rgba(0,0,0,0.9),
+    0 0 40px rgba(168,191,160,0.05);
+}
+
+/* screen content sits inside the tube */
+.screen {
+  position: absolute;
+  inset: 0;
+  padding: clamp(20px, 5vw, 72px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  color: var(--phosphor);
+  scrollbar-width: none;
+  text-shadow: 0 0 6px rgba(168,191,160,0.35);
+}
+.screen::-webkit-scrollbar { display: none; }
+
+/* ---------- CRT OVERLAYS ---------- */
+.scanlines {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0,0,0,0.22) 3px,
+    rgba(0,0,0,0.22) 4px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* slow-travelling bright band, like a refresh sweep */
+.sweep {
+  position: absolute; left: 0; right: 0;
+  height: 120px;
+  z-index: 11;
+  pointer-events: none;
+  background: linear-gradient(to bottom,
+    transparent,
+    rgba(216,212,196,0.03) 40%,
+    rgba(216,212,196,0.06) 50%,
+    rgba(216,212,196,0.03) 60%,
+    transparent);
+  animation: sweep 9s linear infinite;
+}
+@keyframes sweep {
+  0%   { top: -140px; }
+  100% { top: 110%; }
+}
+
+/* vignette + subtle curvature shading */
+.vignette {
+  position: absolute; inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center,
+      transparent 55%,
+      rgba(0,0,0,0.28) 82%,
+      rgba(0,0,0,0.72) 100%);
+}
+
+/* aperture-grille RGB stripes, extremely faint */
+.grille {
+  position: absolute; inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  opacity: 0.35;
+  background: repeating-linear-gradient(
+    to right,
+    rgba(255,60,60,0.035) 0px, rgba(255,60,60,0.035) 1px,
+    rgba(60,255,60,0.03) 1px,  rgba(60,255,60,0.03) 2px,
+    rgba(60,60,255,0.035) 2px, rgba(60,60,255,0.035) 3px
+  );
+}
+
+/* whole-tube flicker */
+.flicker {
+  position: absolute; inset: 0;
+  z-index: 13;
+  pointer-events: none;
+  background: rgba(168,191,160,0.02);
+  animation: flicker 0.12s steps(2) infinite;
+}
+@keyframes flicker {
+  0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.8; }
+}
+
+/* static noise canvas — used on channel change */
+#noise {
+  position: absolute; inset: 0;
+  z-index: 20;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.08s;
+}
+#noise.on { opacity: 1; }
+
+/* ---------- OSD (on-screen display) ---------- */
+.osd {
+  position: absolute;
+  z-index: 15;
+  font-family: var(--osd-font);
+  color: var(--amber);
+  text-shadow: 2px 0 0 rgba(194,163,92,0.35), -1px 0 0 rgba(110,127,141,0.35), 0 0 8px rgba(194,163,92,0.5);
+  pointer-events: none;
+  letter-spacing: 0.05em;
+}
+.osd-ch {
+  top: clamp(16px, 4vw, 44px);
+  right: clamp(20px, 5vw, 56px);
+  font-size: clamp(28px, 4.5vw, 52px);
+}
+.osd-label {
+  top: clamp(16px, 4vw, 44px);
+  left: clamp(20px, 5vw, 56px);
+  font-size: clamp(16px, 2.4vw, 24px);
+  color: var(--ghost);
+  text-shadow: 0 0 6px rgba(110,127,141,0.5);
+}
+.osd-ch.blink { animation: osdblink 0.9s steps(2) 3; }
+@keyframes osdblink { 50% { opacity: 0; } }
+
+/* ---------- CHANNEL DIAL (navigation) ---------- */
+.dial {
+  position: absolute;
+  z-index: 16;
+  bottom: clamp(14px, 3.5vw, 40px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: clamp(10px, 2vw, 22px);
+  font-family: var(--osd-font);
+}
+.dial button {
+  background: transparent;
+  border: 1px solid rgba(168,191,160,0.25);
+  color: var(--phosphor-dim);
+  font-family: var(--osd-font);
+  font-size: clamp(15px, 2vw, 20px);
+  padding: 6px 14px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 5px rgba(168,191,160,0.3);
+  transition: color 0.15s, border-color 0.15s;
+}
+.dial button:hover { color: var(--phosphor); border-color: rgba(168,191,160,0.6); }
+.dial button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.dial button.active {
+  color: var(--amber);
+  border-color: rgba(194,163,92,0.7);
+  text-shadow: 0 0 8px rgba(194,163,92,0.6);
+}
+
+/* ---------- CHANNELS (pages) ---------- */
+.channel { display: none; animation: tune-in 0.45s ease-out; padding-bottom: 90px; }
+.channel.on { display: block; }
+@keyframes tune-in {
+  0%   { transform: scaleY(0.004) scaleX(1.2); filter: brightness(6); }
+  40%  { transform: scaleY(0.6) scaleX(1.02); filter: brightness(2); }
+  100% { transform: scaleY(1) scaleX(1); filter: brightness(1); }
+}
+
+/* ---------- TYPE ---------- */
+h1, h2, h3 { font-family: var(--osd-font); font-weight: 400; }
+
+.hero-title {
+  font-size: clamp(44px, 9vw, 110px);
+  line-height: 0.95;
+  color: var(--burn);
+  text-shadow:
+    2px 0 0 rgba(194,120,92,0.4),
+   -2px 0 0 rgba(110,141,141,0.4),
+    0 0 18px rgba(216,212,196,0.35);
+  margin: clamp(24px, 8vh, 80px) 0 12px;
+}
+.hero-sub {
+  font-family: var(--osd-font);
+  font-size: clamp(20px, 3vw, 30px);
+  color: var(--amber);
+  margin-bottom: clamp(20px, 4vh, 40px);
+}
+.hero-body {
+  max-width: 62ch;
+  font-size: clamp(13px, 1.6vw, 15px);
+  line-height: 1.8;
+  color: var(--phosphor);
+}
+.hero-body p + p { margin-top: 1em; }
+
+.test-bars {
+  display: flex;
+  height: clamp(14px, 2.5vh, 24px);
+  margin-top: clamp(28px, 6vh, 56px);
+  max-width: 520px;
+  opacity: 0.55;
+}
+.test-bars span { flex: 1; }
+
+h2.ch-title {
+  font-size: clamp(30px, 5vw, 54px);
+  color: var(--burn);
+  text-shadow: 1.5px 0 0 rgba(194,120,92,0.35), -1.5px 0 0 rgba(110,141,141,0.35), 0 0 14px rgba(216,212,196,0.3);
+  margin: clamp(20px, 6vh, 56px) 0 8px;
+}
+.ch-sub {
+  font-family: var(--osd-font);
+  color: var(--ghost);
+  font-size: clamp(16px, 2.2vw, 21px);
+  margin-bottom: clamp(24px, 4vh, 44px);
+}
+
+/* ---------- BUILD LISTINGS (like a TV guide) ---------- */
+.guide { border-top: 1px solid rgba(168,191,160,0.2); }
+.guide-row {
+  display: grid;
+  grid-template-columns: clamp(70px, 10vw, 110px) 1fr;
+  gap: clamp(12px, 3vw, 32px);
+  padding: clamp(16px, 3vh, 26px) 0;
+  border-bottom: 1px solid rgba(168,191,160,0.2);
+  cursor: default;
+  transition: background 0.15s;
+}
+.guide-row:hover { background: rgba(168,191,160,0.05); }
+.guide-time {
+  font-family: var(--osd-font);
+  font-size: clamp(18px, 2.4vw, 24px);
+  color: var(--amber);
+}
+.guide-title {
+  font-family: var(--osd-font);
+  font-size: clamp(19px, 2.6vw, 26px);
+  color: var(--phosphor);
+  margin-bottom: 4px;
+}
+.guide-desc {
+  font-size: clamp(12px, 1.5vw, 14px);
+  line-height: 1.7;
+  color: var(--phosphor-dim);
+  max-width: 68ch;
+}
+.guide-tags {
+  margin-top: 8px;
+  font-family: var(--osd-font);
+  font-size: clamp(13px, 1.7vw, 16px);
+  color: var(--ghost);
+  letter-spacing: 0.06em;
+}
+
+/* ---------- CRT MEDIA TREATMENT (images & video) ---------- */
+.tv-frame {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px / 8px;
+  background: #000;
+  box-shadow:
+    inset 0 0 30px rgba(0,0,0,0.9),
+    0 0 0 1px rgba(168,191,160,0.15);
+}
+.tv-frame img,
+.tv-frame video,
+.tv-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 0;
+  filter: saturate(0.55) contrast(1.08) brightness(0.88) sepia(0.18) hue-rotate(-8deg);
+}
+/* per-media scanlines */
+.tv-frame::before {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px, transparent 2px,
+    rgba(0,0,0,0.28) 3px, rgba(0,0,0,0.28) 4px
+  );
+}
+/* per-media vignette + curvature */
+.tv-frame::after {
+  content: "";
+  position: absolute; inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center,
+      transparent 58%,
+      rgba(0,0,0,0.3) 85%,
+      rgba(0,0,0,0.65) 100%);
+}
+/* tracking glitch on hover */
+@keyframes tracking {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(2px) skewX(0.4deg); }
+  40% { transform: translateX(-2px); }
+  60% { transform: translateX(1px) skewX(-0.3deg); }
+  80% { transform: translateX(-1px); }
+}
+.tv-frame:hover img,
+.tv-frame:hover video { animation: tracking 0.25s steps(3) 2; }
+
+/* camcorder-style caption bar */
+.tv-caption {
+  position: absolute;
+  z-index: 4;
+  left: 10px; bottom: 8px;
+  font-family: var(--osd-font);
+  font-size: clamp(13px, 1.6vw, 16px);
+  color: var(--burn);
+  letter-spacing: 0.08em;
+  text-shadow: 1.5px 0 0 rgba(194,120,92,0.45), -1.5px 0 0 rgba(110,141,141,0.45), 0 0 8px rgba(216,212,196,0.5);
+  pointer-events: none;
+}
+.tv-caption.rec::before {
+  content: "●";
+  color: #b0564a;
+  margin-right: 6px;
+  animation: rec-blink 1.2s steps(2) infinite;
+}
+@keyframes rec-blink { 50% { opacity: 0; } }
+
+/* NO SIGNAL state — shown when a media slot is empty */
+.tv-frame.no-signal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(168,191,160,0.06) 0 8px,
+      rgba(0,0,0,0) 8px 16px),
+    #060807;
+}
+.tv-frame.no-signal .ns-text {
+  font-family: var(--osd-font);
+  font-size: clamp(20px, 3vw, 30px);
+  color: var(--phosphor-dim);
+  letter-spacing: 0.2em;
+  animation: ns-drift 4s ease-in-out infinite alternate;
+  text-shadow: 0 0 10px rgba(168,191,160,0.3);
+}
+@keyframes ns-drift {
+  from { transform: translate(-8px, -4px); }
+  to   { transform: translate(8px, 4px); }
+}
+
+/* video embeds keep 16:9 */
+.tv-frame.wide { aspect-ratio: 16 / 9; }
+
+/* guide thumbnails */
+.guide-thumb {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+@media (min-width: 641px) {
+  .guide-row.has-media {
+    grid-template-columns: clamp(70px, 10vw, 110px) clamp(140px, 20vw, 220px) 1fr;
+  }
+}
+
+/* reel section */
+.reel-wrap { max-width: 900px; margin-top: clamp(8px, 2vh, 16px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tv-frame:hover img, .tv-frame:hover video { animation: none; }
+  .tv-frame.no-signal .ns-text { animation: none; }
+  .tv-caption.rec::before { animation: none; }
+}
+
+/* ---------- PROCESS ---------- */
+.vtr {
+  max-width: 66ch;
+  font-size: clamp(13px, 1.6vw, 15px);
+  line-height: 1.85;
+}
+.vtr p + p { margin-top: 1.1em; }
+.vtr .counter {
+  font-family: var(--osd-font);
+  color: var(--amber);
+  font-size: clamp(16px, 2.2vw, 20px);
+  display: block;
+  margin: 1.6em 0 0.4em;
+}
+
+/* ---------- CONTACT ---------- */
+.contact-card {
+  font-family: var(--osd-font);
+  font-size: clamp(20px, 3vw, 30px);
+  line-height: 1.9;
+  margin-top: clamp(20px, 4vh, 36px);
+}
+.contact-card a {
+  color: var(--amber);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(194,163,92,0.5);
+}
+.contact-card a:hover { color: var(--burn); }
+.contact-card .k { color: var(--phosphor-dim); }
+
+.smpte-note {
+  margin-top: clamp(36px, 8vh, 72px);
+  font-family: var(--osd-font);
+  color: var(--phosphor-dim);
+  font-size: clamp(14px, 1.8vw, 17px);
+  letter-spacing: 0.08em;
+}
+
+/* ---------- POWER-ON ---------- */
+.boot {
+  position: absolute; inset: 0;
+  z-index: 30;
+  background: #030403;
+  display: flex; align-items: center; justify-content: center;
+  animation: boot-fade 1.6s ease-out 0.9s forwards;
+}
+.boot-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--burn);
+  box-shadow: 0 0 30px 8px rgba(216,212,196,0.9);
+  animation: boot-expand 0.9s ease-out forwards;
+}
+@keyframes boot-expand {
+  0%   { transform: scale(0); }
+  30%  { transform: scale(1) scaleX(1); }
+  60%  { transform: scaleX(60) scaleY(0.4); }
+  100% { transform: scaleX(300) scaleY(200); opacity: 0.9; }
+}
+@keyframes boot-fade { to { opacity: 0; visibility: hidden; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep, .flicker { animation: none; display: none; }
+  .channel { animation: none; }
+  .boot { display: none; }
+  .osd-ch.blink { animation: none; }
+}
+
+@media (max-width: 640px) {
+  .dial { flex-wrap: wrap; justify-content: center; width: 92%; }
+  .guide-row { grid-template-columns: 1fr; gap: 4px; }
+}
+</style>
+</head>
+<body>
+
+<div class="tv-cabinet">
+  <div class="crt">
+    <div class="boot" aria-hidden="true"><div class="boot-dot"></div></div>
+
+    <div class="osd osd-label" id="osdLabel">SIGNAL</div>
+    <div class="osd osd-ch blink" id="osdCh">CH 01</div>
+
+    <main class="screen" id="screen">
+
+      <!-- CH 01 — SIGNAL -->
+      <section class="channel on" id="ch1" data-label="SIGNAL">
+        <h1 class="hero-title">BEN —<br>FILM CONSTRUCTION</h1>
+        <p class="hero-sub">SETS BUILT · RIGGED · STRUCK</p>
+        <div class="hero-body">
+          <p>I build the worlds the camera believes in. Flats, facades, breakaways, rigs — scenic construction for film and television, from first drafting to final strike.</p>
+          <p>Twelve years on stages and locations. Comfortable in timber, steel, foam, and whatever the art director dreamed up at 2am.</p>
+        </div>
+        <div class="test-bars" aria-hidden="true">
+          <span style="background:#8a8a7c"></span>
+          <span style="background:#8a8a52"></span>
+          <span style="background:#5c8a7c"></span>
+          <span style="background:#5c8a52"></span>
+          <span style="background:#8a5c7c"></span>
+          <span style="background:#8a5c52"></span>
+          <span style="background:#5c5c8a"></span>
+        </div>
+      </section>
+
+      <!-- CH 02 — BUILDS -->
+      <section class="channel" id="ch2" data-label="BUILDS">
+        <h2 class="ch-title">TONIGHT'S PROGRAMMING</h2>
+        <p class="ch-sub">SELECTED BUILDS · ALL TIMES APPROXIMATE</p>
+
+        <!-- MAIN FEATURE: showreel. Swap the no-signal block for one of the
+             commented embeds below when you have a reel URL. -->
+        <div class="reel-wrap">
+          <div class="tv-frame wide no-signal">
+            <span class="ns-text">NO SIGNAL</span>
+            <span class="tv-caption">MAIN FEATURE — REEL</span>
+          </div>
+          <!--
+          YouTube:
+          <div class="tv-frame wide">
+            <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" title="Showreel" allowfullscreen></iframe>
+            <span class="tv-caption rec">REEL 2026</span>
+          </div>
+
+          Vimeo:
+          <div class="tv-frame wide">
+            <iframe src="https://player.vimeo.com/video/YOUR_VIDEO_ID" title="Showreel" allowfullscreen></iframe>
+            <span class="tv-caption rec">REEL 2026</span>
+          </div>
+
+          Self-hosted:
+          <div class="tv-frame wide">
+            <video src="reel.mp4" poster="reel-poster.jpg" controls playsinline></video>
+            <span class="tv-caption rec">REEL 2026</span>
+          </div>
+          -->
+        </div>
+
+        <div class="guide" style="margin-top: clamp(28px, 5vh, 48px);">
+          <div class="guide-row has-media">
+            <div class="guide-time">19:00</div>
+            <div class="tv-frame guide-thumb">
+              <img src="https://picsum.photos/seed/storefront/640/480" alt="Period storefront facade build" loading="lazy">
+              <span class="tv-caption">CAM 1</span>
+            </div>
+            <div>
+              <div class="guide-title">Period Storefront Facade</div>
+              <div class="guide-desc">Full-scale 1940s high street exterior. Three storefronts, practical doors and glazing, aged brick finish over timber frame. Built in sections for a night shoot turnaround.</div>
+              <div class="guide-tags">TIMBER · SCENIC FINISH · LOCATION</div>
+            </div>
+          </div>
+          <div class="guide-row has-media">
+            <div class="guide-time">20:30</div>
+            <div class="tv-frame guide-thumb">
+              <img src="https://picsum.photos/seed/breakaway/640/480" alt="Breakaway wall rig" loading="lazy">
+              <span class="tv-caption">CAM 2</span>
+            </div>
+            <div>
+              <div class="guide-title">Breakaway Wall Rig</div>
+              <div class="guide-desc">Stunt-rated breakaway wall with resettable panels, engineered for six takes. Balsa core, scored plaster skin, hidden steel safety frame.</div>
+              <div class="guide-tags">STUNTS · PRACTICAL FX · RESET</div>
+            </div>
+          </div>
+          <div class="guide-row has-media">
+            <div class="guide-time">22:00</div>
+            <div class="tv-frame guide-thumb">
+              <img src="https://picsum.photos/seed/turntable/640/480" alt="Rotating stage platform" loading="lazy">
+              <span class="tv-caption">CAM 3</span>
+            </div>
+            <div>
+              <div class="guide-title">Rotating Stage Platform</div>
+              <div class="guide-desc">24-foot motorized turntable for a single-take musical number. Steel chassis, silent drive, deck dressed as a diner interior.</div>
+              <div class="guide-tags">STEEL · MECHANICAL · STAGE</div>
+            </div>
+          </div>
+          <div class="guide-row has-media">
+            <div class="guide-time">23:30</div>
+            <div class="tv-frame guide-thumb">
+              <img src="https://picsum.photos/seed/miniature/640/480" alt="Miniature city block" loading="lazy">
+              <span class="tv-caption">CAM 4</span>
+            </div>
+            <div>
+              <div class="guide-title">Late Night: The Miniature Hour</div>
+              <div class="guide-desc">1:8 scale city block for a destruction sequence. Cast plaster buildings with frangible cores, wired for pyro cues.</div>
+              <div class="guide-tags">MINIATURES · PYRO PREP · SCALE</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CH 03 — PROCESS -->
+      <section class="channel" id="ch3" data-label="PROCESS">
+        <h2 class="ch-title">BEHIND THE PICTURE</h2>
+        <p class="ch-sub">HOW A SET GETS MADE</p>
+        <div class="vtr">
+          <span class="counter">00:00:00:01 — DRAFT</span>
+          <p>Every build starts on paper — or these days, on screen. Working drawings from the art department get translated into cut lists, material orders, and a build schedule that survives contact with the shooting calendar.</p>
+          <span class="counter">00:04:12:08 — BUILD</span>
+          <p>Framing, skinning, finishing. The trick is building something that reads as a hundred years old but comes apart in an afternoon. Wild walls, removable ceilings, everything labeled for the truck.</p>
+          <div class="tv-frame wide" style="margin: 1.4em 0;">
+            <img src="https://picsum.photos/seed/workshop/1280/720" alt="Workshop during a build" loading="lazy">
+            <span class="tv-caption rec">SHOP FLOOR — DAY 12</span>
+          </div>
+          <span class="counter">00:09:47:22 — SHOOT</span>
+          <p>On set for the shoot days — pulling walls between setups, resetting breakaways, keeping the standby carpenter's kit within arm's reach of the first AD.</p>
+          <span class="counter">00:14:03:15 — STRIKE</span>
+          <p>What took three weeks to build comes down in two days. Materials sorted for salvage, stage swept, on to the next one.</p>
+        </div>
+      </section>
+
+      <!-- CH 04 — CONTACT -->
+      <section class="channel" id="ch4" data-label="CONTACT">
+        <h2 class="ch-title">STAY TUNED</h2>
+        <p class="ch-sub">BOOKINGS &amp; ENQUIRIES</p>
+        <div class="contact-card">
+          <div><span class="k">EMAIL&nbsp;&nbsp;</span><a href="mailto:hello@example.com">hello@example.com</a></div>
+          <div><span class="k">PHONE&nbsp;&nbsp;</span><a href="tel:+10000000000">+1 (000) 000-0000</a></div>
+          <div><span class="k">REEL&nbsp;&nbsp;&nbsp;</span><a href="#">watch the reel</a></div>
+        </div>
+        <p class="smpte-note">■ BROADCAST ENDS · TRANSMISSION RESUMES ON YOUR SCHEDULE ■</p>
+      </section>
+
+    </main>
+
+    <canvas id="noise" aria-hidden="true"></canvas>
+
+    <div class="grille" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="sweep" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="flicker" aria-hidden="true"></div>
+
+    <nav class="dial" aria-label="Channels">
+      <button class="active" data-ch="1">CH 01 SIGNAL</button>
+      <button data-ch="2">CH 02 BUILDS</button>
+      <button data-ch="3">CH 03 PROCESS</button>
+      <button data-ch="4">CH 04 CONTACT</button>
+    </nav>
+  </div>
+</div>
+
+<script>
+(function () {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const noise = document.getElementById('noise');
+  const nctx = noise.getContext('2d');
+  const screen = document.getElementById('screen');
+  const osdCh = document.getElementById('osdCh');
+  const osdLabel = document.getElementById('osdLabel');
+  const buttons = document.querySelectorAll('.dial button');
+  let noiseTimer = null;
+
+  function sizeNoise() {
+    noise.width = Math.floor(noise.clientWidth / 2);
+    noise.height = Math.floor(noise.clientHeight / 2);
+  }
+  sizeNoise();
+  window.addEventListener('resize', sizeNoise);
+
+  function drawNoise() {
+    const w = noise.width, h = noise.height;
+    const img = nctx.createImageData(w, h);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const v = (Math.random() * 255) | 0;
+      d[i] = v; d[i + 1] = v; d[i + 2] = v; d[i + 3] = 255;
+    }
+    nctx.putImageData(img, 0, 0);
+  }
+
+  function staticBurst(duration, done) {
+    if (reduced) { done(); return; }
+    noise.classList.add('on');
+    const start = performance.now();
+    function loop(t) {
+      drawNoise();
+      if (t - start < duration) {
+        noiseTimer = requestAnimationFrame(loop);
+      } else {
+        noise.classList.remove('on');
+        done();
+      }
+    }
+    noiseTimer = requestAnimationFrame(loop);
+  }
+
+  function tune(ch) {
+    const target = document.getElementById('ch' + ch);
+    if (!target || target.classList.contains('on')) return;
+
+    buttons.forEach(b => b.classList.toggle('active', b.dataset.ch === String(ch)));
+
+    staticBurst(220, function () {
+      document.querySelectorAll('.channel').forEach(c => c.classList.remove('on'));
+      // force reflow so the tune-in animation replays
+      void target.offsetWidth;
+      target.classList.add('on');
+      screen.scrollTop = 0;
+      osdCh.textContent = 'CH 0' + ch;
+      osdLabel.textContent = target.dataset.label;
+      osdCh.classList.remove('blink');
+      void osdCh.offsetWidth;
+      osdCh.classList.add('blink');
+    });
+  }
+
+  buttons.forEach(b => b.addEventListener('click', () => tune(b.dataset.ch)));
+
+  // channel up/down with arrow keys
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const cur = Number(document.querySelector('.dial button.active').dataset.ch);
+    const next = e.key === 'ArrowRight'
+      ? (cur % 4) + 1
+      : ((cur + 2) % 4) + 1;
+    tune(next);
+  });
+})();
+</script>
+</body>
+</html>
