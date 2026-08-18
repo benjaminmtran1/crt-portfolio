@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONTROL ROOM — CRT Portfolio Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --tube: #0b0e0c;
+  --panel: #10140f;
+  --phosphor: #a8bfa0;
+  --phosphor-dim: #5f6f5b;
+  --amber: #c2a35c;
+  --ghost: #6e7f8d;
+  --burn: #d8d4c4;
+  --line: rgba(168,191,160,0.22);
+  --osd: 'VT323', monospace;
+  --mono: 'IBM Plex Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #060806;
+  color: var(--phosphor);
+  font-family: var(--mono);
+  font-size: 13px;
+  min-height: 100vh;
+}
+/* faint scanlines over the whole tool */
+body::after {
+  content:""; position: fixed; inset:0; pointer-events:none; z-index: 999;
+  background: repeating-linear-gradient(to bottom, transparent 0 3px, rgba(0,0,0,0.12) 3px 4px);
+}
+header {
+  display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+header h1 { font-family: var(--osd); font-weight:400; font-size: 28px; color: var(--burn);
+  text-shadow: 1.5px 0 0 rgba(194,120,92,0.35), -1.5px 0 0 rgba(110,141,141,0.35); }
+header .sub { font-family: var(--osd); color: var(--ghost); font-size: 17px; letter-spacing: 0.08em; }
+header .spacer { flex:1; }
+
+.layout { display: grid; grid-template-columns: 260px 1fr 320px; min-height: calc(100vh - 61px); }
+@media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+
+/* ---------- panels ---------- */
+.panel { border-right: 1px solid var(--line); padding: 16px; }
+.panel:last-child { border-right: 0; }
+.panel h2 {
+  font-family: var(--osd); font-weight:400; font-size: 20px; color: var(--amber);
+  letter-spacing: 0.1em; margin-bottom: 12px;
+}
+
+/* ---------- channel list ---------- */
+.ch-item {
+  display:flex; align-items:center; gap:8px;
+  padding: 9px 10px; margin-bottom: 6px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  font-family: var(--osd); font-size: 17px; letter-spacing: 0.06em;
+  color: var(--phosphor-dim);
+}
+.ch-item:hover { color: var(--phosphor); border-color: rgba(168,191,160,0.5); }
+.ch-item.active { color: var(--amber); border-color: rgba(194,163,92,0.7); background: rgba(194,163,92,0.06); }
+.ch-item .num { color: var(--ghost); }
+.ch-item .grow { flex:1; }
+.ch-item .mini { font-size: 14px; padding: 0 4px; background:none; border:0; color: var(--ghost); cursor:pointer; }
+.ch-item .mini:hover { color: var(--burn); }
+
+/* ---------- form controls ---------- */
+label.f { display:block; margin: 12px 0 4px; color: var(--ghost); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+input[type=text], textarea, select {
+  width: 100%;
+  background: #0a0d0a;
+  border: 1px solid var(--line);
+  color: var(--phosphor);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 8px 10px;
+}
+textarea { min-height: 72px; resize: vertical; line-height: 1.6; }
+input:focus, textarea:focus, select:focus { outline: 1px solid var(--amber); border-color: var(--amber); }
+
+button.act {
+  font-family: var(--osd); font-size: 17px; letter-spacing: 0.08em;
+  background: transparent; color: var(--phosphor);
+  border: 1px solid var(--line);
+  padding: 8px 16px; cursor: pointer; margin-top: 10px;
+}
+button.act:hover { color: var(--amber); border-color: rgba(194,163,92,0.7); }
+button.act.primary { color: var(--amber); border-color: rgba(194,163,92,0.7); }
+button.act.primary:hover { color: var(--burn); border-color: var(--burn); }
+button.act.danger:hover { color: #b0564a; border-color: #b0564a; }
+button.act.small { font-size: 15px; padding: 4px 10px; }
+
+/* ---------- cards (projects / steps / blocks) ---------- */
+.card {
+  border: 1px solid var(--line);
+  padding: 12px;
+  margin: 12px 0;
+  background: var(--panel);
+}
+.card .card-head {
+  display:flex; align-items:center; gap:8px;
+  font-family: var(--osd); font-size: 17px; color: var(--phosphor);
+  margin-bottom: 4px;
+}
+.card .card-head .grow { flex: 1; }
+.card .card-head button { background:none; border:0; color: var(--ghost); cursor:pointer; font-size: 15px; font-family: var(--osd); }
+.card .card-head button:hover { color: var(--burn); }
+
+/* ---------- media picker & preview ---------- */
+.media-row { display:flex; gap:12px; align-items:flex-start; margin-top: 6px; flex-wrap: wrap; }
+.tv-frame {
+  position: relative; overflow: hidden; border-radius: 8px / 6px;
+  background: #000; width: 180px; aspect-ratio: 4/3; flex: 0 0 auto;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 0 0 1px var(--line);
+}
+.tv-frame.wide { width: 260px; aspect-ratio: 16/9; }
+.tv-frame img, .tv-frame video {
+  width:100%; height:100%; object-fit: cover; display:block;
+  filter: saturate(0.55) contrast(1.08) brightness(0.88) sepia(0.18) hue-rotate(-8deg);
+}
+.tv-frame::before {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.28) 2px 3px);
+}
+.tv-frame::after {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background: radial-gradient(ellipse at center, transparent 58%, rgba(0,0,0,0.55) 100%);
+}
+.tv-frame .ns {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family: var(--osd); color: var(--phosphor-dim); letter-spacing: 0.2em; font-size: 16px;
+}
+.media-meta { flex: 1; min-width: 180px; }
+.media-meta .path { font-size: 11px; color: var(--ghost); word-break: break-all; margin-top: 6px; }
+input[type=file] { display: none; }
+
+/* ---------- publish panel ---------- */
+.status {
+  font-family: var(--osd); font-size: 16px; letter-spacing: 0.06em;
+  margin-top: 12px; min-height: 20px; color: var(--ghost); white-space: pre-line;
+}
+.status.ok { color: var(--phosphor); }
+.status.err { color: #b0564a; }
+.pending { margin-top: 10px; font-size: 11px; color: var(--ghost); }
+.pending div { padding: 3px 0; border-bottom: 1px dashed var(--line); word-break: break-all; }
+.hint { font-size: 11px; color: var(--phosphor-dim); line-height: 1.6; margin-top: 8px; }
+.hint a { color: var(--amber); }
+.rec-dot { color:#b0564a; animation: blink 1.2s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .rec-dot { animation: none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>CONTROL ROOM</h1>
+  <span class="sub"><span class="rec-dot">●</span> EDITING — CRT PORTFOLIO</span>
+  <span class="spacer"></span>
+  <button class="act small" id="btnLoadFile">LOAD JSON FILE</button>
+  <button class="act small" id="btnDownload">DOWNLOAD JSON</button>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: channel list -->
+  <div class="panel">
+    <h2>CHANNELS</h2>
+    <div id="chList"></div>
+    <button class="act" id="btnAddChannel">+ NEW CHANNEL</button>
+    <label class="f" style="margin-top:20px;">Site title (browser tab)</label>
+    <input type="text" id="sitePageTitle">
+    <label class="f">Hero name (use &lt;br&gt; for line breaks)</label>
+    <input type="text" id="siteHeroName">
+  </div>
+
+  <!-- MIDDLE: editor -->
+  <div class="panel" id="editor">
+    <h2 id="editorTitle">EDITOR</h2>
+    <div id="editorBody"><p class="hint">Select a channel to edit.</p></div>
+  </div>
+
+  <!-- RIGHT: publish -->
+  <div class="panel">
+    <h2>TRANSMIT</h2>
+    <label class="f">GitHub owner</label>
+    <input type="text" id="ghOwner" placeholder="your-username">
+    <label class="f">Repo</label>
+    <input type="text" id="ghRepo" placeholder="crt-portfolio">
+    <label class="f">Branch</label>
+    <input type="text" id="ghBranch" value="main">
+    <label class="f">Fine-grained token (Contents: read/write)</label>
+    <input type="text" id="ghToken" placeholder="github_pat_…">
+    <label style="display:flex; gap:6px; align-items:center; margin-top:8px; font-size:11px; color: var(--ghost); cursor:pointer;">
+      <input type="checkbox" id="ghRemember" style="accent-color:#c2a35c;"> remember settings in this browser
+    </label>
+    <button class="act primary" id="btnPublish">⏵ PUBLISH TO GITHUB</button>
+    <div class="status" id="pubStatus"></div>
+    <div class="pending" id="pendingList"></div>
+    <p class="hint">
+      Publishing commits <b>content.json</b> plus any newly added media to the repo.
+      GitHub Pages redeploys automatically (give it a minute).<br><br>
+      Create a token at github.com → Settings → Developer settings →
+      Fine-grained tokens. Scope it to this one repo, permission
+      "Contents: Read and write". The token stays in your browser only.
+    </p>
+  </div>
+</div>
+
+<input type="file" id="jsonPicker" accept="application/json">
+<input type="file" id="mediaPicker" accept="image/*,video/mp4,video/webm">
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let content = null;
+let selected = 0;
+let pendingAssets = {};   // path -> { base64, mime }
+let mediaTarget = null;   // callback for the shared file picker
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+const BLANK = {
+  hero:    { type:'hero', label:'SIGNAL', sub:'', paragraphs:[''], showTestBars:true },
+  guide:   { type:'guide', label:'BUILDS', title:'', sub:'', reel:{kind:'none',src:'',caption:'MAIN FEATURE — REEL'}, projects:[] },
+  process: { type:'process', label:'PROCESS', title:'', sub:'', steps:[] },
+  contact: { type:'contact', label:'CONTACT', title:'', sub:'', rows:[], note:'' },
+  custom:  { type:'custom', label:'NEW', title:'', sub:'', blocks:[] }
+};
+
+/* ============================================================
+   LOAD
+   ============================================================ */
+function boot(c) {
+  content = c;
+  $('sitePageTitle').value = c.site.pageTitle || '';
+  $('siteHeroName').value = c.site.heroName || '';
+  selected = 0;
+  renderChannelList();
+  renderEditor();
+}
+fetch('content.json', { cache:'no-store' })
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(boot)
+  .catch(() => {
+    $('editorBody').innerHTML = '<p class="hint">Could not fetch content.json (this is normal when opening admin.html straight from disk — browsers block local fetch). Click <b>LOAD JSON FILE</b> and pick your content.json, or run a local server: <code>python3 -m http.server</code></p>';
+  });
+
+$('btnLoadFile').onclick = () => $('jsonPicker').click();
+$('jsonPicker').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  f.text().then(t => boot(JSON.parse(t))).catch(() => setStatus('Could not parse that file as JSON.', 'err'));
+};
+
+$('sitePageTitle').oninput = e => { if (content) content.site.pageTitle = e.target.value; };
+$('siteHeroName').oninput = e => { if (content) content.site.heroName = e.target.value; };
+
+/* ============================================================
+   CHANNEL LIST
+   ============================================================ */
+function renderChannelList() {
+  const el = $('chList');
+  el.innerHTML = '';
+  content.channels.forEach((ch, i) => {
+    const d = document.createElement('div');
+    d.className = 'ch-item' + (i === selected ? ' active' : '');
+    d.innerHTML = `<span class="num">CH ${String(i+1).padStart(2,'0')}</span>
+      <span class="grow">${esc(ch.label)}</span>
+      <button class="mini" data-a="up" title="Move up">▲</button>
+      <button class="mini" data-a="down" title="Move down">▼</button>
+      <button class="mini" data-a="del" title="Delete">✕</button>`;
+    d.onclick = e => {
+      const a = e.target.dataset.a;
+      if (a === 'up' && i > 0) { swap(i, i-1); return; }
+      if (a === 'down' && i < content.channels.length-1) { swap(i, i+1); return; }
+      if (a === 'del') {
+        if (confirm(`Delete channel "${ch.label}"? This only takes effect when you publish.`)) {
+          content.channels.splice(i,1);
+          selected = Math.max(0, selected - (i <= selected ? 1 : 0));
+          renderChannelList(); renderEditor();
+        }
+        return;
+      }
+      selected = i; renderChannelList(); renderEditor();
+    };
+    el.appendChild(d);
+  });
+}
+function swap(a, b) {
+  [content.channels[a], content.channels[b]] = [content.channels[b], content.channels[a]];
+  if (selected === a) selected = b; else if (selected === b) selected = a;
+  renderChannelList(); renderEditor();
+}
+$('btnAddChannel').onclick = () => {
+  const type = prompt('Channel type — one of: hero, guide, process, contact, custom\n(guide = project listings, custom = free-form text/image/video blocks)', 'custom');
+  if (!type || !BLANK[type]) return;
+  const ch = JSON.parse(JSON.stringify(BLANK[type]));
+  ch.id = 'ch-' + Date.now().toString(36);
+  content.channels.push(ch);
+  selected = content.channels.length - 1;
+  renderChannelList(); renderEditor();
+};
+
+/* ============================================================
+   MEDIA PICKER (shared)
+   ============================================================ */
+function pickMedia(cb) { mediaTarget = cb; $('mediaPicker').click(); }
+$('mediaPicker').onchange = e => {
+  const f = e.target.files[0]; if (!f || !mediaTarget) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const base64 = reader.result.split(',')[1];
+    const safe = f.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+    const path = 'assets/' + safe;
+    pendingAssets[path] = { base64, mime: f.type };
+    mediaTarget(path, reader.result);
+    mediaTarget = null;
+    e.target.value = '';
+    renderPending();
+  };
+  reader.readAsDataURL(f);
+};
+function previewSrc(path) {
+  if (pendingAssets[path]) return 'data:' + pendingAssets[path].mime + ';base64,' + pendingAssets[path].base64;
+  return path;
+}
+function mediaWidget(path, onPick, { wide } = {}) {
+  const has = !!path;
+  const src = has ? previewSrc(path) : '';
+  const isVideo = /\.(mp4|webm)$/i.test(path || '');
+  return `
+    <div class="media-row">
+      <div class="tv-frame${wide ? ' wide' : ''}">
+        ${has ? (isVideo ? `<video src="${esc(src)}" muted loop autoplay playsinline></video>` : `<img src="${esc(src)}">`) : `<span class="ns">NO SIGNAL</span>`}
+      </div>
+      <div class="media-meta">
+        <button class="act small" data-media="${esc(onPick)}">${has ? 'REPLACE MEDIA' : 'UPLOAD MEDIA'}</button>
+        ${has ? `<button class="act small danger" data-mediaclear="${esc(onPick)}">CLEAR</button>` : ''}
+        <div class="path">${esc(path || 'No file — shows NO SIGNAL on the site')}</div>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   EDITOR
+   ============================================================ */
+function field(label, id, value, kind = 'input') {
+  if (kind === 'textarea') return `<label class="f">${label}</label><textarea data-f="${id}">${esc(value)}</textarea>`;
+  return `<label class="f">${label}</label><input type="text" data-f="${id}" value="${esc(value)}">`;
+}
+
+const EDITORS = {
+  hero(ch) {
+    return field('Channel label (dial + OSD)', 'label', ch.label)
+      + field('Subtitle', 'sub', ch.sub)
+      + `<label class="f">Intro paragraphs (one per box)</label>`
+      + ch.paragraphs.map((p, i) => `
+          <div class="card"><div class="card-head"><span class="grow">¶ ${i+1}</span>
+            <button data-del-para="${i}">✕ remove</button></div>
+            <textarea data-para="${i}">${esc(p)}</textarea></div>`).join('')
+      + `<button class="act small" id="addPara">+ PARAGRAPH</button>`
+      + `<label style="display:flex;gap:6px;align-items:center;margin-top:14px;font-size:11px;color:var(--ghost);cursor:pointer;">
+           <input type="checkbox" data-f="showTestBars" ${ch.showTestBars ? 'checked' : ''} style="accent-color:#c2a35c;"> show test-card color bars
+         </label>`;
+  },
+  guide(ch) {
+    const reel = ch.reel || { kind:'none', src:'', caption:'' };
+    return field('Channel label', 'label', ch.label)
+      + field('Heading', 'title', ch.title)
+      + field('Subheading', 'sub', ch.sub)
+      + `<label class="f">Showreel</label>
+         <select data-f="reel.kind">
+           ${['none','youtube','vimeo','file'].map(k => `<option value="${k}" ${reel.kind===k?'selected':''}>${k === 'none' ? 'none (NO SIGNAL)' : k}</option>`).join('')}
+         </select>`
+      + field('Reel URL (YouTube/Vimeo link) or file path', 'reel.src', reel.src)
+      + field('Reel caption', 'reel.caption', reel.caption)
+      + (reel.kind === 'file' ? mediaWidget(reel.src, 'reel', { wide:true }) : '')
+      + `<h2 style="margin-top:24px;">PROJECTS</h2>`
+      + (ch.projects || []).map((p, i) => `
+        <div class="card">
+          <div class="card-head"><span class="grow">${esc(p.title || 'Untitled')}</span>
+            <button data-proj-up="${i}">▲</button><button data-proj-down="${i}">▼</button>
+            <button data-proj-del="${i}">✕ remove</button></div>
+          ${field('Timeslot', `p.${i}.time`, p.time)}
+          ${field('Title', `p.${i}.title`, p.title)}
+          ${field('Description', `p.${i}.desc`, p.desc, 'textarea')}
+          ${field('Tags (e.g. TIMBER · STAGE)', `p.${i}.tags`, p.tags)}
+          ${field('Image caption (e.g. CAM 1)', `p.${i}.caption`, p.caption)}
+          ${mediaWidget(p.image, 'proj:' + i)}
+        </div>`).join('')
+      + `<button class="act primary" id="addProject">+ NEW PROJECT</button>`;
+  },
+  process(ch) {
+    return field('Channel label', 'label', ch.label)
+      + field('Heading', 'title', ch.title)
+      + field('Subheading', 'sub', ch.sub)
+      + (ch.steps || []).map((s, i) => `
+        <div class="card">
+          <div class="card-head"><span class="grow">STEP ${i+1}</span>
+            <button data-step-up="${i}">▲</button><button data-step-down="${i}">▼</button>
+            <button data-step-del="${i}">✕ remove</button></div>
+          ${field('Timecode heading (e.g. 00:04:12:08 — BUILD)', `s.${i}.timecode`, s.timecode)}
+          ${field('Text', `s.${i}.text`, s.text, 'textarea')}
+          ${field('Image caption (optional)', `s.${i}.caption`, s.caption)}
+          ${mediaWidget(s.image, 'step:' + i, { wide:true })}
+        </div>`).join('')
+      + `<button class="act primary" id="addStep">+ NEW STEP</button>`;
+  },
+  contact(ch) {
+    return field('Channel label', 'label', ch.label)
+      + field('Heading', 'title', ch.title)
+      + field('Subheading', 'sub', ch.sub)
+      + (ch.rows || []).map((r, i) => `
+        <div class="card">
+          <div class="card-head"><span class="grow">${esc(r.k || 'ROW')}</span>
+            <button data-row-del="${i}">✕ remove</button></div>
+          ${field('Key (EMAIL / PHONE / REEL…)', `r.${i}.k`, r.k)}
+          ${field('Display text', `r.${i}.label`, r.label)}
+          ${field('Link (mailto:, tel:, https://…)', `r.${i}.href`, r.href)}
+        </div>`).join('')
+      + `<button class="act small" id="addRow">+ ROW</button>`
+      + field('Sign-off line', 'note', ch.note);
+  },
+  custom(ch) {
+    return field('Channel label', 'label', ch.label)
+      + field('Heading', 'title', ch.title)
+      + field('Subheading', 'sub', ch.sub)
+      + (ch.blocks || []).map((b, i) => `
+        <div class="card">
+          <div class="card-head"><span class="grow">${b.kind.toUpperCase()} BLOCK</span>
+            <button data-blk-up="${i}">▲</button><button data-blk-down="${i}">▼</button>
+            <button data-blk-del="${i}">✕ remove</button></div>
+          ${b.kind === 'text' ? field('Text', `b.${i}.text`, b.text, 'textarea') : ''}
+          ${b.kind !== 'text' ? field('Caption', `b.${i}.caption`, b.caption) : ''}
+          ${b.kind === 'video' ? `<label class="f">Video source</label>
+            <select data-f="b.${i}.videoKind">
+              ${['file','youtube','vimeo'].map(k => `<option value="${k}" ${b.videoKind===k?'selected':''}>${k}</option>`).join('')}
+            </select>${field('URL or file path', `b.${i}.src`, b.src)}` : ''}
+          ${b.kind === 'image' ? mediaWidget(b.src, 'blk:' + i, { wide:true }) : ''}
+          ${b.kind === 'video' && b.videoKind === 'file' ? mediaWidget(b.src, 'blk:' + i, { wide:true }) : ''}
+        </div>`).join('')
+      + `<button class="act small" data-add-blk="text">+ TEXT</button>
+         <button class="act small" data-add-blk="image">+ IMAGE</button>
+         <button class="act small" data-add-blk="video">+ VIDEO</button>`;
+  }
+};
+
+function renderEditor() {
+  const ch = content.channels[selected];
+  if (!ch) { $('editorBody').innerHTML = '<p class="hint">No channel selected.</p>'; return; }
+  $('editorTitle').textContent = `EDITOR — CH ${String(selected+1).padStart(2,'0')} ${ch.label} (${ch.type})`;
+  $('editorBody').innerHTML = (EDITORS[ch.type] || EDITORS.custom)(ch);
+  wireEditor(ch);
+}
+
+function setByPath(obj, path, val) {
+  const parts = path.split('.');
+  let t = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const key = parts[i];
+    if (key === 'p') t = t.projects[Number(parts[++i])];
+    else if (key === 's') t = t.steps[Number(parts[++i])];
+    else if (key === 'r') t = t.rows[Number(parts[++i])];
+    else if (key === 'b') t = t.blocks[Number(parts[++i])];
+    else { if (!t[key]) t[key] = {}; t = t[key]; }
+  }
+  t[parts[parts.length - 1]] = val;
+}
+
+function wireEditor(ch) {
+  const body = $('editorBody');
+
+  body.querySelectorAll('[data-f]').forEach(el => {
+    const apply = () => {
+      const v = el.type === 'checkbox' ? el.checked : el.value;
+      setByPath(ch, el.dataset.f, v);
+      if (el.dataset.f === 'label') renderChannelList();
+      if (el.tagName === 'SELECT') renderEditor();
+    };
+    el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', apply);
+  });
+  body.querySelectorAll('[data-para]').forEach(el =>
+    el.addEventListener('input', () => ch.paragraphs[Number(el.dataset.para)] = el.value));
+
+  body.addEventListener('click', e => {
+    const d = e.target.dataset;
+    const arr = { 'proj':'projects', 'step':'steps', 'blk':'blocks' };
+    // media pick / clear
+    if (d.media !== undefined) {
+      pickMedia((path) => { applyMediaPath(ch, d.media, path); renderEditor(); });
+      return;
+    }
+    if (d.mediaclear !== undefined) { applyMediaPath(ch, d.mediaclear, ''); renderEditor(); return; }
+    // list ops
+    for (const [k, prop] of Object.entries(arr)) {
+      if (d[k + 'Del'] !== undefined) { ch[prop].splice(Number(d[k + 'Del']), 1); renderEditor(); return; }
+      if (d[k + 'Up'] !== undefined) { const i = Number(d[k + 'Up']); if (i > 0) { [ch[prop][i-1], ch[prop][i]] = [ch[prop][i], ch[prop][i-1]]; renderEditor(); } return; }
+      if (d[k + 'Down'] !== undefined) { const i = Number(d[k + 'Down']); if (i < ch[prop].length-1) { [ch[prop][i+1], ch[prop][i]] = [ch[prop][i], ch[prop][i+1]]; renderEditor(); } return; }
+    }
+    if (d.rowDel !== undefined) { ch.rows.splice(Number(d.rowDel), 1); renderEditor(); return; }
+    if (d.delPara !== undefined) { ch.paragraphs.splice(Number(d.delPara), 1); renderEditor(); return; }
+    if (d.addBlk) { ch.blocks.push(d.addBlk === 'text' ? {kind:'text', text:''} : d.addBlk === 'image' ? {kind:'image', src:'', caption:''} : {kind:'video', videoKind:'file', src:'', caption:''}); renderEditor(); return; }
+    if (e.target.id === 'addProject') { ch.projects.push({ time:'', title:'', desc:'', tags:'', image:'', caption:'CAM ' + (ch.projects.length + 1) }); renderEditor(); }
+    if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); }
+    if (e.target.id === 'addRow') { ch.rows.push({ k:'', label:'', href:'' }); renderEditor(); }
+    if (e.target.id === 'addPara') { ch.paragraphs.push(''); renderEditor(); }
+  });
+}
+
+function applyMediaPath(ch, target, path) {
+  if (target === 'reel') { ch.reel.src = path; return; }
+  const [kind, idx] = target.split(':');
+  const i = Number(idx);
+  if (kind === 'proj') ch.projects[i].image = path;
+  if (kind === 'step') ch.steps[i].image = path;
+  if (kind === 'blk') ch.blocks[i].src = path;
+}
+
+/* ============================================================
+   EXPORT / PUBLISH
+   ============================================================ */
+$('btnDownload').onclick = () => {
+  const blob = new Blob([JSON.stringify(content, null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'content.json';
+  a.click();
+  const names = Object.keys(pendingAssets);
+  if (names.length) {
+    // also download each pending media file for manual placement in assets/
+    names.forEach(p => {
+      const { base64, mime } = pendingAssets[p];
+      const bin = atob(base64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const b = new Blob([bytes], { type: mime });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(b);
+      link.download = p.split('/').pop();
+      link.click();
+    });
+    setStatus('Downloaded content.json + ' + names.length + ' media file(s).\nPlace media in the assets/ folder of the repo.', 'ok');
+  }
+};
+
+function renderPending() {
+  const names = Object.keys(pendingAssets);
+  $('pendingList').innerHTML = names.length
+    ? '<b>Pending media:</b>' + names.map(n => `<div>${esc(n)}</div>`).join('')
+    : '';
+}
+function setStatus(msg, cls) {
+  const el = $('pubStatus');
+  el.textContent = msg;
+  el.className = 'status ' + (cls || '');
+}
+
+/* remember GitHub settings (never the token unless opted in) */
+['ghOwner','ghRepo','ghBranch','ghToken','ghRemember'].forEach(id => {
+  const saved = localStorage.getItem('crtadmin.' + id);
+  if (saved !== null) {
+    if (id === 'ghRemember') $(id).checked = saved === 'true';
+    else $(id).value = saved;
+  }
+  $(id).addEventListener('change', () => {
+    if (!$('ghRemember').checked) {
+      ['ghOwner','ghRepo','ghBranch','ghToken','ghRemember'].forEach(k => localStorage.removeItem('crtadmin.' + k));
+      return;
+    }
+    localStorage.setItem('crtadmin.' + id, id === 'ghRemember' ? $(id).checked : $(id).value);
+  });
+});
+
+async function ghPut(owner, repo, branch, token, path, base64, message) {
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' };
+  let sha;
+  const get = await fetch(url + '?ref=' + branch, { headers });
+  if (get.ok) sha = (await get.json()).sha;
+  const put = await fetch(url, {
+    method: 'PUT', headers,
+    body: JSON.stringify({ message, content: base64, branch, ...(sha ? { sha } : {}) })
+  });
+  if (!put.ok) throw new Error(path + ': ' + (await put.json()).message);
+}
+
+$('btnPublish').onclick = async () => {
+  if (!content) return;
+  const owner = $('ghOwner').value.trim(), repo = $('ghRepo').value.trim(),
+        branch = $('ghBranch').value.trim() || 'main', token = $('ghToken').value.trim();
+  if (!owner || !repo || !token) { setStatus('Fill in owner, repo, and token first.', 'err'); return; }
+
+  const btn = $('btnPublish');
+  btn.disabled = true;
+  try {
+    const assets = Object.entries(pendingAssets);
+    let n = 0;
+    for (const [path, { base64 }] of assets) {
+      setStatus(`Uploading media ${++n}/${assets.length}…\n${path}`);
+      await ghPut(owner, repo, branch, token, path, base64, 'Add media: ' + path.split('/').pop());
+    }
+    setStatus('Committing content.json…');
+    const jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+    await ghPut(owner, repo, branch, token, 'content.json', jsonB64, 'Update site content');
+    pendingAssets = {};
+    renderPending();
+    setStatus('⏵ TRANSMITTED. Live on Pages in ~1 minute.', 'ok');
+  } catch (err) {
+    setStatus('FAILED — ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+};
+</script>
+</body>
+</html>

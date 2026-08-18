@@ -1,0 +1,104 @@
+{
+  "site": {
+    "pageTitle": "BEN — FILM CONSTRUCTION",
+    "heroName": "BEN —<br>FILM CONSTRUCTION"
+  },
+  "channels": [
+    {
+      "id": "signal",
+      "label": "SIGNAL",
+      "type": "hero",
+      "sub": "SETS BUILT · RIGGED · STRUCK",
+      "paragraphs": [
+        "I build the worlds the camera believes in. Flats, facades, breakaways, rigs — scenic construction for film and television, from first drafting to final strike.",
+        "Twelve years on stages and locations. Comfortable in timber, steel, foam, and whatever the art director dreamed up at 2am."
+      ],
+      "showTestBars": true
+    },
+    {
+      "id": "builds",
+      "label": "BUILDS",
+      "type": "guide",
+      "title": "TONIGHT'S PROGRAMMING",
+      "sub": "SELECTED BUILDS · ALL TIMES APPROXIMATE",
+      "reel": { "kind": "none", "src": "", "caption": "MAIN FEATURE — REEL" },
+      "projects": [
+        {
+          "time": "19:00",
+          "title": "Period Storefront Facade",
+          "desc": "Full-scale 1940s high street exterior. Three storefronts, practical doors and glazing, aged brick finish over timber frame. Built in sections for a night shoot turnaround.",
+          "tags": "TIMBER · SCENIC FINISH · LOCATION",
+          "image": "https://picsum.photos/seed/storefront/640/480",
+          "caption": "CAM 1"
+        },
+        {
+          "time": "20:30",
+          "title": "Breakaway Wall Rig",
+          "desc": "Stunt-rated breakaway wall with resettable panels, engineered for six takes. Balsa core, scored plaster skin, hidden steel safety frame.",
+          "tags": "STUNTS · PRACTICAL FX · RESET",
+          "image": "https://picsum.photos/seed/breakaway/640/480",
+          "caption": "CAM 2"
+        },
+        {
+          "time": "22:00",
+          "title": "Rotating Stage Platform",
+          "desc": "24-foot motorized turntable for a single-take musical number. Steel chassis, silent drive, deck dressed as a diner interior.",
+          "tags": "STEEL · MECHANICAL · STAGE",
+          "image": "https://picsum.photos/seed/turntable/640/480",
+          "caption": "CAM 3"
+        },
+        {
+          "time": "23:30",
+          "title": "Late Night: The Miniature Hour",
+          "desc": "1:8 scale city block for a destruction sequence. Cast plaster buildings with frangible cores, wired for pyro cues.",
+          "tags": "MINIATURES · PYRO PREP · SCALE",
+          "image": "https://picsum.photos/seed/miniature/640/480",
+          "caption": "CAM 4"
+        }
+      ]
+    },
+    {
+      "id": "process",
+      "label": "PROCESS",
+      "type": "process",
+      "title": "BEHIND THE PICTURE",
+      "sub": "HOW A SET GETS MADE",
+      "steps": [
+        {
+          "timecode": "00:00:00:01 — DRAFT",
+          "text": "Every build starts on paper — or these days, on screen. Working drawings from the art department get translated into cut lists, material orders, and a build schedule that survives contact with the shooting calendar.",
+          "image": "", "caption": ""
+        },
+        {
+          "timecode": "00:04:12:08 — BUILD",
+          "text": "Framing, skinning, finishing. The trick is building something that reads as a hundred years old but comes apart in an afternoon. Wild walls, removable ceilings, everything labeled for the truck.",
+          "image": "https://picsum.photos/seed/workshop/1280/720",
+          "caption": "SHOP FLOOR — DAY 12"
+        },
+        {
+          "timecode": "00:09:47:22 — SHOOT",
+          "text": "On set for the shoot days — pulling walls between setups, resetting breakaways, keeping the standby carpenter's kit within arm's reach of the first AD.",
+          "image": "", "caption": ""
+        },
+        {
+          "timecode": "00:14:03:15 — STRIKE",
+          "text": "What took three weeks to build comes down in two days. Materials sorted for salvage, stage swept, on to the next one.",
+          "image": "", "caption": ""
+        }
+      ]
+    },
+    {
+      "id": "contact",
+      "label": "CONTACT",
+      "type": "contact",
+      "title": "STAY TUNED",
+      "sub": "BOOKINGS & ENQUIRIES",
+      "rows": [
+        { "k": "EMAIL", "label": "hello@example.com", "href": "mailto:hello@example.com" },
+        { "k": "PHONE", "label": "+1 (000) 000-0000", "href": "tel:+10000000000" },
+        { "k": "REEL", "label": "watch the reel", "href": "#" }
+      ],
+      "note": "■ BROADCAST ENDS · TRANSMISSION RESUMES ON YOUR SCHEDULE ■"
+    }
+  ]
+}

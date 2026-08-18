@@ -1,31 +1,79 @@
 # CRT Portfolio — Handoff Doc
 
-Portfolio site for Ben's film construction work, styled as an old CRT television.
-Single-file site: everything lives in `index.html` (HTML + CSS + vanilla JS, no
-build step, no dependencies beyond two Google Fonts).
+Portfolio site for Ben's film construction work, styled as an old CRT television,
+with a self-contained admin GUI for updating content.
+
+## Files
+
+| File           | What it is                                                    |
+|----------------|---------------------------------------------------------------|
+| `index.html`   | The site. Renders itself from `content.json` at load time.    |
+| `content.json` | All site content: channels, projects, media paths, contact.   |
+| `admin.html`   | "Control Room" GUI — edit content, upload media, publish.     |
+| `assets/`      | Media files (created on first upload).                        |
+
+No build step, no dependencies beyond two Google Fonts.
 
 ## Quick start
 
-Open `index.html` in a browser. That's it. To deploy, host the file anywhere
-static (GitHub Pages, Netlify, Cloudflare Pages).
+Serve the folder locally (fetch of content.json is blocked on file://):
 
-## Concept
+```bash
+python3 -m http.server
+# site:  http://localhost:8000
+# admin: http://localhost:8000/admin.html
+```
 
-The site *is* the television. Sections are channels; navigating triggers a
-static burst, a tune-in animation, and an amber OSD channel readout.
+Deploy by enabling GitHub Pages on this repo (Settings → Pages → deploy from
+`main`). The admin tool also works when hosted — you can edit the live site
+from `yoursite.github.io/admin.html` on any machine.
 
-| Channel | Section  | Content                                      |
-|---------|----------|----------------------------------------------|
-| CH 01   | SIGNAL   | Intro / hero                                 |
-| CH 02   | BUILDS   | Showreel slot + project list as a TV guide   |
-| CH 03   | PROCESS  | Build process as a VTR timecode log          |
-| CH 04   | CONTACT  | Email / phone / reel links                   |
+## Editing workflow (admin.html)
 
-Arrow keys (← →) also change channels.
+1. Open `admin.html`. It loads `content.json` automatically (or use
+   LOAD JSON FILE when serving isn't possible).
+2. **Left panel** — channel list. Click to select, ▲▼ to reorder, ✕ to delete,
+   `+ NEW CHANNEL` to add one (types: hero, guide, process, contact, custom).
+3. **Middle panel** — the editor for the selected channel. Guide channels have
+   an `+ NEW PROJECT` button; each project has fields plus an UPLOAD MEDIA
+   button with a live CRT-graded preview. Custom channels compose free-form
+   text / image / video blocks.
+4. **Right panel** — publish. Enter GitHub owner, repo, branch, and a
+   fine-grained personal access token scoped to this repo with
+   *Contents: Read and write*. PUBLISH commits `content.json` plus any newly
+   uploaded media to `assets/` via the GitHub API. Pages redeploys in ~1 min.
+   - The token never leaves the browser; "remember settings" is opt-in
+     localStorage.
+   - No-GitHub fallback: DOWNLOAD JSON exports `content.json` and any pending
+     media files for manual placement + commit.
+
+### Adding the showreel
+
+In the BUILDS channel editor, set Showreel to `youtube` / `vimeo` and paste the
+watch URL (the ID is extracted automatically), or `file` and upload an MP4.
+`none` shows the animated NO SIGNAL placeholder.
+
+## Content schema (content.json)
+
+```
+site: { pageTitle, heroName }            heroName may contain <br>
+channels: [
+  { type:"hero",    label, sub, paragraphs[], showTestBars }
+  { type:"guide",   label, title, sub,
+                    reel:{ kind:none|youtube|vimeo|file, src, caption },
+                    projects:[{ time, title, desc, tags, image, caption }] }
+  { type:"process", label, title, sub,
+                    steps:[{ timecode, text, image, caption }] }
+  { type:"contact", label, title, sub, rows:[{ k, label, href }], note }
+  { type:"custom",  label, title, sub,
+                    blocks:[{ kind:text|image|video, ... }] }
+]
+```
+
+Channel numbers (CH 01…) come from array order. All text is HTML-escaped at
+render time except `heroName`'s `<br>`.
 
 ## Design tokens
-
-Defined as CSS custom properties at the top of the stylesheet:
 
 - `--tube` `#0b0e0c` — unlit phosphor background
 - `--phosphor` `#a8bfa0` — muted green, primary text
@@ -34,71 +82,46 @@ Defined as CSS custom properties at the top of the stylesheet:
 - `--ghost` `#6e7f8d` — dimmed UI labels
 - `--burn` `#d8d4c4` — bright highlights (headings)
 
-Fonts: **VT323** (OSD/display), **IBM Plex Mono** (body). Loaded from Google
-Fonts with monospace fallbacks.
+Fonts: **VT323** (OSD/display), **IBM Plex Mono** (body).
 
-## CRT effect layers
+## CRT effect layers (index.html)
 
-Stacked full-screen overlays inside `.crt`, back to front:
-
-1. `.grille` — faint RGB aperture-grille stripes
-2. `.scanlines` — horizontal scanlines (multiply blend)
-3. `.sweep` — slow travelling refresh band
-4. `.vignette` — tube curvature shading
-5. `.flicker` — subtle whole-screen flicker
-6. `#noise` — canvas static, only visible during channel changes
-7. `.boot` — one-shot power-on flash on page load
-
-All decorative layers are `aria-hidden` and `pointer-events: none`.
-`prefers-reduced-motion` disables flicker, sweep, boot, glitches, and blinks.
+Stacked overlays inside `.crt`, back to front: `.grille` (RGB stripes),
+`.scanlines`, `.sweep` (travelling refresh band), `.vignette`, `.flicker`,
+`#noise` (canvas static during channel changes), `.boot` (power-on flash).
+All decorative layers are `aria-hidden`; `prefers-reduced-motion` disables
+motion effects. Arrow keys (← →) change channels.
 
 ## Media treatment (`.tv-frame`)
 
-Wrap any `<img>`, `<video>`, or `<iframe>` in `<div class="tv-frame">` to get
-the broadcast look: desaturated green-shifted grade (CSS filter), per-media
-scanlines (`::before`), vignette (`::after`), and a hover tracking glitch.
+Any image/video/iframe wrapped in `.tv-frame` gets the broadcast look:
+desaturated green-shifted CSS filter grade, per-media scanlines, vignette,
+hover tracking glitch, optional `.tv-caption` (add `.rec` for blinking record
+dot). Empty slots render an animated NO SIGNAL state. The grade is pure CSS —
+no image pre-processing needed. On YouTube/Vimeo iframes the overlay sits over
+player controls too; self-hosted video avoids that.
 
-Modifiers / extras:
+## Publishing / security notes
 
-- `.wide` — locks 16:9 aspect ratio (use for video)
-- `.guide-thumb` — 4:3 thumbnail sizing for guide rows
-- `.no-signal` — empty-slot state with drifting "NO SIGNAL" text
-- `<span class="tv-caption">CAM 1</span>` — camcorder OSD caption; add `.rec`
-  for a blinking red record dot
-
-### Adding your reel
-
-In CH 02, replace the `.no-signal` block with one of the commented-out embeds
-directly below it (YouTube / Vimeo / self-hosted `<video>` variants are all
-there). Note: on YouTube/Vimeo iframes the scanline overlay sits over the
-player controls too. Self-hosted video avoids that.
-
-### Replacing placeholder images
-
-All images currently point at `picsum.photos` seeds. Swap each `src` for your
-own stills; the grade is applied by CSS, so no pre-processing needed. Keep
-`loading="lazy"` on anything below the fold.
+- Fine-grained token: github.com → Settings → Developer settings →
+  Fine-grained tokens → scope to this one repo, Contents R/W only.
+- Media uploads go through the GitHub contents API (base64), fine for photos
+  and short clips. GitHub blocks files >100 MB and the API gets unhappy well
+  before that — host long reels on YouTube/Vimeo or an external host instead.
+- If the repo is public, `admin.html` is publicly reachable when Pages is on.
+  That's safe — it's inert without a token — but you can keep it out of the
+  deploy if preferred.
 
 ## Content to replace before launch
 
-- [ ] Hero copy on CH 01 (bio is placeholder)
-- [ ] All four project entries on CH 02 (titles, descriptions, tags)
-- [ ] All placeholder images
-- [ ] Reel embed on CH 02
+- [ ] Hero copy on CH 01
+- [ ] Project entries + real stills (placeholders point at picsum.photos)
+- [ ] Reel embed
 - [ ] Email, phone, reel link on CH 04
-- [ ] `<title>` tag and the on-screen name
-
-## Architecture notes
-
-- Channel switching: `tune(ch)` in the inline script — runs the static burst,
-  swaps `.on` classes, replays the tune-in animation via forced reflow, resets
-  scroll, updates the OSD.
-- Static noise renders at half resolution to the `#noise` canvas for speed.
-- No frameworks, no build tooling — deliberate, to keep hosting trivial.
 
 ## Ideas parked for later
 
 - Lightbox: thumbnails expand fullscreen with the channel-tune animation
-- Degraded-broadcast image hover (VHS chroma bleed via SVG filters)
-- An off-air / test-card easter egg channel (CH 00)
-- Real project stills shot on set
+- VHS chroma-bleed hover via SVG filters
+- Off-air / test-card easter egg channel (CH 00)
+- Live preview iframe inside admin.html
