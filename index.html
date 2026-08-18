@@ -423,6 +423,162 @@ h2.ch-title {
 /* reel section */
 .reel-wrap { max-width: 900px; margin-top: clamp(8px, 2vh, 16px); }
 
+/* ---------- PROJECT POP-UP (picture-in-picture window) ---------- */
+.guide-row.clickable { cursor: pointer; }
+.guide-row.clickable:hover .guide-title { color: var(--burn); text-shadow: 0 0 10px rgba(216,212,196,0.4); }
+.guide-more {
+  font-family: var(--osd-font);
+  font-size: clamp(13px, 1.7vw, 16px);
+  color: var(--amber);
+  margin-top: 6px;
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.guide-row.clickable:hover .guide-more { opacity: 1; }
+
+.pip-backdrop {
+  position: absolute; inset: 0;
+  z-index: 18;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vw, 40px);
+  background: rgba(3,5,4,0.78);
+}
+.pip-backdrop.open { display: flex; }
+
+.pip {
+  position: relative;
+  width: min(880px, 100%);
+  max-height: 100%;
+  background: #0a0d0b;
+  border: 1px solid rgba(168,191,160,0.35);
+  border-radius: 12px / 10px;
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.8);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: tune-in 0.4s ease-out;
+}
+/* the pop-up is its own little tube: scanlines + vignette */
+.pip::before {
+  content: ""; position: absolute; inset: 0; z-index: 6; pointer-events: none;
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.2) 3px, rgba(0,0,0,0.2) 4px);
+}
+.pip::after {
+  content: ""; position: absolute; inset: 0; z-index: 7; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%);
+}
+
+.pip-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px clamp(14px, 3vw, 24px);
+  border-bottom: 1px solid rgba(168,191,160,0.25);
+  font-family: var(--osd-font);
+}
+.pip-head .pip-osd {
+  color: var(--amber);
+  font-size: clamp(16px, 2.2vw, 21px);
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 8px rgba(194,163,92,0.5);
+}
+.pip-head .grow { flex: 1; }
+.pip-close {
+  background: transparent;
+  border: 1px solid rgba(168,191,160,0.35);
+  color: var(--phosphor);
+  font-family: var(--osd-font);
+  font-size: clamp(15px, 2vw, 18px);
+  padding: 4px 12px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+}
+.pip-close:hover { color: var(--amber); border-color: rgba(194,163,92,0.7); }
+.pip-close:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+.pip-body {
+  overflow-y: auto;
+  padding: clamp(14px, 3vw, 24px);
+  scrollbar-width: none;
+}
+.pip-body::-webkit-scrollbar { display: none; }
+
+.pip-title {
+  font-family: var(--osd-font);
+  font-weight: 400;
+  font-size: clamp(26px, 4vw, 40px);
+  color: var(--burn);
+  text-shadow: 1.5px 0 0 rgba(194,120,92,0.35), -1.5px 0 0 rgba(110,141,141,0.35), 0 0 12px rgba(216,212,196,0.3);
+  margin-bottom: 2px;
+}
+.pip-meta {
+  font-family: var(--osd-font);
+  color: var(--ghost);
+  font-size: clamp(14px, 1.9vw, 18px);
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+.pip-writeup {
+  font-size: clamp(12px, 1.5vw, 14px);
+  line-height: 1.8;
+  color: var(--phosphor);
+  max-width: 70ch;
+  margin-bottom: 18px;
+}
+.pip-writeup p + p { margin-top: 0.9em; }
+
+/* gallery: main viewer + camera-select strip */
+.pip-viewer { position: relative; }
+.pip-viewer .tv-frame { aspect-ratio: 16 / 9; }
+.pip-viewer .tv-frame img { animation: pip-tune 0.3s ease-out; }
+@keyframes pip-tune {
+  0% { transform: scaleY(0.01); filter: brightness(5) saturate(0.55) contrast(1.08) sepia(0.18) hue-rotate(-8deg); }
+  100% { transform: scaleY(1); }
+}
+.pip-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  z-index: 5;
+  background: rgba(3,5,4,0.6);
+  border: 1px solid rgba(168,191,160,0.35);
+  color: var(--phosphor);
+  font-family: var(--osd-font);
+  font-size: 22px;
+  width: 40px; height: 40px;
+  cursor: pointer;
+}
+.pip-nav:hover { color: var(--amber); border-color: rgba(194,163,92,0.7); }
+.pip-nav.prev { left: 10px; }
+.pip-nav.next { right: 10px; }
+
+.pip-strip {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+.pip-strip::-webkit-scrollbar { display: none; }
+.pip-strip .tv-frame {
+  width: clamp(76px, 12vw, 110px);
+  aspect-ratio: 4 / 3;
+  flex: 0 0 auto;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+.pip-strip .tv-frame:hover { opacity: 0.85; }
+.pip-strip .tv-frame.sel {
+  opacity: 1;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 0 0 1px rgba(194,163,92,0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pip { animation: none; }
+  .pip-viewer .tv-frame img { animation: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tv-frame:hover img, .tv-frame:hover video { animation: none; }
   .tv-frame.no-signal .ns-text { animation: none; }
@@ -514,6 +670,17 @@ h2.ch-title {
 
     <main class="screen" id="screen"></main>
 
+    <div class="pip-backdrop" id="pipBackdrop">
+      <div class="pip" role="dialog" aria-modal="true" aria-labelledby="pipTitle">
+        <div class="pip-head">
+          <span class="pip-osd" id="pipOsd">PROGRAM DETAIL</span>
+          <span class="grow"></span>
+          <button class="pip-close" id="pipClose">✕ CLOSE</button>
+        </div>
+        <div class="pip-body" id="pipBody"></div>
+      </div>
+    </div>
+
     <canvas id="noise" aria-hidden="true"></canvas>
 
     <div class="grille" aria-hidden="true"></div>
@@ -556,7 +723,11 @@ const DEFAULT_CONTENT = {
       "type": "guide",
       "title": "TONIGHT'S PROGRAMMING",
       "sub": "SELECTED BUILDS · ALL TIMES APPROXIMATE",
-      "reel": { "kind": "none", "src": "", "caption": "MAIN FEATURE — REEL" },
+      "reel": {
+        "kind": "none",
+        "src": "",
+        "caption": "MAIN FEATURE — REEL"
+      },
       "projects": [
         {
           "time": "19:00",
@@ -564,7 +735,22 @@ const DEFAULT_CONTENT = {
           "desc": "Full-scale 1940s high street exterior. Three storefronts, practical doors and glazing, aged brick finish over timber frame. Built in sections for a night shoot turnaround.",
           "tags": "TIMBER · SCENIC FINISH · LOCATION",
           "image": "https://picsum.photos/seed/storefront/640/480",
-          "caption": "CAM 1"
+          "caption": "CAM 1",
+          "writeup": "Commissioned for a wartime drama shooting nights on a back-lot street. The brief: three adjoining 1940s storefronts with practical doors, openable sash windows, and glazing safe enough to play action against.\n\nBuilt as six craned-in sections over a steel spine so the facade could land on uneven tarmac and still read dead level on camera. Brick finish is carved and scumbled foam over ply skins — close enough that the DP asked which street we'd found.",
+          "gallery": [
+            {
+              "src": "https://picsum.photos/seed/storefront/1280/720",
+              "caption": "CAM 1 — WIDE"
+            },
+            {
+              "src": "https://picsum.photos/seed/storefront2/1280/720",
+              "caption": "CAM 2 — DETAIL"
+            },
+            {
+              "src": "https://picsum.photos/seed/storefront3/1280/720",
+              "caption": "CAM 3 — BUILD"
+            }
+          ]
         },
         {
           "time": "20:30",
@@ -572,7 +758,18 @@ const DEFAULT_CONTENT = {
           "desc": "Stunt-rated breakaway wall with resettable panels, engineered for six takes. Balsa core, scored plaster skin, hidden steel safety frame.",
           "tags": "STUNTS · PRACTICAL FX · RESET",
           "image": "https://picsum.photos/seed/breakaway/640/480",
-          "caption": "CAM 2"
+          "caption": "CAM 2",
+          "writeup": "A stunt performer goes through this wall six times in one day, and the wall has to look identical in every take. Balsa framing with a scored plaster skin, backed by a hidden steel goalpost frame that keeps the surrounding set rigid.\n\nReset time got down to eleven minutes by take three — pre-cut replacement panels, keyed fixings, and a two-person drill we rehearsed like a pit stop.",
+          "gallery": [
+            {
+              "src": "https://picsum.photos/seed/breakaway/1280/720",
+              "caption": "CAM 1 — RIG"
+            },
+            {
+              "src": "https://picsum.photos/seed/breakaway2/1280/720",
+              "caption": "CAM 2 — RESET"
+            }
+          ]
         },
         {
           "time": "22:00",
@@ -580,7 +777,22 @@ const DEFAULT_CONTENT = {
           "desc": "24-foot motorized turntable for a single-take musical number. Steel chassis, silent drive, deck dressed as a diner interior.",
           "tags": "STEEL · MECHANICAL · STAGE",
           "image": "https://picsum.photos/seed/turntable/640/480",
-          "caption": "CAM 3"
+          "caption": "CAM 3",
+          "writeup": "A single-take musical number needed the whole diner to revolve around the camera. A 24-foot turntable on a steel chassis, driven silently enough to record live vocals on top of it.\n\nThe deck breaks into pie sections that two people can carry, and the drive unit bolts to a standard stage floor — it's been re-dressed and reused twice since.",
+          "gallery": [
+            {
+              "src": "https://picsum.photos/seed/turntable/1280/720",
+              "caption": "CAM 1 — DECK"
+            },
+            {
+              "src": "https://picsum.photos/seed/turntable2/1280/720",
+              "caption": "CAM 2 — DRIVE"
+            },
+            {
+              "src": "https://picsum.photos/seed/turntable3/1280/720",
+              "caption": "CAM 3 — DRESSED"
+            }
+          ]
         },
         {
           "time": "23:30",
@@ -588,7 +800,18 @@ const DEFAULT_CONTENT = {
           "desc": "1:8 scale city block for a destruction sequence. Cast plaster buildings with frangible cores, wired for pyro cues.",
           "tags": "MINIATURES · PYRO PREP · SCALE",
           "image": "https://picsum.photos/seed/miniature/640/480",
-          "caption": "CAM 4"
+          "caption": "CAM 4",
+          "writeup": "A city block at 1:8 scale, built to be destroyed exactly once. Cast plaster buildings with frangible cores, pre-weakened along planned failure lines and wired for pyro cues.\n\nEverything was documented brick-by-brick beforehand so the VFX team could rebuild it digitally for the previz — then we blew up the real one.",
+          "gallery": [
+            {
+              "src": "https://picsum.photos/seed/miniature/1280/720",
+              "caption": "CAM 1 — BLOCK"
+            },
+            {
+              "src": "https://picsum.photos/seed/miniature2/1280/720",
+              "caption": "CAM 2 — WIRING"
+            }
+          ]
         }
       ]
     },
@@ -602,7 +825,8 @@ const DEFAULT_CONTENT = {
         {
           "timecode": "00:00:00:01 — DRAFT",
           "text": "Every build starts on paper — or these days, on screen. Working drawings from the art department get translated into cut lists, material orders, and a build schedule that survives contact with the shooting calendar.",
-          "image": "", "caption": ""
+          "image": "",
+          "caption": ""
         },
         {
           "timecode": "00:04:12:08 — BUILD",
@@ -613,12 +837,14 @@ const DEFAULT_CONTENT = {
         {
           "timecode": "00:09:47:22 — SHOOT",
           "text": "On set for the shoot days — pulling walls between setups, resetting breakaways, keeping the standby carpenter's kit within arm's reach of the first AD.",
-          "image": "", "caption": ""
+          "image": "",
+          "caption": ""
         },
         {
           "timecode": "00:14:03:15 — STRIKE",
           "text": "What took three weeks to build comes down in two days. Materials sorted for salvage, stage swept, on to the next one.",
-          "image": "", "caption": ""
+          "image": "",
+          "caption": ""
         }
       ]
     },
@@ -629,9 +855,21 @@ const DEFAULT_CONTENT = {
       "title": "STAY TUNED",
       "sub": "BOOKINGS & ENQUIRIES",
       "rows": [
-        { "k": "EMAIL", "label": "hello@example.com", "href": "mailto:hello@example.com" },
-        { "k": "PHONE", "label": "+1 (000) 000-0000", "href": "tel:+10000000000" },
-        { "k": "REEL", "label": "watch the reel", "href": "#" }
+        {
+          "k": "EMAIL",
+          "label": "hello@example.com",
+          "href": "mailto:hello@example.com"
+        },
+        {
+          "k": "PHONE",
+          "label": "+1 (000) 000-0000",
+          "href": "tel:+10000000000"
+        },
+        {
+          "k": "REEL",
+          "label": "watch the reel",
+          "href": "#"
+        }
       ],
       "note": "■ BROADCAST ENDS · TRANSMISSION RESUMES ON YOUR SCHEDULE ■"
     }
@@ -687,16 +925,20 @@ const RENDERERS = {
       ${bars}`;
   },
   guide(ch) {
-    const rows = (ch.projects || []).map(p => `
-      <div class="guide-row has-media">
+    const rows = (ch.projects || []).map((p, pi) => {
+      const openable = (p.writeup && p.writeup.trim()) || (p.gallery && p.gallery.length);
+      return `
+      <div class="guide-row has-media${openable ? ' clickable' : ''}"${openable ? ` data-chid="${esc(ch.id)}" data-proj="${pi}" role="button" tabindex="0" aria-haspopup="dialog"` : ''}>
         <div class="guide-time">${esc(p.time)}</div>
         ${mediaFrame(p.image, p.caption, { thumb: true, alt: p.title })}
         <div>
           <div class="guide-title">${esc(p.title)}</div>
           <div class="guide-desc">${esc(p.desc)}</div>
           <div class="guide-tags">${esc(p.tags)}</div>
+          ${openable ? '<div class="guide-more">⏵ PRESS FOR PROGRAM DETAIL</div>' : ''}
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
     return `
       <h2 class="ch-title">${esc(ch.title)}</h2>
       <p class="ch-sub">${esc(ch.sub)}</p>
@@ -737,6 +979,7 @@ const RENDERERS = {
 };
 
 function buildSite(content) {
+  window.__siteContent = content;
   document.title = content.site.pageTitle || document.title;
   const screen = document.getElementById('screen');
   const dial = document.getElementById('dial');
@@ -829,6 +1072,16 @@ function wireTuning(count) {
       if (b) tune(b.dataset.ch);
     });
     document.addEventListener('keydown', e => {
+      /* pop-up owns the keyboard while open */
+      if (pip.open) {
+        if (e.key === 'Escape') { closePip(); return; }
+        if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && pip.gallery.length > 1) {
+          const n = pip.gallery.length;
+          pip.idx = (pip.idx + (e.key === 'ArrowRight' ? 1 : -1) + n) % n;
+          pipRenderGallery();
+        }
+        return;
+      }
       if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
       const active = document.querySelector('.dial button.active');
       if (!active) return;
@@ -839,6 +1092,114 @@ function wireTuning(count) {
     });
   }
 }
+
+/* ---------- PROJECT POP-UP ---------- */
+const pip = {
+  backdrop: null, body: null, osd: null,
+  gallery: [], idx: 0, lastFocus: null, open: false
+};
+
+function pipGalleryHtml() {
+  if (!pip.gallery.length) return '';
+  const cur = pip.gallery[pip.idx];
+  const strip = pip.gallery.length > 1 ? `
+    <div class="pip-strip">
+      ${pip.gallery.map((g, i) => `
+        <div class="tv-frame${i === pip.idx ? ' sel' : ''}" data-gal="${i}" role="button" tabindex="0" aria-label="Show image ${i+1}">
+          <img src="${esc(g.src)}" alt="" loading="lazy">
+        </div>`).join('')}
+    </div>` : '';
+  const nav = pip.gallery.length > 1 ? `
+    <button class="pip-nav prev" data-galstep="-1" aria-label="Previous image">‹</button>
+    <button class="pip-nav next" data-galstep="1" aria-label="Next image">›</button>` : '';
+  return `
+    <div class="pip-viewer">
+      <div class="tv-frame wide">
+        <img src="${esc(cur.src)}" alt="${esc(cur.caption || 'Project image')}" key="${pip.idx}">
+        ${cur.caption ? `<span class="tv-caption">${esc(cur.caption)}</span>` : ''}
+      </div>
+      ${nav}
+    </div>
+    ${strip}`;
+}
+
+function pipRenderGallery() {
+  const holder = document.getElementById('pipGallery');
+  if (holder) holder.innerHTML = pipGalleryHtml();
+}
+
+function openProject(chid, pi) {
+  const content = window.__siteContent;
+  const channel = content.channels.find(c => c.id === chid);
+  const p = channel?.projects?.[pi];
+  if (!p) return;
+
+  pip.gallery = (p.gallery && p.gallery.length) ? p.gallery
+    : (p.image ? [{ src: p.image, caption: p.caption }] : []);
+  pip.idx = 0;
+  pip.lastFocus = document.activeElement;
+
+  pip.osd.textContent = `PROGRAM DETAIL — ${p.time || ''}`.trim();
+  const paras = (p.writeup || '').split(/\n\s*\n/).filter(Boolean)
+    .map(t => `<p>${esc(t)}</p>`).join('');
+  pip.body.innerHTML = `
+    <h3 class="pip-title" id="pipTitle">${esc(p.title)}</h3>
+    <div class="pip-meta">${esc(p.tags || '')}</div>
+    ${paras ? `<div class="pip-writeup">${paras}</div>` : ''}
+    <div id="pipGallery">${pipGalleryHtml()}</div>`;
+  pip.backdrop.classList.add('open');
+  pip.open = true;
+  pip.body.scrollTop = 0;
+  document.getElementById('pipClose').focus();
+}
+
+function closePip() {
+  pip.backdrop.classList.remove('open');
+  pip.open = false;
+  if (pip.lastFocus && pip.lastFocus.focus) pip.lastFocus.focus();
+}
+
+function wirePip() {
+  pip.backdrop = document.getElementById('pipBackdrop');
+  pip.body = document.getElementById('pipBody');
+  pip.osd = document.getElementById('pipOsd');
+
+  document.getElementById('pipClose').addEventListener('click', closePip);
+  pip.backdrop.addEventListener('click', e => { if (e.target === pip.backdrop) closePip(); });
+
+  /* open from guide rows (click or Enter/Space) */
+  const screen = document.getElementById('screen');
+  function tryOpen(target) {
+    const row = target.closest('.guide-row.clickable');
+    if (!row) return false;
+    openProject(row.dataset.chid, Number(row.dataset.proj));
+    return true;
+  }
+  screen.addEventListener('click', e => tryOpen(e.target));
+  screen.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && tryOpen(e.target)) e.preventDefault();
+  });
+
+  /* gallery interactions */
+  pip.body.addEventListener('click', e => {
+    const step = e.target.closest('[data-galstep]');
+    if (step) {
+      const n = pip.gallery.length;
+      pip.idx = (pip.idx + Number(step.dataset.galstep) + n) % n;
+      pipRenderGallery();
+      return;
+    }
+    const thumb = e.target.closest('[data-gal]');
+    if (thumb) { pip.idx = Number(thumb.dataset.gal); pipRenderGallery(); }
+  });
+  pip.body.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const thumb = e.target.closest('[data-gal]');
+      if (thumb) { e.preventDefault(); pip.idx = Number(thumb.dataset.gal); pipRenderGallery(); }
+    }
+  });
+}
+wirePip();
 
 /* ---------- boot ---------- */
 fetch('content.json', { cache: 'no-store' })

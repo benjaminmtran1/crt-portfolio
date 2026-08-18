@@ -395,6 +395,17 @@ const EDITORS = {
           ${field('Tags (e.g. TIMBER · STAGE)', `p.${i}.tags`, p.tags)}
           ${field('Image caption (e.g. CAM 1)', `p.${i}.caption`, p.caption)}
           ${mediaWidget(p.image, 'proj:' + i)}
+          ${field('Pop-up write-up (blank line = new paragraph; leave empty to disable pop-up)', `p.${i}.writeup`, p.writeup || '', 'textarea')}
+          <label class="f">Pop-up gallery</label>
+          ${(p.gallery || []).map((g, gi) => `
+            <div class="card">
+              <div class="card-head"><span class="grow">IMG ${gi+1}</span>
+                <button data-gal-up="${i}:${gi}">▲</button><button data-gal-down="${i}:${gi}">▼</button>
+                <button data-gal-del="${i}:${gi}">✕ remove</button></div>
+              ${field('Caption', `p.${i}.gallery.${gi}.caption`, g.caption)}
+              ${mediaWidget(g.src, `gal:${i}:${gi}`, { wide: true })}
+            </div>`).join('')}
+          <button class="act small" data-add-gal="${i}">+ GALLERY IMAGE</button>
         </div>`).join('')
       + `<button class="act primary" id="addProject">+ NEW PROJECT</button>`;
   },
@@ -506,9 +517,26 @@ function wireEditor(ch) {
       if (d[k + 'Down'] !== undefined) { const i = Number(d[k + 'Down']); if (i < ch[prop].length-1) { [ch[prop][i+1], ch[prop][i]] = [ch[prop][i], ch[prop][i+1]]; renderEditor(); } return; }
     }
     if (d.rowDel !== undefined) { ch.rows.splice(Number(d.rowDel), 1); renderEditor(); return; }
+    /* gallery ops (target format "projIdx:galIdx") */
+    const galOp = (key, fn) => {
+      if (d[key] === undefined) return false;
+      const [pi, gi] = d[key].split(':').map(Number);
+      fn(ch.projects[pi].gallery, gi);
+      renderEditor();
+      return true;
+    };
+    if (galOp('galDel', (g, i) => g.splice(i, 1))) return;
+    if (galOp('galUp', (g, i) => { if (i > 0) [g[i-1], g[i]] = [g[i], g[i-1]]; })) return;
+    if (galOp('galDown', (g, i) => { if (i < g.length-1) [g[i+1], g[i]] = [g[i], g[i+1]]; })) return;
+    if (d.addGal !== undefined) {
+      const p = ch.projects[Number(d.addGal)];
+      if (!p.gallery) p.gallery = [];
+      p.gallery.push({ src: '', caption: '' });
+      renderEditor(); return;
+    }
     if (d.delPara !== undefined) { ch.paragraphs.splice(Number(d.delPara), 1); renderEditor(); return; }
     if (d.addBlk) { ch.blocks.push(d.addBlk === 'text' ? {kind:'text', text:''} : d.addBlk === 'image' ? {kind:'image', src:'', caption:''} : {kind:'video', videoKind:'file', src:'', caption:''}); renderEditor(); return; }
-    if (e.target.id === 'addProject') { ch.projects.push({ time:'', title:'', desc:'', tags:'', image:'', caption:'CAM ' + (ch.projects.length + 1) }); renderEditor(); }
+    if (e.target.id === 'addProject') { ch.projects.push({ time:'', title:'', desc:'', tags:'', image:'', caption:'CAM ' + (ch.projects.length + 1), writeup:'', gallery:[] }); renderEditor(); }
     if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); }
     if (e.target.id === 'addRow') { ch.rows.push({ k:'', label:'', href:'' }); renderEditor(); }
     if (e.target.id === 'addPara') { ch.paragraphs.push(''); renderEditor(); }
@@ -517,11 +545,12 @@ function wireEditor(ch) {
 
 function applyMediaPath(ch, target, path) {
   if (target === 'reel') { ch.reel.src = path; return; }
-  const [kind, idx] = target.split(':');
-  const i = Number(idx);
+  const parts = target.split(':');
+  const kind = parts[0], i = Number(parts[1]);
   if (kind === 'proj') ch.projects[i].image = path;
   if (kind === 'step') ch.steps[i].image = path;
   if (kind === 'blk') ch.blocks[i].src = path;
+  if (kind === 'gal') ch.projects[i].gallery[Number(parts[2])].src = path;
 }
 
 /* ============================================================

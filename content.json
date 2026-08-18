@@ -21,7 +21,11 @@
       "type": "guide",
       "title": "TONIGHT'S PROGRAMMING",
       "sub": "SELECTED BUILDS · ALL TIMES APPROXIMATE",
-      "reel": { "kind": "none", "src": "", "caption": "MAIN FEATURE — REEL" },
+      "reel": {
+        "kind": "none",
+        "src": "",
+        "caption": "MAIN FEATURE — REEL"
+      },
       "projects": [
         {
           "time": "19:00",
@@ -29,7 +33,22 @@
           "desc": "Full-scale 1940s high street exterior. Three storefronts, practical doors and glazing, aged brick finish over timber frame. Built in sections for a night shoot turnaround.",
           "tags": "TIMBER · SCENIC FINISH · LOCATION",
           "image": "https://picsum.photos/seed/storefront/640/480",
-          "caption": "CAM 1"
+          "caption": "CAM 1",
+          "writeup": "Commissioned for a wartime drama shooting nights on a back-lot street. The brief: three adjoining 1940s storefronts with practical doors, openable sash windows, and glazing safe enough to play action against.\n\nBuilt as six craned-in sections over a steel spine so the facade could land on uneven tarmac and still read dead level on camera. Brick finish is carved and scumbled foam over ply skins — close enough that the DP asked which street we'd found.",
+          "gallery": [
+            {
+              "src": "https://picsum.photos/seed/storefront/1280/720",
+              "caption": "CAM 1 — WIDE"
+            },
+            {
+              "src": "https://picsum.photos/seed/storefront2/1280/720",
+              "caption": "CAM 2 — DETAIL"
+            },
+            {
+              "src": "https://picsum.photos/seed/storefront3/1280/720",
+              "caption": "CAM 3 — BUILD"
+            }
+          ]
         },
         {
           "time": "20:30",
@@ -37,7 +56,18 @@
           "desc": "Stunt-rated breakaway wall with resettable panels, engineered for six takes. Balsa core, scored plaster skin, hidden steel safety frame.",
           "tags": "STUNTS · PRACTICAL FX · RESET",
           "image": "https://picsum.photos/seed/breakaway/640/480",
-          "caption": "CAM 2"
+          "caption": "CAM 2",
+          "writeup": "A stunt performer goes through this wall six times in one day, and the wall has to look identical in every take. Balsa framing with a scored plaster skin, backed by a hidden steel goalpost frame that keeps the surrounding set rigid.\n\nReset time got down to eleven minutes by take three — pre-cut replacement panels, keyed fixings, and a two-person drill we rehearsed like a pit stop.",
+          "gallery": [
+            {
+              "src": "https://picsum.photos/seed/breakaway/1280/720",
+              "caption": "CAM 1 — RIG"
+            },
+            {
+              "src": "https://picsum.photos/seed/breakaway2/1280/720",
+              "caption": "CAM 2 — RESET"
+            }
+          ]
         },
         {
           "time": "22:00",
@@ -45,7 +75,22 @@
           "desc": "24-foot motorized turntable for a single-take musical number. Steel chassis, silent drive, deck dressed as a diner interior.",
           "tags": "STEEL · MECHANICAL · STAGE",
           "image": "https://picsum.photos/seed/turntable/640/480",
-          "caption": "CAM 3"
+          "caption": "CAM 3",
+          "writeup": "A single-take musical number needed the whole diner to revolve around the camera. A 24-foot turntable on a steel chassis, driven silently enough to record live vocals on top of it.\n\nThe deck breaks into pie sections that two people can carry, and the drive unit bolts to a standard stage floor — it's been re-dressed and reused twice since.",
+          "gallery": [
+            {
+              "src": "https://picsum.photos/seed/turntable/1280/720",
+              "caption": "CAM 1 — DECK"
+            },
+            {
+              "src": "https://picsum.photos/seed/turntable2/1280/720",
+              "caption": "CAM 2 — DRIVE"
+            },
+            {
+              "src": "https://picsum.photos/seed/turntable3/1280/720",
+              "caption": "CAM 3 — DRESSED"
+            }
+          ]
         },
         {
           "time": "23:30",
@@ -53,7 +98,18 @@
           "desc": "1:8 scale city block for a destruction sequence. Cast plaster buildings with frangible cores, wired for pyro cues.",
           "tags": "MINIATURES · PYRO PREP · SCALE",
           "image": "https://picsum.photos/seed/miniature/640/480",
-          "caption": "CAM 4"
+          "caption": "CAM 4",
+          "writeup": "A city block at 1:8 scale, built to be destroyed exactly once. Cast plaster buildings with frangible cores, pre-weakened along planned failure lines and wired for pyro cues.\n\nEverything was documented brick-by-brick beforehand so the VFX team could rebuild it digitally for the previz — then we blew up the real one.",
+          "gallery": [
+            {
+              "src": "https://picsum.photos/seed/miniature/1280/720",
+              "caption": "CAM 1 — BLOCK"
+            },
+            {
+              "src": "https://picsum.photos/seed/miniature2/1280/720",
+              "caption": "CAM 2 — WIRING"
+            }
+          ]
         }
       ]
     },
@@ -67,7 +123,8 @@
         {
           "timecode": "00:00:00:01 — DRAFT",
           "text": "Every build starts on paper — or these days, on screen. Working drawings from the art department get translated into cut lists, material orders, and a build schedule that survives contact with the shooting calendar.",
-          "image": "", "caption": ""
+          "image": "",
+          "caption": ""
         },
         {
           "timecode": "00:04:12:08 — BUILD",
@@ -78,12 +135,14 @@
         {
           "timecode": "00:09:47:22 — SHOOT",
           "text": "On set for the shoot days — pulling walls between setups, resetting breakaways, keeping the standby carpenter's kit within arm's reach of the first AD.",
-          "image": "", "caption": ""
+          "image": "",
+          "caption": ""
         },
         {
           "timecode": "00:14:03:15 — STRIKE",
           "text": "What took three weeks to build comes down in two days. Materials sorted for salvage, stage swept, on to the next one.",
-          "image": "", "caption": ""
+          "image": "",
+          "caption": ""
         }
       ]
     },
@@ -94,9 +153,21 @@
       "title": "STAY TUNED",
       "sub": "BOOKINGS & ENQUIRIES",
       "rows": [
-        { "k": "EMAIL", "label": "hello@example.com", "href": "mailto:hello@example.com" },
-        { "k": "PHONE", "label": "+1 (000) 000-0000", "href": "tel:+10000000000" },
-        { "k": "REEL", "label": "watch the reel", "href": "#" }
+        {
+          "k": "EMAIL",
+          "label": "hello@example.com",
+          "href": "mailto:hello@example.com"
+        },
+        {
+          "k": "PHONE",
+          "label": "+1 (000) 000-0000",
+          "href": "tel:+10000000000"
+        },
+        {
+          "k": "REEL",
+          "label": "watch the reel",
+          "href": "#"
+        }
       ],
       "note": "■ BROADCAST ENDS · TRANSMISSION RESUMES ON YOUR SCHEDULE ■"
     }

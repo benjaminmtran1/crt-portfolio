@@ -61,7 +61,8 @@ channels: [
   { type:"hero",    label, sub, paragraphs[], showTestBars }
   { type:"guide",   label, title, sub,
                     reel:{ kind:none|youtube|vimeo|file, src, caption },
-                    projects:[{ time, title, desc, tags, image, caption }] }
+                    projects:[{ time, title, desc, tags, image, caption,
+                                writeup, gallery:[{ src, caption }] }] }
   { type:"process", label, title, sub,
                     steps:[{ timecode, text, image, caption }] }
   { type:"contact", label, title, sub, rows:[{ k, label, href }], note }
@@ -100,6 +101,18 @@ hover tracking glitch, optional `.tv-caption` (add `.rec` for blinking record
 dot). Empty slots render an animated NO SIGNAL state. The grade is pure CSS —
 no image pre-processing needed. On YouTube/Vimeo iframes the overlay sits over
 player controls too; self-hosted video avoids that.
+
+## Project pop-up ("Program Detail")
+
+A project with a `writeup` and/or `gallery` becomes clickable in the guide —
+hovering shows "PRESS FOR PROGRAM DETAIL", and clicking (or Enter/Space) opens
+a picture-in-picture window styled as its own small tube: scanlines, vignette,
+tune-in animation. Inside: title, tags, the write-up (blank lines in the
+write-up become paragraph breaks), and a gallery with a 16:9 main viewer plus
+a camera-select thumbnail strip. Arrow keys step the gallery while open; ESC
+or the backdrop closes it and channel-switching keys are suspended. Projects
+with neither field stay non-clickable. Edit both fields per-project in the
+admin's BUILDS editor (`+ GALLERY IMAGE` to add images).
 
 ## Publishing / security notes
 
