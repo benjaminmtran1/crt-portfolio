@@ -358,8 +358,22 @@ h2.ch-title {
   60% { transform: translateX(1px) skewX(-0.3deg); }
   80% { transform: translateX(-1px); }
 }
-.tv-frame:hover img,
-.tv-frame:hover video { animation: tracking 0.25s steps(3) 2; }
+/* VHS chroma bleed — mouse hover (hover-capable devices only) */
+@media (hover: hover) {
+  .tv-frame:hover img,
+  .tv-frame:hover video,
+  .tv-frame:hover iframe {
+    animation: tracking 0.25s steps(3) 2;
+    filter: saturate(0.55) contrast(1.08) brightness(0.88) sepia(0.18) hue-rotate(-8deg) url(#chromaBleed);
+  }
+}
+/* VHS chroma bleed — touch (class applied by JS while pressed) */
+.tv-frame.bleed img,
+.tv-frame.bleed video,
+.tv-frame.bleed iframe {
+  animation: tracking 0.25s steps(3) 2;
+  filter: saturate(0.55) contrast(1.08) brightness(0.88) sepia(0.18) hue-rotate(-8deg) url(#chromaBleed);
+}
 
 /* camcorder-style caption bar */
 .tv-caption {
@@ -580,7 +594,11 @@ h2.ch-title {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tv-frame:hover img, .tv-frame:hover video { animation: none; }
+  .tv-frame:hover img, .tv-frame:hover video, .tv-frame:hover iframe,
+  .tv-frame.bleed img, .tv-frame.bleed video, .tv-frame.bleed iframe {
+    animation: none;
+    filter: saturate(0.55) contrast(1.08) brightness(0.88) sepia(0.18) hue-rotate(-8deg);
+  }
   .tv-frame.no-signal .ns-text { animation: none; }
   .tv-caption.rec::before { animation: none; }
 }
@@ -660,6 +678,31 @@ h2.ch-title {
 </style>
 </head>
 <body>
+
+<!-- VHS chroma bleed filter: splits R/G/B, smears and offsets the red and
+     blue channels horizontally with a slow SMIL wobble, recombines. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="chromaBleed" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+      <feColorMatrix in="SourceGraphic" type="matrix"
+        values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red"/>
+      <feGaussianBlur in="red" stdDeviation="1.4 0" result="redSmear"/>
+      <feOffset in="redSmear" dx="3" dy="0" result="redShift">
+        <animate attributeName="dx" values="3;5;2.5;4.5;3" dur="1.1s" repeatCount="indefinite"/>
+      </feOffset>
+      <feColorMatrix in="SourceGraphic" type="matrix"
+        values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue"/>
+      <feGaussianBlur in="blue" stdDeviation="1.4 0" result="blueSmear"/>
+      <feOffset in="blueSmear" dx="-3" dy="0" result="blueShift">
+        <animate attributeName="dx" values="-3;-5;-2.5;-4.5;-3" dur="0.9s" repeatCount="indefinite"/>
+      </feOffset>
+      <feColorMatrix in="SourceGraphic" type="matrix"
+        values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green"/>
+      <feComposite in="redShift" in2="blueShift" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="rb"/>
+      <feComposite in="rb" in2="green" operator="arithmetic" k1="0" k2="1" k3="1" k4="0"/>
+    </filter>
+  </defs>
+</svg>
 
 <div class="tv-cabinet">
   <div class="crt">
@@ -1200,6 +1243,33 @@ function wirePip() {
   });
 }
 wirePip();
+
+/* ---------- VHS CHROMA BLEED — touch support ----------
+   Hover doesn't exist on touch, so: pressing any media frame applies the
+   bleed while the finger is down, lingering briefly after lift so a quick
+   tap still flashes the effect (and taps still open pop-ups as normal). */
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function releaseAll() {
+    document.querySelectorAll('.tv-frame.bleed').forEach(f => {
+      clearTimeout(f._bleedT);
+      f._bleedT = setTimeout(() => f.classList.remove('bleed'), 350);
+    });
+  }
+  document.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch') return;
+    const f = e.target.closest('.tv-frame');
+    if (!f) return;
+    clearTimeout(f._bleedT);
+    f.classList.add('bleed');
+  }, { passive: true });
+  document.addEventListener('pointerup', e => {
+    if (e.pointerType === 'touch') releaseAll();
+  }, { passive: true });
+  document.addEventListener('pointercancel', e => {
+    if (e.pointerType === 'touch') releaseAll();
+  }, { passive: true });
+})();
 
 /* ---------- boot ---------- */
 fetch('content.json', { cache: 'no-store' })

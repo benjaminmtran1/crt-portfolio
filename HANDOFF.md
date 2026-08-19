@@ -97,7 +97,10 @@ motion effects. Arrow keys (← →) change channels.
 
 Any image/video/iframe wrapped in `.tv-frame` gets the broadcast look:
 desaturated green-shifted CSS filter grade, per-media scanlines, vignette,
-hover tracking glitch, optional `.tv-caption` (add `.rec` for blinking record
+hover tracking glitch with VHS chroma bleed (SVG filter `#chromaBleed`
+splits R/B channels, smears and wobbles them via SMIL — on touch devices,
+press-and-hold any frame for the same effect, with a short linger after a
+tap), optional `.tv-caption` (add `.rec` for blinking record
 dot). Empty slots render an animated NO SIGNAL state. The grade is pure CSS —
 no image pre-processing needed. On YouTube/Vimeo iframes the overlay sits over
 player controls too; self-hosted video avoids that.
@@ -135,6 +138,5 @@ admin's BUILDS editor (`+ GALLERY IMAGE` to add images).
 ## Ideas parked for later
 
 - Lightbox: thumbnails expand fullscreen with the channel-tune animation
-- VHS chroma-bleed hover via SVG filters
 - Off-air / test-card easter egg channel (CH 00)
 - Live preview iframe inside admin.html
