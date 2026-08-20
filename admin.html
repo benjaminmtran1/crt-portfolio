@@ -608,6 +608,42 @@ function setStatus(msg, cls) {
   });
 });
 
+/* When a publish fails, ask GitHub who the token is and what it can see,
+   so the status box can say what's actually wrong instead of "Not Found". */
+async function diagnose(owner, repo, branch, token) {
+  const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' };
+  const lines = [];
+  try {
+    const u = await fetch('https://api.github.com/user', { headers });
+    if (u.status === 401) {
+      lines.push('⚠ TOKEN REJECTED — invalid or expired. Generate a new fine-grained token and paste the fresh value.');
+      return lines;
+    }
+    const user = await u.json();
+    lines.push(`Token belongs to: ${user.login}`);
+    if (owner.toLowerCase() !== user.login.toLowerCase())
+      lines.push(`⚠ OWNER field says "${owner}" but the token is ${user.login}'s. If the repo lives under ${user.login}, fix OWNER.`);
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
+    if (!r.ok) {
+      lines.push(`⚠ REPO ${owner}/${repo} NOT VISIBLE to this token — check OWNER/REPO spelling, and that the token's Repository access includes this repo.`);
+      return lines;
+    }
+    const info = await r.json();
+    const perms = info.permissions || {};
+    lines.push(`Repo reachable: ${info.full_name} (default branch: ${info.default_branch})`);
+    if (!perms.push) {
+      lines.push('⚠ TOKEN IS READ-ONLY on this repo. Edit the token: Repository access → Only select repositories → pick this repo; Permissions → Contents → Read and write.');
+    } else {
+      lines.push('Token can write to the repo.');
+      if (branch !== info.default_branch)
+        lines.push(`⚠ BRANCH field says "${branch}" — repo default is "${info.default_branch}". Check the branch exists.`);
+    }
+  } catch (e) {
+    lines.push('Diagnostic error: ' + e.message);
+  }
+  return lines;
+}
+
 async function ghPut(owner, repo, branch, token, path, base64, message) {
   const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
   const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' };
@@ -643,7 +679,9 @@ $('btnPublish').onclick = async () => {
     renderPending();
     setStatus('⏵ TRANSMITTED. Live on Pages in ~1 minute.', 'ok');
   } catch (err) {
-    setStatus('FAILED — ' + err.message, 'err');
+    setStatus('FAILED — ' + err.message + '\nRunning diagnostics…', 'err');
+    const findings = await diagnose(owner, repo, branch, token);
+    setStatus('FAILED — ' + err.message + '\n' + findings.join('\n'), 'err');
   } finally {
     btn.disabled = false;
   }
