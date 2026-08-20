@@ -197,6 +197,45 @@
               "caption": ""
             }
           ]
+        },
+        {
+          "time": "Mcdonald's - It's McValue",
+          "title": "",
+          "desc": "",
+          "tags": "",
+          "image": "assets/screenshot-2026-08-20-at-3.37.40-pm.jpg",
+          "caption": "CAM 3",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://www.youtube.com/watch?v=SUqkJ00fWx8",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6560.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6598.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6549.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6544.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6505.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6517.dng.jpg",
+              "caption": ""
+            }
+          ]
         }
       ]
     },
