@@ -122,24 +122,24 @@
       "projects": [
         {
           "time": "19:00",
-          "title": "Rotating Stage Platform",
-          "desc": "24-foot motorized turntable for a single-take musical number. Steel chassis, silent drive, deck dressed as a diner interior.",
-          "tags": "STEEL · MECHANICAL · STAGE",
-          "image": "https://picsum.photos/seed/turntable/640/480",
+          "title": "Taco Bell - Love Me Tender",
+          "desc": "",
+          "tags": "Art Coordinator · Construction",
+          "image": "assets/screenshot-2026-08-20-at-2.20.59-pm.jpg",
           "caption": "CAM 1",
-          "writeup": "A single-take musical number needed the whole diner to revolve around the camera. A 24-foot turntable on a steel chassis, driven silently enough to record live vocals on top of it.\n\nThe deck breaks into pie sections that two people can carry, and the drive unit bolts to a standard stage floor — it's been re-dressed and reused twice since.",
+          "writeup": "",
           "gallery": [
             {
-              "src": "https://picsum.photos/seed/turntable/1280/720",
-              "caption": "CAM 1 — DECK"
+              "src": "https://www.youtube.com/watch?v=uHDmH2Z8I6M",
+              "caption": ""
             },
             {
-              "src": "https://picsum.photos/seed/turntable2/1280/720",
-              "caption": "CAM 2 — DRIVE"
+              "src": "assets/screenshot-2026-08-20-at-2.20.59-pm.jpg",
+              "caption": ""
             },
             {
-              "src": "https://picsum.photos/seed/turntable3/1280/720",
-              "caption": "CAM 3 — DRESSED"
+              "src": "assets/img_8417.jpg",
+              "caption": ""
             }
           ]
         }
