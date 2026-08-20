@@ -16,19 +16,19 @@
       "showTestBars": true,
       "carousel": [
         {
-          "src": "https://picsum.photos/seed/storefront/1280/720",
+          "src": "assets/img_8883.jpg",
           "caption": "CAM 1 — PERIOD STOREFRONT"
         },
         {
-          "src": "https://picsum.photos/seed/turntable/1280/720",
+          "src": "assets/img_8267.jpg",
           "caption": "CAM 2 — ROTATING STAGE"
         },
         {
-          "src": "https://picsum.photos/seed/breakaway/1280/720",
+          "src": "assets/img_7762.dng.jpg",
           "caption": "CAM 3 — BREAKAWAY RIG"
         },
         {
-          "src": "https://picsum.photos/seed/miniature/1280/720",
+          "src": "assets/img_2242.dng.jpg",
           "caption": "CAM 4 — MINIATURE BLOCK"
         }
       ]
