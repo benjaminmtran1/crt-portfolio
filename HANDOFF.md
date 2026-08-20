@@ -34,7 +34,14 @@ from `yoursite.github.io/admin.html` on any machine.
    LOAD JSON FILE when serving isn't possible).
 2. **Left panel** — channel list. Click to select, ▲▼ to reorder, ✕ to delete,
    `+ NEW CHANNEL` to add one (types: hero, guide, process, contact, custom).
-3. **Middle panel** — the editor for the selected channel. Guide channels have
+3. **Middle panel** — the editor for the selected channel. Projects, hero
+   carousel slides, and gallery images are **collapsible cards**: click a
+   card's header to open/close it, or use EXPAND ALL / COLLAPSE ALL in the
+   section header. Collapsed cards show number, title, and a summary
+   (image count, whether there's a write-up, filename, or a red "no media"
+   flag). Newly added items open automatically; batch-uploaded ones stay
+   collapsed. Collapse state is tracked per item object, so it follows a
+   card when reordered and never lands in content.json. Guide channels have
    an `+ NEW PROJECT` button; each project has fields plus an UPLOAD MEDIA
    button with a live CRT-graded preview. Custom channels compose free-form
    text / image / video blocks.

@@ -112,6 +112,20 @@ button.act.small { font-size: 15px; padding: 4px 10px; }
 .card .card-head .grow { flex: 1; }
 .card .card-head button { background:none; border:0; color: var(--ghost); cursor:pointer; font-size: 15px; font-family: var(--osd); }
 .card .card-head button:hover { color: var(--burn); }
+/* collapsible cards */
+.card .card-head[data-toggle] { cursor: pointer; user-select: none; }
+.card .card-head[data-toggle]:hover .grow { color: var(--burn); }
+.card.collapsed { margin: 6px 0; padding: 8px 12px; }
+.card.collapsed .card-body { display: none; }
+.card .card-head .caret { color: var(--amber); width: 14px; flex: 0 0 auto; }
+.card .card-head .num { color: var(--ghost); flex: 0 0 auto; }
+.card .card-head .sum {
+  flex: 0 1 auto; font-size: 11px; color: var(--phosphor-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%;
+}
+.card .card-head .warn { color: #b0564a; }
+.list-head { display: flex; align-items: center; gap: 8px; margin-top: 24px; }
+.list-head h2 { margin: 0; flex: 1; }
 
 /* ---------- media picker & preview ---------- */
 .media-row { display:flex; gap:12px; align-items:flex-start; margin-top: 6px; flex-wrap: wrap; }
@@ -461,6 +475,44 @@ function mediaWidget(path, onPick, { wide } = {}) {
 /* ============================================================
    EDITOR
    ============================================================ */
+/* Collapse state lives on the item objects themselves (WeakSet), so it
+   survives re-renders and follows items when they're reordered — and never
+   ends up in the published JSON. Not in the set = collapsed. */
+const EXPANDED = new WeakSet();
+function isOpen(o) { return EXPANDED.has(o); }
+function openItem(o) { EXPANDED.add(o); }
+
+/* one collapsible card header: caret, number, title, summary, row buttons */
+function cardHead(item, i, kind, title, summary, num) {
+  const open = isOpen(item);
+  /* i may be a compound key like "2:0" (gallery), so the display number
+     is passed separately when it can't be derived from i */
+  const n = num != null ? num : Number(i) + 1;
+  return `<div class="card-head" data-toggle="${kind}:${i}">
+      <span class="caret">${open ? '▾' : '▸'}</span>
+      <span class="num">${String(n).padStart(2, '0')}</span>
+      <span class="grow">${esc(title || 'Untitled')}</span>
+      ${summary ? `<span class="sum">${summary}</span>` : ''}
+      <button data-${kind}-up="${i}" title="Move up">▲</button>
+      <button data-${kind}-down="${i}" title="Move down">▼</button>
+      <button data-${kind}-del="${i}" title="Remove">✕</button>
+    </div>`;
+}
+/* short "what's in here" line for a collapsed card */
+function mediaSum(src) {
+  if (!src) return '<span class="warn">no media</span>';
+  if (/^https?:\/\//i.test(src)) {
+    if (/youtu\.?be|vimeo/.test(src)) return 'video link';
+    return 'url';
+  }
+  return esc(src.replace(/^assets\//, ''));
+}
+function listHead(title, count, kind) {
+  return `<div class="list-head"><h2>${esc(title)} (${count})</h2>
+    <button class="act small" data-expand="${kind}">EXPAND ALL</button>
+    <button class="act small" data-collapse="${kind}">COLLAPSE ALL</button></div>`;
+}
+
 function field(label, id, value, kind = 'input') {
   if (kind === 'textarea') return `<label class="f">${label}</label><textarea data-f="${id}">${esc(value)}</textarea>`;
   return `<label class="f">${label}</label><input type="text" data-f="${id}" value="${esc(value)}">`;
@@ -476,15 +528,15 @@ const EDITORS = {
             <button data-del-para="${i}">✕ remove</button></div>
             <textarea data-para="${i}">${esc(p)}</textarea></div>`).join('')
       + `<button class="act small" id="addPara">+ PARAGRAPH</button>`
-      + `<h2 style="margin-top:24px;">FEATURED CAROUSEL</h2>
-         <p class="hint">Slides rotate on the SIGNAL channel — click/swipe to change, auto-advances. Slides can be images or videos (upload, or USE URL with a YouTube/Vimeo link). Leave empty for no carousel.</p>`
+      + listHead('FEATURED CAROUSEL', (ch.carousel || []).length, 'car')
+      + `<p class="hint">Slides rotate on the SIGNAL channel — click/swipe to change, auto-advances. Slides can be images or videos (upload, or USE URL with a YouTube/Vimeo link). Leave empty for no carousel.</p>`
       + (ch.carousel || []).map((s, i) => `
-        <div class="card">
-          <div class="card-head"><span class="grow">SLIDE ${i+1}</span>
-            <button data-car-up="${i}">▲</button><button data-car-down="${i}">▼</button>
-            <button data-car-del="${i}">✕ remove</button></div>
-          ${field('Caption (e.g. CAM 1 — STOREFRONT)', `c.${i}.caption`, s.caption)}
-          ${mediaWidget(s.src, 'car:' + i, { wide: true })}
+        <div class="card${isOpen(s) ? '' : ' collapsed'}">
+          ${cardHead(s, i, 'car', s.caption || 'Slide', mediaSum(s.src))}
+          <div class="card-body">
+            ${field('Caption (e.g. CAM 1 — STOREFRONT)', `c.${i}.caption`, s.caption)}
+            ${mediaWidget(s.src, 'car:' + i, { wide: true })}
+          </div>
         </div>`).join('')
       + `<button class="act small" id="addSlide">+ SLIDE</button>
          <button class="act small" data-batch-car="1">+ BATCH UPLOAD</button>`
@@ -504,31 +556,35 @@ const EDITORS = {
       + field('Reel URL (YouTube/Vimeo link) or file path', 'reel.src', reel.src)
       + field('Reel caption', 'reel.caption', reel.caption)
       + (reel.kind === 'file' ? mediaWidget(reel.src, 'reel', { wide:true }) : '')
-      + `<h2 style="margin-top:24px;">PROJECTS</h2>`
-      + (ch.projects || []).map((p, i) => `
-        <div class="card">
-          <div class="card-head"><span class="grow">${esc(p.title || 'Untitled')}</span>
-            <button data-proj-up="${i}">▲</button><button data-proj-down="${i}">▼</button>
-            <button data-proj-del="${i}">✕ remove</button></div>
-          ${field('Timeslot', `p.${i}.time`, p.time)}
-          ${field('Title', `p.${i}.title`, p.title)}
-          ${field('Description', `p.${i}.desc`, p.desc, 'textarea')}
-          ${field('Tags (e.g. TIMBER · STAGE)', `p.${i}.tags`, p.tags)}
-          ${field('Image caption (e.g. CAM 1)', `p.${i}.caption`, p.caption)}
-          ${mediaWidget(p.image, 'proj:' + i)}
-          ${field('Pop-up write-up (blank line = new paragraph; leave empty to disable pop-up)', `p.${i}.writeup`, p.writeup || '', 'textarea')}
-          <label class="f">Pop-up gallery</label>
-          ${(p.gallery || []).map((g, gi) => `
-            <div class="card">
-              <div class="card-head"><span class="grow">IMG ${gi+1}</span>
-                <button data-gal-up="${i}:${gi}">▲</button><button data-gal-down="${i}:${gi}">▼</button>
-                <button data-gal-del="${i}:${gi}">✕ remove</button></div>
-              ${field('Caption', `p.${i}.gallery.${gi}.caption`, g.caption)}
-              ${mediaWidget(g.src, `gal:${i}:${gi}`, { wide: true })}
-            </div>`).join('')}
-          <button class="act small" data-add-gal="${i}">+ GALLERY IMAGE</button>
-          <button class="act small" data-batch-gal="${i}">+ BATCH UPLOAD</button>
-        </div>`).join('')
+      + listHead('PROJECTS', (ch.projects || []).length, 'proj')
+      + (ch.projects || []).map((p, i) => {
+        const nGal = (p.gallery || []).length;
+        const sum = [nGal ? nGal + ' img' : '', p.writeup ? 'write-up' : '', p.image ? '' : 'no still']
+          .filter(Boolean).join(' · ');
+        return `
+        <div class="card${isOpen(p) ? '' : ' collapsed'}">
+          ${cardHead(p, i, 'proj', p.title, sum)}
+          <div class="card-body">
+            ${field('Timeslot', `p.${i}.time`, p.time)}
+            ${field('Title', `p.${i}.title`, p.title)}
+            ${field('Description', `p.${i}.desc`, p.desc, 'textarea')}
+            ${field('Tags (e.g. TIMBER · STAGE)', `p.${i}.tags`, p.tags)}
+            ${field('Image caption (e.g. CAM 1)', `p.${i}.caption`, p.caption)}
+            ${mediaWidget(p.image, 'proj:' + i)}
+            ${field('Pop-up write-up (blank line = new paragraph; leave empty to disable pop-up)', `p.${i}.writeup`, p.writeup || '', 'textarea')}
+            <label class="f">Pop-up gallery (${nGal})</label>
+            ${(p.gallery || []).map((g, gi) => `
+              <div class="card${isOpen(g) ? '' : ' collapsed'}">
+                ${cardHead(g, `${i}:${gi}`, 'gal', g.caption || 'Image ' + (gi + 1), mediaSum(g.src), gi + 1)}
+                <div class="card-body">
+                  ${field('Caption', `p.${i}.gallery.${gi}.caption`, g.caption)}
+                  ${mediaWidget(g.src, `gal:${i}:${gi}`, { wide: true })}
+                </div>
+              </div>`).join('')}
+            <button class="act small" data-add-gal="${i}">+ GALLERY IMAGE</button>
+            <button class="act small" data-batch-gal="${i}">+ BATCH UPLOAD</button>
+          </div>
+        </div>`; }).join('')
       + `<button class="act primary" id="addProject">+ NEW PROJECT</button>`;
   },
   process(ch) {
@@ -683,16 +739,41 @@ function wireEditor(ch) {
     if (d.addGal !== undefined) {
       const p = ch.projects[Number(d.addGal)];
       if (!p.gallery) p.gallery = [];
-      p.gallery.push({ src: '', caption: '' });
+      const g = { src: '', caption: '' };
+      p.gallery.push(g); openItem(g);
       renderEditor(); return;
     }
     if (d.delPara !== undefined) { ch.paragraphs.splice(Number(d.delPara), 1); renderEditor(); return; }
     if (d.addBlk) { ch.blocks.push(d.addBlk === 'text' ? {kind:'text', text:''} : d.addBlk === 'image' ? {kind:'image', src:'', caption:''} : {kind:'video', videoKind:'file', src:'', caption:''}); renderEditor(); return; }
-    if (e.target.id === 'addProject') { ch.projects.push({ time:'', title:'', desc:'', tags:'', image:'', caption:'CAM ' + (ch.projects.length + 1), writeup:'', gallery:[] }); renderEditor(); }
-    if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); }
-    if (e.target.id === 'addRow') { ch.rows.push({ k:'', label:'', href:'' }); renderEditor(); }
-    if (e.target.id === 'addPara') { ch.paragraphs.push(''); renderEditor(); }
-    if (e.target.id === 'addSlide') { if (!ch.carousel) ch.carousel = []; ch.carousel.push({ src:'', caption:'' }); renderEditor(); }
+    /* expand / collapse every card of a kind */
+    if (d.expand || d.collapse) {
+      const kind = d.expand || d.collapse;
+      const list = kind === 'proj' ? (ch.projects || []) : (ch.carousel || []);
+      list.forEach(o => d.expand ? EXPANDED.add(o) : EXPANDED.delete(o));
+      renderEditor(); return;
+    }
+    if (e.target.id === 'addProject') {
+      const p = { time:'', title:'', desc:'', tags:'', image:'', caption:'CAM ' + (ch.projects.length + 1), writeup:'', gallery:[] };
+      ch.projects.push(p); openItem(p); renderEditor(); return;
+    }
+    if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); return; }
+    if (e.target.id === 'addRow') { ch.rows.push({ k:'', label:'', href:'' }); renderEditor(); return; }
+    if (e.target.id === 'addPara') { ch.paragraphs.push(''); renderEditor(); return; }
+    if (e.target.id === 'addSlide') {
+      if (!ch.carousel) ch.carousel = [];
+      const s = { src:'', caption:'' };
+      ch.carousel.push(s); openItem(s); renderEditor(); return;
+    }
+    /* card header click toggles that card (buttons inside it act normally) */
+    const tog = e.target.closest('[data-toggle]');
+    if (tog && !e.target.closest('button')) {
+      const [kind, a, b] = tog.dataset.toggle.split(':');
+      const obj = kind === 'proj' ? ch.projects[+a]
+                : kind === 'car'  ? (ch.carousel || [])[+a]
+                : kind === 'gal'  ? ((ch.projects[+a] || {}).gallery || [])[+b]
+                : null;
+      if (obj) { EXPANDED.has(obj) ? EXPANDED.delete(obj) : EXPANDED.add(obj); renderEditor(); }
+    }
   };
   body.addEventListener('click', body._clickHandler);
 }
