@@ -6,7 +6,7 @@
 <title>BEN — FILM CONSTRUCTION</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&family=Anton&family=Alfa+Slab+One&family=Bowlby+One+SC&family=Passion+One:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&family=Bowlby+One+SC&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    CRT PORTFOLIO — design tokens
@@ -54,7 +54,7 @@
   --grade: saturate(0.95) contrast(1.05) brightness(0.97) sepia(0.12) hue-rotate(-5deg);
 
   --osd-font: 'VT323', monospace;
-  --display-font: 'Anton', 'Arial Narrow', sans-serif;
+  --display-font: 'Bowlby One SC', 'Arial Black', sans-serif;
   --body-font: 'IBM Plex Mono', monospace;
 }
 
@@ -311,11 +311,15 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
   bottom: auto;
   font-size: clamp(12px, 1.5vw, 17px);
   max-width: 38%;
+  /* bone, not ink: these sit on open picture where a saturated ink would
+     disappear — the same split the reference cards use between a coloured
+     title and its bone credit lines */
+  color: var(--burn);
+  text-shadow: 0 0 6px rgba(0,0,0,0.95), 0 0 14px rgba(0,0,0,0.8);
 }
 .hero-plate .car-osd {
   right: auto;
   left: calc(clamp(20px, 5vw, 56px) + 26px);
-  opacity: 0.85;
 }
 .hero-plate .tv-caption {
   left: auto;
@@ -381,7 +385,7 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
   font-family: var(--display-font);
   white-space: nowrap;
   text-transform: uppercase;
-  font-size: clamp(32px, min(8vw, 11.5vh), 112px);
+  font-size: clamp(34px, min(6.6vw, 10vh), 96px);
   line-height: 0.94;
   letter-spacing: 0.008em;
   color: var(--ink);
@@ -389,9 +393,9 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
   /* hard offset shadow in a darkened tone of the ink — the way a title
      card was printed — plus a soft bloom so it still glows on a tube */
   text-shadow:
-    0.05em 0.05em 0 color-mix(in srgb, var(--ink) 22%, #000),
-    0 0.012em 0.05em rgba(0,0,0,0.55),
-    0 0 0.5em rgba(var(--ink-rgb), 0.4);
+    0.062em 0.062em 0 color-mix(in srgb, var(--ink) 30%, #000),
+    0 0 0.09em rgba(0,0,0,0.8),
+    0 0 0.6em rgba(var(--ink-rgb), 0.38);
 }
 .hero-rule {
   position: relative;
@@ -399,15 +403,15 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
   height: 1px;
   margin: clamp(16px, 3vh, 34px) 0;
   background: linear-gradient(to right,
-    transparent, rgba(var(--ink-rgb),0.55) 12%,
-    rgba(var(--ink-rgb),0.55) 88%, transparent);
+    transparent, rgba(var(--ink-rgb),0.8) 12%,
+    rgba(var(--ink-rgb),0.8) 88%, transparent);
 }
 .hero-rule::before,
 .hero-rule::after {
   content: "";
   position: absolute; top: -3px;
   width: 1px; height: 7px;
-  background: rgba(var(--ink-rgb),0.55);
+  background: rgba(var(--ink-rgb),0.8);
 }
 .hero-rule::before { left: 12%; }
 .hero-rule::after { right: 12%; }
@@ -440,6 +444,9 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
 }
 @media (max-width: 640px) {
   .hero-copy { padding: 0 22px; }
+  /* too narrow to hold a long name on one line at a readable size — let it
+     wrap rather than shrink away */
+  .hero-title { white-space: normal; }
   .hero-eyebrow { letter-spacing: 0.22em; text-indent: 0.22em; }
   .hero-body { line-height: 1.7; }
   .hero-rule { width: 70%; }
@@ -461,8 +468,9 @@ h2.ch-title {
   letter-spacing: 0.01em;
   color: var(--ink);
   text-shadow:
-    0.045em 0.045em 0 color-mix(in srgb, var(--ink) 24%, #000),
-    0 0 0.45em rgba(var(--ink-rgb), 0.3);
+    0.05em 0.05em 0 color-mix(in srgb, var(--ink) 28%, #000),
+    0 0 0.08em rgba(0,0,0,0.7),
+    0 0 0.5em rgba(var(--ink-rgb), 0.3);
   margin: clamp(20px, 6vh, 56px) 0 10px;
 }
 .ch-sub {
@@ -1532,12 +1540,21 @@ function fitHeroFrame() {
   crt.style.setProperty('--dial-h', Math.ceil(dial.offsetHeight + gap) + 'px');
 }
 
+/* The title is a flex item sized to fit-content, so it happily overflows its
+   container: measure against the container's inner width, never the title's
+   own. Narrow screens let it wrap instead of shrinking away (see the
+   max-width media query), and a wrapping title needs no scaling. */
 function fitHeroTitle() {
   document.querySelectorAll('.hero-copy .hero-title').forEach(t => {
     t.style.fontSize = '';
+    if (getComputedStyle(t).whiteSpace !== 'nowrap') return;
+    const box = t.parentElement;
+    const cs = getComputedStyle(box);
+    const avail = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const natural = Math.max(t.scrollWidth, t.getBoundingClientRect().width);
+    if (avail <= 0 || natural <= avail) return;
     const base = parseFloat(getComputedStyle(t).fontSize);
-    const over = t.scrollWidth / t.clientWidth;
-    if (over > 1.005) t.style.fontSize = Math.max(18, Math.floor(base / over)) + 'px';
+    t.style.fontSize = Math.max(16, Math.floor(base * avail / natural)) + 'px';
   });
 }
 let heroFitT;

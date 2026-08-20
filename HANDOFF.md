@@ -139,8 +139,13 @@ hardcoding it.
 one definition, five call sites (base, hover, touch-bleed, retune, off-air).
 
 Fonts: **VT323** (OSD chrome — channel numbers, dial, captions),
-`--display-font` (headings and the hero title), **IBM Plex Mono** (body copy
-and tracked credit lines).
+**Bowlby One SC** via `--display-font` (headings and the hero title — the fat
+rounded grotesque the title cards use), **IBM Plex Mono** (body copy and the
+tracked credit line above the hero title).
+
+Swap the display face by changing `--display-font` and the `family=` list in
+the Google Fonts `<link>`; the hero title re-fits itself to whatever face
+loads, so no sizes need touching.
 
 ## CRT effect layers (index.html)
 
@@ -210,8 +215,15 @@ Structure (`RENDERERS.hero`, the `.hero-*` rules in index.html):
 - `.hero-eyebrow` is `ch.sub`, tracked out to 0.44em and uppercased. The old
   `.hero-sub` rule is gone; the content field itself is unchanged.
 - `.hero-title` is `white-space: nowrap`, so it keeps the line breaks written
-  into `heroName`. `fitHeroTitle()` scales it down if a longer name would run
-  past the title-safe box.
+  into `heroName`, and is printed in the channel ink with the hard offset
+  shadow. `fitHeroTitle()` scales it down if a longer name would run past the
+  title-safe box — it measures the *container's* inner width, since the title
+  is a flex item sized to fit-content and will happily overflow. Below 640px
+  the title wraps instead of shrinking away, and a wrapping title is left
+  alone.
+- The still counter and slide caption are bone, not ink: they sit on open
+  picture where a saturated ink disappears. That is the same split the
+  reference cards use between a coloured title and its bone credit lines.
 - `fitHeroFrame()` measures the dial and publishes `--dial-h`, so the copy
   block and the safe marks clear it however many rows it wraps to on narrow
   screens. Both run on load, after fonts settle, and on resize.
