@@ -156,6 +156,13 @@ carousel is manual (plus arrow keys). `prefers-reduced-motion` disables both
 the glitch and auto-advance. Hero slides are managed in the admin's SIGNAL
 editor (FEATURED CAROUSEL → `+ SLIDE`).
 
+Slides accept video too: a YouTube/Vimeo watch URL or a direct .mp4/.webm
+file becomes an embedded player (`slideVideoKind`/`slideMediaHtml`). On video
+slides the nav zones shrink to 12% edge strips so player controls stay
+clickable, the camcorder caption is hidden, and auto-advance holds until the
+viewer moves on ("video holds the broadcast"). Gallery images in the admin's
+project editor take the same URLs via USE URL.
+
 ## Publishing / security notes
 
 - Fine-grained token: github.com → Settings → Developer settings →

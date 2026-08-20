@@ -378,6 +378,12 @@ h2.ch-title {
 /* ---------- CRT CAROUSEL (hero + pop-up) ---------- */
 .carousel { position: relative; max-width: 900px; margin-top: clamp(24px, 4vh, 40px); }
 .carousel .tv-frame { user-select: none; -webkit-user-select: none; }
+.car-media { position: absolute; inset: 0; }
+/* video slides: keep the player's controls reachable — nav shrinks to edge
+   strips, caption gets out of the control bar's way */
+.tv-frame.has-video .car-zone.prev { width: 12%; }
+.tv-frame.has-video .car-zone.next { width: 12%; }
+.tv-frame.has-video .tv-caption { display: none !important; }
 .car-osd {
   position: absolute; z-index: 4; right: 10px; top: 8px;
   font-family: var(--osd-font); font-size: clamp(13px, 1.6vw, 16px);
@@ -408,11 +414,15 @@ h2.ch-title {
   0% { opacity: 1; } 20% { opacity: 0.5; } 30% { opacity: 0.95; }
   45% { opacity: 0.7; } 60% { opacity: 1; } 100% { opacity: 1; }
 }
-.tv-frame.retune img {
+.tv-frame.retune img,
+.tv-frame.retune video,
+.tv-frame.retune iframe {
   animation: tracking 0.22s steps(3) 2, retuneFlash 0.4s linear 1;
   filter: saturate(0.55) contrast(1.08) brightness(0.88) sepia(0.18) hue-rotate(-8deg) url(#chromaBleed);
 }
-@media (prefers-reduced-motion: reduce) { .tv-frame.retune img { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .tv-frame.retune img, .tv-frame.retune video, .tv-frame.retune iframe { animation: none; }
+}
 .pip-body .carousel { margin: 14px 0 18px; max-width: none; }
 
 /* camcorder-style caption bar */
@@ -1071,6 +1081,29 @@ function reelFrame(reel) {
 const CAR = { reg: {}, seq: 0 };
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* a slide src can be an image, a YouTube/Vimeo link, or a direct video file */
+function slideVideoKind(src) {
+  src = src || '';
+  if (/(?:youtube\.com\/(?:watch|shorts|embed)|youtu\.be\/)/.test(src)) return 'youtube';
+  if (/vimeo\.com\/(?:video\/)?\d+/.test(src)) return 'vimeo';
+  if (/\.(mp4|webm|m4v)(\?|#|$)/i.test(src)) return 'file';
+  return null;
+}
+function slideMediaHtml(s) {
+  const kind = slideVideoKind(s.src);
+  if (kind === 'youtube') {
+    const id = s.src.replace(/^.*(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]+).*$/, '$1');
+    return `<iframe src="https://www.youtube-nocookie.com/embed/${esc(id)}" title="${esc(s.caption || 'Video')}" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  }
+  if (kind === 'vimeo') {
+    const id = s.src.replace(/^.*vimeo\.com\/(?:video\/)?(\d+).*$/, '$1');
+    return `<iframe src="https://player.vimeo.com/video/${esc(id)}" title="${esc(s.caption || 'Video')}" allowfullscreen></iframe>`;
+  }
+  if (kind === 'file')
+    return `<video src="${esc(s.src)}" controls playsinline preload="metadata"></video>`;
+  return `<img src="${esc(s.src)}" alt="${esc(s.caption || 'Featured still')}">`;
+}
+
 function carouselHtml(items, opts = {}) {
   items = (items || []).filter(s => s && s.src);
   if (!items.length) return '';
@@ -1080,8 +1113,8 @@ function carouselHtml(items, opts = {}) {
   const multi = items.length > 1;
   return `
     <div class="carousel${opts.cls ? ' ' + opts.cls : ''}" data-carid="${id}" data-idx="0"${opts.auto && multi ? ' data-auto="1"' : ''}>
-      <div class="tv-frame wide">
-        <img src="${esc(first.src)}" alt="${esc(first.caption || 'Featured still')}">
+      <div class="tv-frame wide${slideVideoKind(first.src) ? ' has-video' : ''}">
+        <div class="car-media">${slideMediaHtml(first)}</div>
         <span class="tv-caption car-cap"${first.caption ? '' : ' style="display:none"'}>${esc(first.caption || '')}</span>
         <span class="car-osd">${multi ? 'STILL 01/' + String(items.length).padStart(2, '0') : ''}</span>
         ${multi ? `
@@ -1101,9 +1134,8 @@ function carGo(el, dir) {
   const s = items[idx];
   const frame = el.querySelector('.tv-frame');
   const apply = () => {
-    const img = frame.querySelector('img');
-    img.src = s.src;
-    img.alt = s.caption || 'Featured still';
+    frame.querySelector('.car-media').innerHTML = slideMediaHtml(s);
+    frame.classList.toggle('has-video', !!slideVideoKind(s.src));
     const cap = frame.querySelector('.car-cap');
     cap.textContent = s.caption || '';
     cap.style.display = s.caption ? '' : 'none';
@@ -1140,6 +1172,9 @@ if (!REDUCED_MOTION) setInterval(() => {
     if (!el._lastNav) { el._lastNav = Date.now(); return; }  /* settle first */
     if (el.matches(':hover')) return;
     if (Date.now() - el._lastNav < 6000) return;
+    const items = CAR.reg[el.dataset.carid] || [];
+    const cur = items[Number(el.dataset.idx)];
+    if (cur && slideVideoKind(cur.src)) return;        /* video holds the broadcast */
     carGo(el, 1);
   });
 }, 1500);

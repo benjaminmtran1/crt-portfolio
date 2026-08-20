@@ -399,14 +399,26 @@ function previewSrc(path) {
   if (pendingAssets[path]) return 'data:' + pendingAssets[path].mime + ';base64,' + pendingAssets[path].base64;
   return path;
 }
+function embedPreview(path) {
+  if (/(?:youtube\.com\/(?:watch|shorts|embed)|youtu\.be\/)/.test(path)) {
+    const id = path.replace(/^.*(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]+).*$/, '$1');
+    return `<iframe src="https://www.youtube-nocookie.com/embed/${esc(id)}" allowfullscreen style="border:0;width:100%;height:100%;"></iframe>`;
+  }
+  if (/vimeo\.com\/(?:video\/)?\d+/.test(path)) {
+    const id = path.replace(/^.*vimeo\.com\/(?:video\/)?(\d+).*$/, '$1');
+    return `<iframe src="https://player.vimeo.com/video/${esc(id)}" allowfullscreen style="border:0;width:100%;height:100%;"></iframe>`;
+  }
+  return null;
+}
 function mediaWidget(path, onPick, { wide } = {}) {
   const has = !!path;
   const src = has ? previewSrc(path) : '';
-  const isVideo = /\.(mp4|webm)$/i.test(path || '');
+  const embed = has ? embedPreview(path) : null;
+  const isVideo = /\.(mp4|webm|m4v)(\?|#|$)/i.test(path || '');
   return `
     <div class="media-row">
       <div class="tv-frame${wide ? ' wide' : ''}">
-        ${has ? (isVideo ? `<video src="${esc(src)}" muted loop autoplay playsinline></video>` : `<img src="${esc(src)}">`) : `<span class="ns">NO SIGNAL</span>`}
+        ${has ? (embed || (isVideo ? `<video src="${esc(src)}" muted loop autoplay playsinline></video>` : `<img src="${esc(src)}">`)) : `<span class="ns">NO SIGNAL</span>`}
       </div>
       <div class="media-meta">
         <button class="act small" data-media="${esc(onPick)}">${has ? 'REPLACE MEDIA' : 'UPLOAD MEDIA'}</button>
@@ -436,7 +448,7 @@ const EDITORS = {
             <textarea data-para="${i}">${esc(p)}</textarea></div>`).join('')
       + `<button class="act small" id="addPara">+ PARAGRAPH</button>`
       + `<h2 style="margin-top:24px;">FEATURED CAROUSEL</h2>
-         <p class="hint">Slides rotate on the SIGNAL channel — click/swipe to change, auto-advances. Leave empty for no carousel.</p>`
+         <p class="hint">Slides rotate on the SIGNAL channel — click/swipe to change, auto-advances. Slides can be images or videos (upload, or USE URL with a YouTube/Vimeo link). Leave empty for no carousel.</p>`
       + (ch.carousel || []).map((s, i) => `
         <div class="card">
           <div class="card-head"><span class="grow">SLIDE ${i+1}</span>
@@ -593,7 +605,7 @@ function wireEditor(ch) {
       return;
     }
     if (d.mediaurl !== undefined) {
-      const u = (prompt('Paste a direct image/video URL (https://…):') || '').trim();
+      const u = (prompt('Paste an image URL, a YouTube/Vimeo link, or a direct video URL (https://…):') || '').trim();
       if (!u) return;
       if (!/^https?:\/\//i.test(u)) { alert('That doesn\'t look like a URL — it must start with http:// or https://'); return; }
       applyMediaPath(ch, d.mediaurl, u);
