@@ -375,6 +375,46 @@ h2.ch-title {
   filter: saturate(0.55) contrast(1.08) brightness(0.88) sepia(0.18) hue-rotate(-8deg) url(#chromaBleed);
 }
 
+/* ---------- CRT CAROUSEL (hero + pop-up) ---------- */
+.carousel { position: relative; max-width: 900px; margin-top: clamp(24px, 4vh, 40px); }
+.carousel .tv-frame { user-select: none; -webkit-user-select: none; }
+.car-osd {
+  position: absolute; z-index: 4; right: 10px; top: 8px;
+  font-family: var(--osd-font); font-size: clamp(13px, 1.6vw, 16px);
+  color: var(--amber); letter-spacing: 0.08em;
+  text-shadow: 0 0 6px rgba(194,163,92,0.5);
+}
+.car-zone {
+  position: absolute; z-index: 5; top: 0; bottom: 0;
+  border: 0; background: none; padding: 0; cursor: pointer;
+}
+.car-zone.prev { left: 0; width: 38%; }
+.car-zone.next { right: 0; width: 62%; }
+.car-hint {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-family: var(--osd-font); font-size: clamp(14px, 1.8vw, 18px);
+  color: var(--amber); letter-spacing: 0.1em; white-space: nowrap;
+  opacity: 0; transition: opacity 0.15s;
+  text-shadow: 0 0 8px rgba(194,163,92,0.6);
+  pointer-events: none;
+}
+.car-zone.prev .car-hint { left: 12px; }
+.car-zone.next .car-hint { right: 12px; }
+@media (hover: hover) { .car-zone:hover .car-hint { opacity: 1; } }
+.car-zone:focus-visible { outline: 2px solid var(--amber); outline-offset: -4px; }
+.car-zone:focus-visible .car-hint { opacity: 1; }
+/* slide-change retune: tracking jitter + chroma bleed + brightness stutter */
+@keyframes retuneFlash {
+  0% { opacity: 1; } 20% { opacity: 0.5; } 30% { opacity: 0.95; }
+  45% { opacity: 0.7; } 60% { opacity: 1; } 100% { opacity: 1; }
+}
+.tv-frame.retune img {
+  animation: tracking 0.22s steps(3) 2, retuneFlash 0.4s linear 1;
+  filter: saturate(0.55) contrast(1.08) brightness(0.88) sepia(0.18) hue-rotate(-8deg) url(#chromaBleed);
+}
+@media (prefers-reduced-motion: reduce) { .tv-frame.retune img { animation: none; } }
+.pip-body .carousel { margin: 14px 0 18px; max-width: none; }
+
 /* camcorder-style caption bar */
 .tv-caption {
   position: absolute;
@@ -1024,6 +1064,86 @@ function reelFrame(reel) {
   return `<div class="tv-frame wide"><video src="${esc(reel.src)}" controls playsinline${reel.poster ? ` poster="${esc(reel.poster)}"` : ''}></video>${cap}</div>`;
 }
 
+/* ---------- CRT CAROUSEL (hero + pop-up) ----------
+   Slides swap with a retune glitch. Click/tap left third = back,
+   right two-thirds = forward; swipe on touch; auto-advances when
+   visible unless the viewer prefers reduced motion. */
+const CAR = { reg: {}, seq: 0 };
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function carouselHtml(items, opts = {}) {
+  items = (items || []).filter(s => s && s.src);
+  if (!items.length) return '';
+  const id = opts.id || ('car' + (++CAR.seq));
+  CAR.reg[id] = items;
+  const first = items[0];
+  const multi = items.length > 1;
+  return `
+    <div class="carousel${opts.cls ? ' ' + opts.cls : ''}" data-carid="${id}" data-idx="0"${opts.auto && multi ? ' data-auto="1"' : ''}>
+      <div class="tv-frame wide">
+        <img src="${esc(first.src)}" alt="${esc(first.caption || 'Featured still')}">
+        <span class="tv-caption car-cap"${first.caption ? '' : ' style="display:none"'}>${esc(first.caption || '')}</span>
+        <span class="car-osd">${multi ? 'STILL 01/' + String(items.length).padStart(2, '0') : ''}</span>
+        ${multi ? `
+        <button class="car-zone prev" aria-label="Previous still"><span class="car-hint">◀ TRACK</span></button>
+        <button class="car-zone next" aria-label="Next still"><span class="car-hint">TRACK ▶</span></button>` : ''}
+      </div>
+    </div>`;
+}
+
+function carGo(el, dir) {
+  if (!el) return;
+  const items = CAR.reg[el.dataset.carid];
+  if (!items || items.length < 2) return;
+  const idx = (Number(el.dataset.idx) + dir + items.length) % items.length;
+  el.dataset.idx = idx;
+  el._lastNav = Date.now();
+  const s = items[idx];
+  const frame = el.querySelector('.tv-frame');
+  const apply = () => {
+    const img = frame.querySelector('img');
+    img.src = s.src;
+    img.alt = s.caption || 'Featured still';
+    const cap = frame.querySelector('.car-cap');
+    cap.textContent = s.caption || '';
+    cap.style.display = s.caption ? '' : 'none';
+    frame.querySelector('.car-osd').textContent =
+      'STILL ' + String(idx + 1).padStart(2, '0') + '/' + String(items.length).padStart(2, '0');
+  };
+  if (REDUCED_MOTION) { apply(); return; }
+  frame.classList.remove('retune'); void frame.offsetWidth;
+  frame.classList.add('retune');
+  setTimeout(apply, 110);           /* swap mid-glitch */
+  clearTimeout(frame._retuneT);
+  frame._retuneT = setTimeout(() => frame.classList.remove('retune'), 450);
+}
+
+document.addEventListener('click', e => {
+  const zone = e.target.closest('.car-zone');
+  if (zone) carGo(zone.closest('.carousel'), zone.classList.contains('prev') ? -1 : 1);
+});
+document.addEventListener('touchstart', e => {
+  const car = e.target.closest('.carousel');
+  if (car) car._swipeX = e.touches[0].clientX;
+}, { passive: true });
+document.addEventListener('touchend', e => {
+  const car = e.target.closest('.carousel');
+  if (!car || car._swipeX == null) return;
+  const dx = e.changedTouches[0].clientX - car._swipeX;
+  car._swipeX = null;
+  if (Math.abs(dx) > 40) carGo(car, dx < 0 ? 1 : -1);
+}, { passive: true });
+
+if (!REDUCED_MOTION) setInterval(() => {
+  document.querySelectorAll('.carousel[data-auto]').forEach(el => {
+    if (!el.offsetParent) return;                      /* channel not on air */
+    if (!el._lastNav) { el._lastNav = Date.now(); return; }  /* settle first */
+    if (el.matches(':hover')) return;
+    if (Date.now() - el._lastNav < 6000) return;
+    carGo(el, 1);
+  });
+}, 1500);
+
 const RENDERERS = {
   hero(ch, site) {
     const bars = ch.showTestBars ? `
@@ -1037,6 +1157,7 @@ const RENDERERS = {
       <h1 class="hero-title">${escBr(site.heroName)}</h1>
       <p class="hero-sub">${esc(ch.sub)}</p>
       <div class="hero-body">${(ch.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join('')}</div>
+      ${carouselHtml(ch.carousel, { auto: true, id: 'hero-' + (ch.id || 'signal') })}
       ${bars}`;
   },
   guide(ch) {
@@ -1268,11 +1389,8 @@ function wireTuning(count) {
       /* pop-up owns the keyboard while open */
       if (pip.open) {
         if (e.key === 'Escape') { closePip(); return; }
-        if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && pip.gallery.length > 1) {
-          const n = pip.gallery.length;
-          pip.idx = (pip.idx + (e.key === 'ArrowRight' ? 1 : -1) + n) % n;
-          pipRenderGallery();
-        }
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft')
+          carGo(pip.body.querySelector('.carousel'), e.key === 'ArrowRight' ? 1 : -1);
         return;
       }
       /* number keys tune directly; 0 is the off-air channel */
@@ -1297,37 +1415,8 @@ function wireTuning(count) {
 /* ---------- PROJECT POP-UP ---------- */
 const pip = {
   backdrop: null, body: null, osd: null,
-  gallery: [], idx: 0, lastFocus: null, open: false
+  lastFocus: null, open: false
 };
-
-function pipGalleryHtml() {
-  if (!pip.gallery.length) return '';
-  const cur = pip.gallery[pip.idx];
-  const strip = pip.gallery.length > 1 ? `
-    <div class="pip-strip">
-      ${pip.gallery.map((g, i) => `
-        <div class="tv-frame${i === pip.idx ? ' sel' : ''}" data-gal="${i}" role="button" tabindex="0" aria-label="Show image ${i+1}">
-          <img src="${esc(g.src)}" alt="" loading="lazy">
-        </div>`).join('')}
-    </div>` : '';
-  const nav = pip.gallery.length > 1 ? `
-    <button class="pip-nav prev" data-galstep="-1" aria-label="Previous image">‹</button>
-    <button class="pip-nav next" data-galstep="1" aria-label="Next image">›</button>` : '';
-  return `
-    <div class="pip-viewer">
-      <div class="tv-frame wide">
-        <img src="${esc(cur.src)}" alt="${esc(cur.caption || 'Project image')}" key="${pip.idx}">
-        ${cur.caption ? `<span class="tv-caption">${esc(cur.caption)}</span>` : ''}
-      </div>
-      ${nav}
-    </div>
-    ${strip}`;
-}
-
-function pipRenderGallery() {
-  const holder = document.getElementById('pipGallery');
-  if (holder) holder.innerHTML = pipGalleryHtml();
-}
 
 function openProject(chid, pi) {
   const content = window.__siteContent;
@@ -1335,9 +1424,8 @@ function openProject(chid, pi) {
   const p = channel?.projects?.[pi];
   if (!p) return;
 
-  pip.gallery = (p.gallery && p.gallery.length) ? p.gallery
+  const slides = (p.gallery && p.gallery.length) ? p.gallery
     : (p.image ? [{ src: p.image, caption: p.caption }] : []);
-  pip.idx = 0;
   pip.lastFocus = document.activeElement;
 
   pip.osd.textContent = `PROGRAM DETAIL — ${p.time || ''}`.trim();
@@ -1346,8 +1434,8 @@ function openProject(chid, pi) {
   pip.body.innerHTML = `
     <h3 class="pip-title" id="pipTitle">${esc(p.title)}</h3>
     <div class="pip-meta">${esc(p.tags || '')}</div>
-    ${paras ? `<div class="pip-writeup">${paras}</div>` : ''}
-    <div id="pipGallery">${pipGalleryHtml()}</div>`;
+    ${carouselHtml(slides, { id: 'pip' })}
+    ${paras ? `<div class="pip-writeup">${paras}</div>` : ''}`;
   pip.backdrop.classList.add('open');
   pip.open = true;
   pip.body.scrollTop = 0;
@@ -1381,24 +1469,6 @@ function wirePip() {
     if ((e.key === 'Enter' || e.key === ' ') && tryOpen(e.target)) e.preventDefault();
   });
 
-  /* gallery interactions */
-  pip.body.addEventListener('click', e => {
-    const step = e.target.closest('[data-galstep]');
-    if (step) {
-      const n = pip.gallery.length;
-      pip.idx = (pip.idx + Number(step.dataset.galstep) + n) % n;
-      pipRenderGallery();
-      return;
-    }
-    const thumb = e.target.closest('[data-gal]');
-    if (thumb) { pip.idx = Number(thumb.dataset.gal); pipRenderGallery(); }
-  });
-  pip.body.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      const thumb = e.target.closest('[data-gal]');
-      if (thumb) { e.preventDefault(); pip.idx = Number(thumb.dataset.gal); pipRenderGallery(); }
-    }
-  });
 }
 wirePip();
 

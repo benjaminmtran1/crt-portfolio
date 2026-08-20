@@ -13,7 +13,25 @@
         "I build the worlds the camera believes in. Flats, facades, breakaways, rigs — scenic construction for film and television, from first draft to final strike.",
         "Comfortable in timber, steel, foam, and whatever the art director dreamed up at 2am."
       ],
-      "showTestBars": true
+      "showTestBars": true,
+      "carousel": [
+        {
+          "src": "https://picsum.photos/seed/storefront/1280/720",
+          "caption": "CAM 1 — PERIOD STOREFRONT"
+        },
+        {
+          "src": "https://picsum.photos/seed/turntable/1280/720",
+          "caption": "CAM 2 — ROTATING STAGE"
+        },
+        {
+          "src": "https://picsum.photos/seed/breakaway/1280/720",
+          "caption": "CAM 3 — BREAKAWAY RIG"
+        },
+        {
+          "src": "https://picsum.photos/seed/miniature/1280/720",
+          "caption": "CAM 4 — MINIATURE BLOCK"
+        }
+      ]
     },
     {
       "id": "narrative",
@@ -22,8 +40,8 @@
       "title": "TONIGHT'S PROGRAMMING",
       "sub": "NARRATIVE FEATURES & EPISODIC",
       "reel": {
-        "kind": "youtube",
-        "src": "https://www.youtube.com/watch?v=fAdo8drjc_M",
+        "kind": "none",
+        "src": "",
         "caption": "MAIN FEATURE — REEL"
       },
       "projects": [

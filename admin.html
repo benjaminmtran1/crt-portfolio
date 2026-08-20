@@ -229,7 +229,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 const BLANK = {
-  hero:    { type:'hero', label:'SIGNAL', sub:'', paragraphs:[''], showTestBars:true },
+  hero:    { type:'hero', label:'SIGNAL', sub:'', paragraphs:[''], carousel:[], showTestBars:true },
   guide:   { type:'guide', label:'BUILDS', title:'', sub:'', reel:{kind:'none',src:'',caption:'MAIN FEATURE — REEL'}, projects:[] },
   process: { type:'process', label:'PROCESS', title:'', sub:'', steps:[] },
   contact: { type:'contact', label:'CONTACT', title:'', sub:'', rows:[], note:'' },
@@ -435,6 +435,17 @@ const EDITORS = {
             <button data-del-para="${i}">✕ remove</button></div>
             <textarea data-para="${i}">${esc(p)}</textarea></div>`).join('')
       + `<button class="act small" id="addPara">+ PARAGRAPH</button>`
+      + `<h2 style="margin-top:24px;">FEATURED CAROUSEL</h2>
+         <p class="hint">Slides rotate on the SIGNAL channel — click/swipe to change, auto-advances. Leave empty for no carousel.</p>`
+      + (ch.carousel || []).map((s, i) => `
+        <div class="card">
+          <div class="card-head"><span class="grow">SLIDE ${i+1}</span>
+            <button data-car-up="${i}">▲</button><button data-car-down="${i}">▼</button>
+            <button data-car-del="${i}">✕ remove</button></div>
+          ${field('Caption (e.g. CAM 1 — STOREFRONT)', `c.${i}.caption`, s.caption)}
+          ${mediaWidget(s.src, 'car:' + i, { wide: true })}
+        </div>`).join('')
+      + `<button class="act small" id="addSlide">+ SLIDE</button>`
       + `<label style="display:flex;gap:6px;align-items:center;margin-top:14px;font-size:11px;color:var(--ghost);cursor:pointer;">
            <input type="checkbox" data-f="showTestBars" ${ch.showTestBars ? 'checked' : ''} style="accent-color:#c2a35c;"> show test-card color bars
          </label>`;
@@ -549,6 +560,7 @@ function setByPath(obj, path, val) {
     else if (key === 's') t = t.steps[Number(parts[++i])];
     else if (key === 'r') t = t.rows[Number(parts[++i])];
     else if (key === 'b') t = t.blocks[Number(parts[++i])];
+    else if (key === 'c') t = t.carousel[Number(parts[++i])];
     else { if (!t[key]) t[key] = {}; t = t[key]; }
   }
   t[parts[parts.length - 1]] = val;
@@ -574,7 +586,7 @@ function wireEditor(ch) {
   if (body._clickHandler) body.removeEventListener('click', body._clickHandler);
   body._clickHandler = e => {
     const d = e.target.dataset;
-    const arr = { 'proj':'projects', 'step':'steps', 'blk':'blocks' };
+    const arr = { 'proj':'projects', 'step':'steps', 'blk':'blocks', 'car':'carousel' };
     // media pick / clear / direct URL
     if (d.media !== undefined) {
       pickMedia((path) => { applyMediaPath(ch, d.media, path); renderEditor(); }, e.target);
@@ -619,6 +631,7 @@ function wireEditor(ch) {
     if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); }
     if (e.target.id === 'addRow') { ch.rows.push({ k:'', label:'', href:'' }); renderEditor(); }
     if (e.target.id === 'addPara') { ch.paragraphs.push(''); renderEditor(); }
+    if (e.target.id === 'addSlide') { if (!ch.carousel) ch.carousel = []; ch.carousel.push({ src:'', caption:'' }); renderEditor(); }
   };
   body.addEventListener('click', body._clickHandler);
 }
@@ -630,6 +643,7 @@ function applyMediaPath(ch, target, path) {
   if (kind === 'proj') ch.projects[i].image = path;
   if (kind === 'step') ch.steps[i].image = path;
   if (kind === 'blk') ch.blocks[i].src = path;
+  if (kind === 'car') ch.carousel[i].src = path;
   if (kind === 'gal') ch.projects[i].gallery[Number(parts[2])].src = path;
 }
 

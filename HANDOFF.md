@@ -74,7 +74,8 @@ admin's channel list.
 ```
 site: { pageTitle, heroName }            heroName may contain <br>
 channels: [
-  { type:"hero",    label, sub, paragraphs[], showTestBars }
+  { type:"hero",    label, sub, paragraphs[], showTestBars,
+                    carousel:[{ src, caption }] }
   { type:"guide",   label, title, sub,
                     reel:{ kind:none|youtube|vimeo|file, src, caption },
                     projects:[{ time, title, desc, tags, image, caption,
@@ -137,12 +138,23 @@ player controls too; self-hosted video avoids that.
 A project with a `writeup` and/or `gallery` becomes clickable in the guide —
 hovering shows "PRESS FOR PROGRAM DETAIL", and clicking (or Enter/Space) opens
 a picture-in-picture window styled as its own small tube: scanlines, vignette,
-tune-in animation. Inside: title, tags, the write-up (blank lines in the
-write-up become paragraph breaks), and a gallery with a 16:9 main viewer plus
-a camera-select thumbnail strip. Arrow keys step the gallery while open; ESC
-or the backdrop closes it and channel-switching keys are suspended. Projects
-with neither field stay non-clickable. Edit both fields per-project in the
-admin's BUILDS editor (`+ GALLERY IMAGE` to add images).
+tune-in animation. Inside: title, tags, a carousel of the gallery images at
+the top, then the write-up (blank lines become paragraph breaks). Arrow keys
+step the carousel while open; ESC or the backdrop closes it and
+channel-switching keys are suspended. Projects with neither field stay
+non-clickable. Edit both fields per-project in the admin's guide editor
+(`+ GALLERY IMAGE` to add images).
+
+## CRT carousel (hero + pop-up)
+
+Shared component (`carouselHtml`/`carGo` in index.html). Slides swap with a
+"retune" glitch (tracking jitter + chroma bleed + brightness stutter). Click
+or tap the left third for previous, right two-thirds for next (hover shows
+◀ TRACK / TRACK ▶ hints); swipe works on touch. The hero carousel
+auto-advances every ~6s while its channel is on air and unhovered; the pop-up
+carousel is manual (plus arrow keys). `prefers-reduced-motion` disables both
+the glitch and auto-advance. Hero slides are managed in the admin's SIGNAL
+editor (FEATURED CAROUSEL → `+ SLIDE`).
 
 ## Publishing / security notes
 
