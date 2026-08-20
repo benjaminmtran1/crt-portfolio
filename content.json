@@ -48,69 +48,7 @@
         "src": "",
         "caption": "MAIN FEATURE — REEL"
       },
-      "projects": [
-        {
-          "time": "19:00",
-          "title": "Period Storefront Facade",
-          "desc": "Full-scale 1940s high street exterior. Three storefronts, practical doors and glazing, aged brick finish over timber frame. Built in sections for a night shoot turnaround.",
-          "tags": "TIMBER · SCENIC FINISH · LOCATION",
-          "image": "https://picsum.photos/seed/storefront/640/480",
-          "caption": "CAM 1",
-          "writeup": "Commissioned for a wartime drama shooting nights on a back-lot street. The brief: three adjoining 1940s storefronts with practical doors, openable sash windows, and glazing safe enough to play action against.\n\nBuilt as six craned-in sections over a steel spine so the facade could land on uneven tarmac and still read dead level on camera. Brick finish is carved and scumbled foam over ply skins — close enough that the DP asked which street we'd found.",
-          "gallery": [
-            {
-              "src": "https://picsum.photos/seed/storefront/1280/720",
-              "caption": "CAM 1 — WIDE"
-            },
-            {
-              "src": "https://picsum.photos/seed/storefront2/1280/720",
-              "caption": "CAM 2 — DETAIL"
-            },
-            {
-              "src": "https://picsum.photos/seed/storefront3/1280/720",
-              "caption": "CAM 3 — BUILD"
-            }
-          ]
-        },
-        {
-          "time": "20:30",
-          "title": "Breakaway Wall Rig",
-          "desc": "Stunt-rated breakaway wall with resettable panels, engineered for six takes. Balsa core, scored plaster skin, hidden steel safety frame.",
-          "tags": "STUNTS · PRACTICAL FX · RESET",
-          "image": "https://picsum.photos/seed/breakaway/640/480",
-          "caption": "CAM 2",
-          "writeup": "A stunt performer goes through this wall six times in one day, and the wall has to look identical in every take. Balsa framing with a scored plaster skin, backed by a hidden steel goalpost frame that keeps the surrounding set rigid.\n\nReset time got down to eleven minutes by take three — pre-cut replacement panels, keyed fixings, and a two-person drill we rehearsed like a pit stop.",
-          "gallery": [
-            {
-              "src": "https://picsum.photos/seed/breakaway/1280/720",
-              "caption": "CAM 1 — RIG"
-            },
-            {
-              "src": "https://picsum.photos/seed/breakaway2/1280/720",
-              "caption": "CAM 2 — RESET"
-            }
-          ]
-        },
-        {
-          "time": "22:00",
-          "title": "Late Night: The Miniature Hour",
-          "desc": "1:8 scale city block for a destruction sequence. Cast plaster buildings with frangible cores, wired for pyro cues.",
-          "tags": "MINIATURES · PYRO PREP · SCALE",
-          "image": "https://picsum.photos/seed/miniature/640/480",
-          "caption": "CAM 3",
-          "writeup": "A city block at 1:8 scale, built to be destroyed exactly once. Cast plaster buildings with frangible cores, pre-weakened along planned failure lines and wired for pyro cues.\n\nEverything was documented brick-by-brick beforehand so the VFX team could rebuild it digitally for the previz — then we blew up the real one.",
-          "gallery": [
-            {
-              "src": "https://picsum.photos/seed/miniature/1280/720",
-              "caption": "CAM 1 — BLOCK"
-            },
-            {
-              "src": "https://picsum.photos/seed/miniature2/1280/720",
-              "caption": "CAM 2 — WIRING"
-            }
-          ]
-        }
-      ]
+      "projects": []
     },
     {
       "id": "commercial",
