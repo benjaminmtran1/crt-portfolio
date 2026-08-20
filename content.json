@@ -190,6 +190,25 @@
           "caption": "CAM 1",
           "writeup": "",
           "gallery": []
+        },
+        {
+          "time": "19:00",
+          "title": "Toronto Raptors x Häagen-Dazs",
+          "desc": "Photobooth install at Scotiabank Arena",
+          "tags": "Install · Sports ",
+          "image": "assets/screenshot-2026-08-20-at-2.09.04-pm.jpg",
+          "caption": "CAM 2",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "assets/img_0336.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2242.dng.jpg",
+              "caption": ""
+            }
+          ]
         }
       ]
     },
