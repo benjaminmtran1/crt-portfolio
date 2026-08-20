@@ -62,6 +62,11 @@ the browser can decode it; otherwise the slot shows an inline error with
 instructions. Videos are capped at 25 MB and must be MP4/WebM. Every media
 slot also has a USE URL button for externally hosted media.
 
+Batch upload: the hero FEATURED CAROUSEL and each project gallery have a
+`+ BATCH UPLOAD` button — multi-select files in one go; each becomes a slide
+(same downscale/JPEG pipeline; failures are reported and skipped without
+aborting the rest).
+
 ### Project categories
 
 Projects live in one guide channel per category — NARRATIVE, COMMERCIAL,
