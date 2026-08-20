@@ -105,14 +105,42 @@ render time except `heroName`'s `<br>`.
 
 ## Design tokens
 
-- `--tube` `#0b0e0c` — unlit phosphor background
-- `--phosphor` `#a8bfa0` — muted green, primary text
-- `--phosphor-dim` `#5f6f5b` — secondary text
-- `--amber` `#c2a35c` — OSD accents, active states
-- `--ghost` `#6e7f8d` — dimmed UI labels
-- `--burn` `#d8d4c4` — bright highlights (headings)
+The palette comes off 60s–80s film title cards: one saturated ink printed
+over faded Technicolor photography, warm bone-white credits, never a neutral
+grey.
 
-Fonts: **VT323** (OSD/display), **IBM Plex Mono** (body).
+| Token | Value | Role |
+|-------|-------|------|
+| `--tube` | `#15100e` | warm near-black — unlit glass |
+| `--deep` | `#0c0908` | deepest black — bezels, scrims |
+| `--burn` | `#f7e9d2` | bone white — headings, highlights |
+| `--phosphor` | `#ded0bb` | warm sand — body copy |
+| `--phosphor-dim` | `#9c8a79` | secondary text |
+| `--ghost` | `#a58f7b` | dimmed UI labels |
+| `--ink` | per channel | the colour currently on air |
+
+**The inks.** Every channel is "printed" in a different one, the way each
+title card in a run got its own colour pass — tomato `#e8503a`, butter
+`#f2cb4a`, bubblegum `#f272a8`, sea green `#67b6a6`, marigold `#ec9a3c`,
+bone `#f6e6cd`, cycling by channel number (CH 00 is always bone). `paintInk()`
+writes `--ink` and `--ink-rgb` onto `.crt` from inside `tune()`'s static
+burst, so the OSD, dial, headings, timecodes and hero title all repaint
+together with the picture.
+
+Because custom properties compute once where they are declared, an alias like
+`--amber: var(--ink)` on `:root` would freeze at the root value and never
+follow the channel. Use `var(--ink)` directly.
+
+Translucent glows, borders and scrims use the `*-rgb` triplet tokens
+(`rgba(var(--ink-rgb), 0.4)`) so they track the palette rather than
+hardcoding it.
+
+`--grade` holds the film grade applied to every image, video and iframe —
+one definition, five call sites (base, hover, touch-bleed, retune, off-air).
+
+Fonts: **VT323** (OSD chrome — channel numbers, dial, captions),
+`--display-font` (headings and the hero title), **IBM Plex Mono** (body copy
+and tracked credit lines).
 
 ## CRT effect layers (index.html)
 
