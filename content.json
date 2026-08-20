@@ -22,8 +22,8 @@
       "title": "TONIGHT'S PROGRAMMING",
       "sub": "SELECTED BUILDS · ALL TIMES APPROXIMATE",
       "reel": {
-        "kind": "none",
-        "src": "",
+        "kind": "youtube",
+        "src": "https://www.youtube.com/watch?v=fAdo8drjc_M",
         "caption": "MAIN FEATURE — REEL"
       },
       "projects": [
