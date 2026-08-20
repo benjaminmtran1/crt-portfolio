@@ -49,9 +49,25 @@ from `yoursite.github.io/admin.html` on any machine.
 
 ### Adding the showreel
 
-In the BUILDS channel editor, set Showreel to `youtube` / `vimeo` and paste the
+In a guide channel's editor, set Showreel to `youtube` / `vimeo` and paste the
 watch URL (the ID is extracted automatically), or `file` and upload an MP4.
-`none` shows the animated NO SIGNAL placeholder.
+`none` hides the reel block entirely (so category channels without a reel
+don't show an empty frame).
+
+### Media uploads (admin)
+
+Uploaded images are processed in the browser before queueing: downscaled to
+max 1920px and re-encoded as JPEG (~q0.82). HEIC converts automatically where
+the browser can decode it; otherwise the slot shows an inline error with
+instructions. Videos are capped at 25 MB and must be MP4/WebM. Every media
+slot also has a USE URL button for externally hosted media.
+
+### Project categories
+
+Projects live in one guide channel per category — NARRATIVE, COMMERCIAL,
+REALITY, INSTALLS — plus SIGNAL (hero), ABOUT (custom), and CONTACT.
+Categories are just guide channels: add/remove/reorder them freely in the
+admin's channel list.
 
 ## Content schema (content.json)
 

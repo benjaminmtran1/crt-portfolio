@@ -1057,7 +1057,7 @@ const RENDERERS = {
     return `
       <h2 class="ch-title">${esc(ch.title)}</h2>
       <p class="ch-sub">${esc(ch.sub)}</p>
-      <div class="reel-wrap">${reelFrame(ch.reel)}</div>
+      ${ch.reel && ch.reel.kind !== 'none' ? `<div class="reel-wrap">${reelFrame(ch.reel)}</div>` : ''}
       <div class="guide" style="margin-top: clamp(28px, 5vh, 48px);">${rows}</div>`;
   },
   process(ch) {

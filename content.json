@@ -16,11 +16,11 @@
       "showTestBars": true
     },
     {
-      "id": "builds",
-      "label": "BUILDS",
+      "id": "narrative",
+      "label": "NARRATIVE",
       "type": "guide",
       "title": "TONIGHT'S PROGRAMMING",
-      "sub": "SELECTED BUILDS · ALL TIMES APPROXIMATE",
+      "sub": "NARRATIVE FEATURES & EPISODIC",
       "reel": {
         "kind": "youtube",
         "src": "https://www.youtube.com/watch?v=fAdo8drjc_M",
@@ -71,11 +71,44 @@
         },
         {
           "time": "22:00",
+          "title": "Late Night: The Miniature Hour",
+          "desc": "1:8 scale city block for a destruction sequence. Cast plaster buildings with frangible cores, wired for pyro cues.",
+          "tags": "MINIATURES · PYRO PREP · SCALE",
+          "image": "https://picsum.photos/seed/miniature/640/480",
+          "caption": "CAM 3",
+          "writeup": "A city block at 1:8 scale, built to be destroyed exactly once. Cast plaster buildings with frangible cores, pre-weakened along planned failure lines and wired for pyro cues.\n\nEverything was documented brick-by-brick beforehand so the VFX team could rebuild it digitally for the previz — then we blew up the real one.",
+          "gallery": [
+            {
+              "src": "https://picsum.photos/seed/miniature/1280/720",
+              "caption": "CAM 1 — BLOCK"
+            },
+            {
+              "src": "https://picsum.photos/seed/miniature2/1280/720",
+              "caption": "CAM 2 — WIRING"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "commercial",
+      "label": "COMMERCIAL",
+      "type": "guide",
+      "title": "PAID PROGRAMMING",
+      "sub": "SPOTS & BRANDED CONTENT",
+      "reel": {
+        "kind": "none",
+        "src": "",
+        "caption": "MAIN FEATURE — REEL"
+      },
+      "projects": [
+        {
+          "time": "19:00",
           "title": "Rotating Stage Platform",
           "desc": "24-foot motorized turntable for a single-take musical number. Steel chassis, silent drive, deck dressed as a diner interior.",
           "tags": "STEEL · MECHANICAL · STAGE",
           "image": "https://picsum.photos/seed/turntable/640/480",
-          "caption": "CAM 3",
+          "caption": "CAM 1",
           "writeup": "A single-take musical number needed the whole diner to revolve around the camera. A 24-foot turntable on a steel chassis, driven silently enough to record live vocals on top of it.\n\nThe deck breaks into pie sections that two people can carry, and the drive unit bolts to a standard stage floor — it's been re-dressed and reused twice since.",
           "gallery": [
             {
@@ -91,25 +124,54 @@
               "caption": "CAM 3 — DRESSED"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "id": "reality",
+      "label": "REALITY",
+      "type": "guide",
+      "title": "AS SEEN ON TV",
+      "sub": "UNSCRIPTED & COMPETITION BUILDS",
+      "reel": {
+        "kind": "none",
+        "src": "",
+        "caption": "MAIN FEATURE — REEL"
+      },
+      "projects": [
         {
-          "time": "23:30",
-          "title": "Late Night: The Miniature Hour",
-          "desc": "1:8 scale city block for a destruction sequence. Cast plaster buildings with frangible cores, wired for pyro cues.",
-          "tags": "MINIATURES · PYRO PREP · SCALE",
-          "image": "https://picsum.photos/seed/miniature/640/480",
-          "caption": "CAM 4",
-          "writeup": "A city block at 1:8 scale, built to be destroyed exactly once. Cast plaster buildings with frangible cores, pre-weakened along planned failure lines and wired for pyro cues.\n\nEverything was documented brick-by-brick beforehand so the VFX team could rebuild it digitally for the previz — then we blew up the real one.",
-          "gallery": [
-            {
-              "src": "https://picsum.photos/seed/miniature/1280/720",
-              "caption": "CAM 1 — BLOCK"
-            },
-            {
-              "src": "https://picsum.photos/seed/miniature2/1280/720",
-              "caption": "CAM 2 — WIRING"
-            }
-          ]
+          "time": "19:00",
+          "title": "Competition Workshop Set",
+          "desc": "Modular workshop bays for a fabrication competition series. Identical stations, overnight resets between episodes, camera hides built into the racking.",
+          "tags": "MODULAR · QUICK RESET · CAMERA HIDES",
+          "image": "https://picsum.photos/seed/workshopset/640/480",
+          "caption": "CAM 1",
+          "writeup": "",
+          "gallery": []
+        }
+      ]
+    },
+    {
+      "id": "installation",
+      "label": "INSTALLS",
+      "type": "guide",
+      "title": "PUBLIC ACCESS",
+      "sub": "INSTALLATIONS & EXPERIENTIAL",
+      "reel": {
+        "kind": "none",
+        "src": "",
+        "caption": "MAIN FEATURE — REEL"
+      },
+      "projects": [
+        {
+          "time": "19:00",
+          "title": "Brand Activation Facade",
+          "desc": "Walk-through storefront installation for a product launch — three rooms, practical lighting, built to survive six weeks of foot traffic instead of six days of shooting.",
+          "tags": "EXPERIENTIAL · PUBLIC · DURABLE",
+          "image": "https://picsum.photos/seed/activation/640/480",
+          "caption": "CAM 1",
+          "writeup": "",
+          "gallery": []
         }
       ]
     },

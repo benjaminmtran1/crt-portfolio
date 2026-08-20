@@ -312,16 +312,26 @@ $('btnAddChannel').onclick = () => {
 /* ============================================================
    MEDIA PICKER (shared)
    ============================================================ */
-function pickMedia(cb) { mediaTarget = cb; $('mediaPicker').click(); }
+let mediaStatusEl = null;  // the picked slot's caption line, for progress/errors
+function pickMedia(cb, btn) {
+  mediaTarget = cb;
+  mediaStatusEl = btn && btn.closest ? (btn.closest('.media-row') || {querySelector:()=>null}).querySelector('.path') : null;
+  $('mediaPicker').click();
+}
+function setMediaStatus(msg, isErr) {
+  if (mediaStatusEl) { mediaStatusEl.textContent = msg; mediaStatusEl.style.color = isErr ? '#b0564a' : ''; }
+}
 $('mediaPicker').onchange = async e => {
   const f = e.target.files[0]; if (!f || !mediaTarget) return;
+  setMediaStatus('PROCESSING ' + f.name + '…');
   try {
     const { base64, mime, name } = await prepareMedia(f);
     const path = 'assets/' + name;
     pendingAssets[path] = { base64, mime };
     mediaTarget(path, 'data:' + mime + ';base64,' + base64);
   } catch (err) {
-    alert('CAN\'T QUEUE THIS FILE\n\n' + err.message);
+    console.error('Media prepare failed:', err);
+    setMediaStatus('✕ ' + err.message, true);
   }
   mediaTarget = null;
   e.target.value = '';
@@ -347,20 +357,31 @@ async function prepareMedia(f) {
   let bmp;
   try { bmp = await createImageBitmap(f); }
   catch {
-    const heic = /heic|heif/i.test(f.name + ' ' + f.type);
-    throw new Error(heic
-      ? 'This is a HEIC photo, which this browser can\'t read (and the live site can\'t display). On iPhone: share via AirDrop/Mail with "Most Compatible", or screenshot it — or convert to JPEG and re-upload.'
-      : 'Couldn\'t decode this image in this browser. Convert it to JPEG or PNG and try again.');
+    /* older Safari can't createImageBitmap from a File — decode via <img> */
+    bmp = await new Promise((res, rej) => {
+      const url = URL.createObjectURL(f);
+      const im = new Image();
+      im.onload = () => { URL.revokeObjectURL(url); res(im); };
+      im.onerror = () => {
+        URL.revokeObjectURL(url);
+        const heic = /heic|heif/i.test(f.name + ' ' + f.type);
+        rej(new Error(heic
+          ? 'HEIC photo — this browser can\'t read it (and the live site can\'t display it). On iPhone: share via AirDrop/Mail with "Most Compatible", or convert to JPEG and re-upload.'
+          : 'Couldn\'t decode this image in this browser. Convert it to JPEG or PNG and try again.'));
+      };
+      im.src = url;
+    });
   }
-  const scale = Math.min(1, IMG_MAX_DIM / Math.max(bmp.width, bmp.height));
+  const bw = bmp.naturalWidth || bmp.width, bh = bmp.naturalHeight || bmp.height;
+  const scale = Math.min(1, IMG_MAX_DIM / Math.max(bw, bh));
   const cv = document.createElement('canvas');
-  cv.width = Math.round(bmp.width * scale);
-  cv.height = Math.round(bmp.height * scale);
+  cv.width = Math.round(bw * scale);
+  cv.height = Math.round(bh * scale);
   const ctx = cv.getContext('2d');
   ctx.fillStyle = '#000';               /* transparency → tube black */
   ctx.fillRect(0, 0, cv.width, cv.height);
   ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
-  bmp.close();
+  if (bmp.close) bmp.close();
   const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', IMG_JPEG_Q));
   if (!blob) throw new Error('Image re-encode failed — try converting to JPEG manually.');
   const name = safe.replace(/\.(heic|heif|png|webp|jpe?g|tiff?|avif|bmp)$/i, '') + '.jpg';
@@ -389,6 +410,7 @@ function mediaWidget(path, onPick, { wide } = {}) {
       </div>
       <div class="media-meta">
         <button class="act small" data-media="${esc(onPick)}">${has ? 'REPLACE MEDIA' : 'UPLOAD MEDIA'}</button>
+        <button class="act small" data-mediaurl="${esc(onPick)}">USE URL</button>
         ${has ? `<button class="act small danger" data-mediaclear="${esc(onPick)}">CLEAR</button>` : ''}
         <div class="path">${esc(path || 'No file — shows NO SIGNAL on the site')}</div>
       </div>
@@ -547,12 +569,23 @@ function wireEditor(ch) {
   body.querySelectorAll('[data-para]').forEach(el =>
     el.addEventListener('input', () => ch.paragraphs[Number(el.dataset.para)] = el.value));
 
-  body.addEventListener('click', e => {
+  /* re-wiring on every render must not stack listeners — one click
+     handler per element, always closing over the current channel */
+  if (body._clickHandler) body.removeEventListener('click', body._clickHandler);
+  body._clickHandler = e => {
     const d = e.target.dataset;
     const arr = { 'proj':'projects', 'step':'steps', 'blk':'blocks' };
-    // media pick / clear
+    // media pick / clear / direct URL
     if (d.media !== undefined) {
-      pickMedia((path) => { applyMediaPath(ch, d.media, path); renderEditor(); });
+      pickMedia((path) => { applyMediaPath(ch, d.media, path); renderEditor(); }, e.target);
+      return;
+    }
+    if (d.mediaurl !== undefined) {
+      const u = (prompt('Paste a direct image/video URL (https://…):') || '').trim();
+      if (!u) return;
+      if (!/^https?:\/\//i.test(u)) { alert('That doesn\'t look like a URL — it must start with http:// or https://'); return; }
+      applyMediaPath(ch, d.mediaurl, u);
+      renderEditor();
       return;
     }
     if (d.mediaclear !== undefined) { applyMediaPath(ch, d.mediaclear, ''); renderEditor(); return; }
@@ -586,7 +619,8 @@ function wireEditor(ch) {
     if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); }
     if (e.target.id === 'addRow') { ch.rows.push({ k:'', label:'', href:'' }); renderEditor(); }
     if (e.target.id === 'addPara') { ch.paragraphs.push(''); renderEditor(); }
-  });
+  };
+  body.addEventListener('click', body._clickHandler);
 }
 
 function applyMediaPath(ch, target, path) {
