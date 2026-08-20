@@ -263,6 +263,10 @@
           "writeup": "",
           "gallery": [
             {
+              "src": "https://youtu.be/37ZG9lddxto?si=gkH0kzHxbvewLs8H",
+              "caption": ""
+            },
+            {
               "src": "assets/img_7661.jpg",
               "caption": ""
             },
@@ -308,7 +312,48 @@
           "image": "assets/img_0077.jpg",
           "caption": "CAM 2",
           "writeup": "",
-          "gallery": []
+          "gallery": [
+            {
+              "src": "https://youtu.be/Os7NLu9Lgv4?si=YBMKqsL8gzj8hU4H",
+              "caption": ""
+            },
+            {
+              "src": "assets/2a4b084e-32e8-4cab-b3a7-549d8092d49a.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2463.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2316.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2532.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2559.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2629.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2634.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2690.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0376.jpg",
+              "caption": ""
+            }
+          ]
         }
       ]
     },
