@@ -247,18 +247,13 @@
       "rows": [
         {
           "k": "EMAIL",
-          "label": "hello@example.com",
-          "href": "mailto:hello@example.com"
+          "label": "contact@benjamintran.ca",
+          "href": "mailto:contact@benjamintran.ca"
         },
         {
           "k": "PHONE",
-          "label": "+1 (000) 000-0000",
-          "href": "tel:+10000000000"
-        },
-        {
-          "k": "REEL",
-          "label": "watch the reel",
-          "href": "#"
+          "label": "+1 647 533 8726",
+          "href": "tel:+16475338726"
         }
       ],
       "note": "■ BROADCAST ENDS · TRANSMISSION RESUMES ON YOUR SCHEDULE ■"
