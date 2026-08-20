@@ -151,7 +151,16 @@
           "image": "assets/screenshot-2026-08-20-at-2.30.34-pm.jpg",
           "caption": "CAM 2",
           "writeup": "",
-          "gallery": []
+          "gallery": [
+            {
+              "src": "assets/img_0131.jpg",
+              "caption": ""
+            },
+            {
+              "src": "",
+              "caption": ""
+            }
+          ]
         }
       ]
     },
