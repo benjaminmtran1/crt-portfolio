@@ -223,29 +223,176 @@ html, body {
 /* ---------- TYPE ---------- */
 h1, h2, h3 { font-family: var(--osd-font); font-weight: 400; }
 
-.hero-title {
-  font-size: clamp(44px, 9vw, 110px);
-  line-height: 0.95;
-  color: var(--burn);
-  text-shadow:
-    2px 0 0 rgba(194,120,92,0.4),
-   -2px 0 0 rgba(110,141,141,0.4),
-    0 0 18px rgba(216,212,196,0.35);
-  margin: clamp(24px, 8vh, 80px) 0 12px;
+/* ---------- CH 01 — FULL-FRAME TITLE CARD ----------
+   The hero channel is one fixed composition that never scrolls: the
+   carousel fills the tube as a picture plate and the type is supered over
+   it the way a title card or a broadcast super worked in the era — picture
+   dipped under the words, everything locked to the title-safe rectangle,
+   the whole block symmetrical about the centre line. */
+.channel.ch-hero { position: absolute; inset: 0; padding: 0; }
+.hero-card { position: absolute; inset: 0; overflow: hidden; background: var(--tube); }
+
+/* --- the picture plate --- */
+.hero-plate { position: absolute; inset: 0; }
+.hero-plate .carousel { position: absolute; inset: 0; margin: 0; max-width: none; }
+.hero-plate .tv-frame.wide {
+  position: absolute; inset: 0;
+  aspect-ratio: auto;             /* the plate is tube-shaped, not 16:9 */
+  border-radius: 0;
+  box-shadow: none;
 }
-.hero-sub {
+/* the tube supplies its own scanlines and vignette — a second set laid over
+   a full-bleed plate only crushes the picture */
+.hero-plate .tv-frame::before,
+.hero-plate .tv-frame::after { display: none; }
+/* CRTs overscanned: the picture ran off the edge of the mask. Scaling the
+   plate a touch reproduces that, and swallows the tracking-glitch shift. */
+.hero-plate .tv-frame img,
+.hero-plate .tv-frame video,
+.hero-plate .tv-frame iframe { transform: scale(1.04); }
+/* nav sits in edge strips so the middle of the picture isn't a click trap */
+.hero-plate .car-zone.prev,
+.hero-plate .car-zone.next { width: 26%; }
+/* counter and caption take opposite title-safe corners, clear of the
+   channel label, the CH number and the dial */
+.hero-plate .car-osd,
+.hero-plate .tv-caption {
+  z-index: 7;                     /* clear of the dip, which sits at 6 */
+  top: calc(clamp(68px, 12vh, 118px) + 10px);
+  bottom: auto;
+  font-size: clamp(12px, 1.5vw, 17px);
+  max-width: 38%;
+}
+.hero-plate .car-osd {
+  right: auto;
+  left: calc(clamp(20px, 5vw, 56px) + 26px);
+  opacity: 0.85;
+}
+.hero-plate .tv-caption {
+  left: auto;
+  right: calc(clamp(20px, 5vw, 56px) + 26px);
+  text-align: right;
+}
+
+/* --- picture dipped under the supers --- */
+.hero-dip {
+  position: absolute; inset: 0; z-index: 6;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 72% 54% at 50% 52%,
+      rgba(5,6,5,0.78) 0%, rgba(5,6,5,0.46) 58%, rgba(5,6,5,0) 82%),
+    linear-gradient(to bottom,
+      rgba(5,6,5,0.62) 0%, rgba(5,6,5,0.28) 18%,
+      rgba(5,6,5,0.28) 48%, rgba(5,6,5,0.70) 86%, rgba(5,6,5,0.86) 100%);
+}
+
+/* --- title-safe registration marks --- */
+.hero-safe {
+  position: absolute; z-index: 7;
+  inset: clamp(68px, 12vh, 118px) clamp(20px, 5vw, 56px)
+         calc(var(--dial-h, 74px) + clamp(8px, 1.6vh, 20px));
+  pointer-events: none;
+}
+.hero-safe i {
+  position: absolute;
+  width: 15px; height: 15px;
+  border: 1px solid rgba(194,163,92,0.32);
+}
+.hero-safe i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.hero-safe i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.hero-safe i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.hero-safe i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+
+/* --- the supered type --- */
+.hero-copy {
+  position: absolute; z-index: 8;
+  left: 0; right: 0;
+  top: clamp(64px, 11vh, 120px);
+  bottom: calc(var(--dial-h, 74px) + clamp(14px, 2.5vh, 32px));
+  padding: 0 clamp(24px, 6vw, 110px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+.hero-eyebrow {
   font-family: var(--osd-font);
-  font-size: clamp(20px, 3vw, 30px);
+  font-size: clamp(12px, 1.5vw, 18px);
+  letter-spacing: 0.44em;
+  text-indent: 0.44em;            /* tracking pads the right edge; re-centre */
+  text-transform: uppercase;
   color: var(--amber);
-  margin-bottom: clamp(20px, 4vh, 40px);
+  text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 14px rgba(194,163,92,0.45);
+  margin-bottom: clamp(14px, 2.6vh, 30px);
 }
+.hero-title {
+  white-space: nowrap;
+  font-size: clamp(30px, min(7vw, 10.5vh), 94px);
+  line-height: 0.94;
+  letter-spacing: 0.03em;
+  color: var(--burn);
+  margin: 0;
+  text-shadow:
+    2px 0 0 rgba(194,120,92,0.42),
+   -2px 0 0 rgba(110,141,141,0.42),
+    0 0 4px rgba(0,0,0,0.85),
+    0 2px 20px rgba(0,0,0,0.9),
+    0 0 26px rgba(216,212,196,0.32);
+}
+.hero-rule {
+  position: relative;
+  width: min(56%, 460px);
+  height: 1px;
+  margin: clamp(16px, 3vh, 34px) 0;
+  background: linear-gradient(to right,
+    transparent, rgba(194,163,92,0.55) 12%,
+    rgba(194,163,92,0.55) 88%, transparent);
+}
+.hero-rule::before,
+.hero-rule::after {
+  content: "";
+  position: absolute; top: -3px;
+  width: 1px; height: 7px;
+  background: rgba(194,163,92,0.55);
+}
+.hero-rule::before { left: 12%; }
+.hero-rule::after { right: 12%; }
 .hero-body {
-  max-width: 62ch;
-  font-size: clamp(13px, 1.6vw, 15px);
-  line-height: 1.8;
+  max-width: 58ch;
+  font-size: clamp(12px, 1.45vw, 15px);
+  line-height: 1.85;
   color: var(--phosphor);
+  text-shadow:
+    0 1px 3px rgba(0,0,0,0.95),
+    0 0 12px rgba(0,0,0,0.85),
+    0 0 8px rgba(168,191,160,0.28);
 }
-.hero-body p + p { margin-top: 1em; }
+.hero-body p + p { margin-top: 0.85em; }
+.hero-copy .test-bars {
+  margin-top: clamp(18px, 3.4vh, 36px);
+  width: min(46%, 300px);
+  max-width: none;
+  height: clamp(8px, 1.4vh, 14px);
+  opacity: 0.42;
+}
+/* short tubes: tighten the stack so the card never needs to scroll */
+@media (max-height: 640px) {
+  .hero-copy { top: 54px; }
+  .hero-safe { inset-block-start: 54px; }
+  .hero-eyebrow { letter-spacing: 0.3em; text-indent: 0.3em; margin-bottom: 10px; }
+  .hero-rule { margin: 12px 0; }
+  .hero-body { line-height: 1.6; }
+  .hero-copy .test-bars { display: none; }
+}
+@media (max-width: 640px) {
+  .hero-copy { padding: 0 22px; }
+  .hero-eyebrow { letter-spacing: 0.22em; text-indent: 0.22em; }
+  .hero-body { line-height: 1.7; }
+  .hero-rule { width: 70%; }
+  .hero-copy .test-bars { display: none; }   /* the dial owns the bottom here */
+}
 
 .test-bars {
   display: flex;
@@ -1158,12 +1305,22 @@ const RENDERERS = {
         <span style="background:#8a5c7c"></span><span style="background:#8a5c52"></span>
         <span style="background:#5c5c8a"></span>
       </div>` : '';
+    const plate = carouselHtml(ch.carousel, {
+      auto: true, cls: 'plate', id: 'hero-' + (ch.id || 'signal')
+    });
     return `
-      <h1 class="hero-title">${escBr(site.heroName)}</h1>
-      <p class="hero-sub">${esc(ch.sub)}</p>
-      <div class="hero-body">${(ch.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join('')}</div>
-      ${carouselHtml(ch.carousel, { auto: true, id: 'hero-' + (ch.id || 'signal') })}
-      ${bars}`;
+      <div class="hero-card">
+        <div class="hero-plate">${plate}</div>
+        <div class="hero-dip" aria-hidden="true"></div>
+        <div class="hero-safe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="hero-copy">
+          ${ch.sub ? `<p class="hero-eyebrow">${esc(ch.sub)}</p>` : ''}
+          <h1 class="hero-title">${escBr(site.heroName)}</h1>
+          <div class="hero-rule" aria-hidden="true"></div>
+          <div class="hero-body">${(ch.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join('')}</div>
+          ${bars}
+        </div>
+      </div>`;
   },
   guide(ch) {
     const rows = (ch.projects || []).map((p, pi) => {
@@ -1230,7 +1387,7 @@ function buildSite(content) {
   content.channels.forEach((ch, i) => {
     const n = i + 1;
     const sec = document.createElement('section');
-    sec.className = 'channel' + (i === 0 ? ' on' : '');
+    sec.className = 'channel ch-' + ch.type + (i === 0 ? ' on' : '');
     sec.id = 'ch' + n;
     sec.dataset.label = ch.label;
     const render = RENDERERS[ch.type] || RENDERERS.custom;
@@ -1274,10 +1431,40 @@ function buildSite(content) {
   screen.appendChild(off);
   wireOffAir();
 
+  fitHeroFrame();
+  fitHeroTitle();
+  document.fonts?.ready.then(() => { fitHeroFrame(); fitHeroTitle(); });
+
   document.getElementById('osdCh').textContent = 'CH 01';
   document.getElementById('osdLabel').textContent = content.channels[0]?.label || '';
   wireTuning(content.channels.length);
 }
+
+/* The hero title holds the line breaks the author wrote (nowrap), so a long
+   name would run past the title-safe box instead of reflowing. Scale it down
+   to the widest line that fits — the composition stays symmetrical either
+   way, which is the whole point of the card. */
+function fitHeroFrame() {
+  const dial = document.getElementById('dial');
+  const crt = document.querySelector('.crt');
+  if (!dial || !crt) return;
+  const gap = parseFloat(getComputedStyle(dial).bottom) || 0;
+  crt.style.setProperty('--dial-h', Math.ceil(dial.offsetHeight + gap) + 'px');
+}
+
+function fitHeroTitle() {
+  document.querySelectorAll('.hero-copy .hero-title').forEach(t => {
+    t.style.fontSize = '';
+    const base = parseFloat(getComputedStyle(t).fontSize);
+    const over = t.scrollWidth / t.clientWidth;
+    if (over > 1.005) t.style.fontSize = Math.max(18, Math.floor(base / over)) + 'px';
+  });
+}
+let heroFitT;
+window.addEventListener('resize', () => {
+  clearTimeout(heroFitT);
+  heroFitT = setTimeout(() => { fitHeroFrame(); fitHeroTitle(); }, 120);
+});
 
 /* ---------- CH 00 clock + test tone ---------- */
 let oaWired = false, oaAudio = null, oaOsc = null;
