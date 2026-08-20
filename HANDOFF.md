@@ -91,7 +91,18 @@ Stacked overlays inside `.crt`, back to front: `.grille` (RGB stripes),
 `.scanlines`, `.sweep` (travelling refresh band), `.vignette`, `.flicker`,
 `#noise` (canvas static during channel changes), `.boot` (power-on flash).
 All decorative layers are `aria-hidden`; `prefers-reduced-motion` disables
-motion effects. Arrow keys (← →) change channels.
+motion effects. Arrow keys (← →) change channels, and number keys tune
+channels directly.
+
+## CH 00 — OFF AIR (easter egg)
+
+A hidden test-card channel, hardcoded in `index.html` (never in the dial or
+content.json). Muted SMPTE-style bars, a BEN·TV ident, a live broadcast clock,
+blinking PLEASE STAND BY, and a TONE button that plays a quiet 1 kHz sine via
+WebAudio (auto-killed when tuning away). Three ways in: channel-surfing wraps
+through it (← from CH 01 or → past the last channel), pressing the 0 key, or
+tapping the CH number OSD in the top-right corner (tap again to return —
+that's the touch route).
 
 ## Media treatment (`.tv-frame`)
 
@@ -138,5 +149,4 @@ admin's BUILDS editor (`+ GALLERY IMAGE` to add images).
 ## Ideas parked for later
 
 - Lightbox: thumbnails expand fullscreen with the channel-tune animation
-- Off-air / test-card easter egg channel (CH 00)
 - Live preview iframe inside admin.html

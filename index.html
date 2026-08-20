@@ -641,6 +641,78 @@ h2.ch-title {
   letter-spacing: 0.08em;
 }
 
+/* ---------- CH 00 — OFF AIR (easter egg) ---------- */
+.offair {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 220px);
+  margin-top: clamp(12px, 3vh, 32px);
+}
+.oa-bars { display: flex; flex: 1 1 55%; min-height: 160px; }
+.oa-bars span { flex: 1; }
+.oa-mid { display: flex; flex: 0 0 clamp(18px, 4vh, 34px); }
+.oa-mid span { flex: 1; }
+.oa-panel {
+  flex: 1 1 45%;
+  background: #060807;
+  border-top: 2px solid rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 1vh, 10px);
+  text-align: center;
+  padding: clamp(16px, 3vh, 28px);
+}
+.oa-ident {
+  font-family: var(--osd-font);
+  font-size: clamp(40px, 8vw, 88px);
+  color: var(--burn);
+  letter-spacing: 0.12em;
+  text-shadow: 2px 0 0 rgba(194,120,92,0.4), -2px 0 0 rgba(110,141,141,0.4), 0 0 18px rgba(216,212,196,0.35);
+}
+.oa-clock {
+  font-family: var(--osd-font);
+  font-size: clamp(26px, 4.5vw, 46px);
+  color: var(--amber);
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 10px rgba(194,163,92,0.5);
+  font-variant-numeric: tabular-nums;
+}
+.oa-standby {
+  font-family: var(--osd-font);
+  font-size: clamp(17px, 2.6vw, 24px);
+  color: var(--phosphor);
+  letter-spacing: 0.3em;
+  animation: oa-blink 1.6s steps(2) infinite;
+}
+@keyframes oa-blink { 50% { opacity: 0.15; } }
+.oa-tone {
+  margin-top: clamp(6px, 1.5vh, 14px);
+  background: transparent;
+  border: 1px solid rgba(168,191,160,0.3);
+  color: var(--phosphor-dim);
+  font-family: var(--osd-font);
+  font-size: clamp(14px, 1.9vw, 18px);
+  letter-spacing: 0.1em;
+  padding: 5px 14px;
+  cursor: pointer;
+}
+.oa-tone:hover { color: var(--amber); border-color: rgba(194,163,92,0.6); }
+.oa-tone.on { color: var(--amber); border-color: rgba(194,163,92,0.8); }
+.oa-small {
+  margin-top: clamp(8px, 2vh, 16px);
+  font-family: var(--osd-font);
+  font-size: clamp(13px, 1.7vw, 16px);
+  color: var(--phosphor-dim);
+  letter-spacing: 0.08em;
+  max-width: 46ch;
+  line-height: 1.7;
+}
+/* OSD channel number becomes the secret touch target */
+.osd-ch { pointer-events: auto; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .oa-standby { animation: none; } }
+
 /* ---------- POWER-ON ---------- */
 .boot {
   position: absolute; inset: 0;
@@ -1046,9 +1118,80 @@ function buildSite(content) {
     dial.appendChild(btn);
   });
 
+  /* CH 00 — OFF AIR: hardcoded easter egg, never in the dial or content.json */
+  const off = document.createElement('section');
+  off.className = 'channel';
+  off.id = 'ch0';
+  off.dataset.label = 'OFF AIR';
+  off.innerHTML = `
+    <div class="offair">
+      <div class="oa-bars" aria-hidden="true">
+        <span style="background:#8a8a7c"></span><span style="background:#8a8a52"></span>
+        <span style="background:#5c8a7c"></span><span style="background:#5c8a52"></span>
+        <span style="background:#8a5c7c"></span><span style="background:#8a5c52"></span>
+        <span style="background:#5c5c8a"></span>
+      </div>
+      <div class="oa-mid" aria-hidden="true">
+        <span style="background:#5c5c8a"></span><span style="background:#0b0e0c"></span>
+        <span style="background:#8a5c7c"></span><span style="background:#0b0e0c"></span>
+        <span style="background:#5c8a7c"></span><span style="background:#0b0e0c"></span>
+        <span style="background:#8a8a7c"></span>
+      </div>
+      <div class="oa-panel">
+        <div class="oa-ident">BEN·TV</div>
+        <div class="oa-clock" id="oaClock">--:--:--</div>
+        <div class="oa-standby">PLEASE STAND BY</div>
+        <button class="oa-tone" id="oaTone">TONE: OFF</button>
+        <p class="oa-small">END OF TODAY'S PROGRAMMING · YOU FOUND CHANNEL ZERO · BEN·TV THANKS YOU FOR WATCHING · TRANSMISSION RESUMES 06:00</p>
+      </div>
+    </div>`;
+  screen.appendChild(off);
+  wireOffAir();
+
   document.getElementById('osdCh').textContent = 'CH 01';
   document.getElementById('osdLabel').textContent = content.channels[0]?.label || '';
   wireTuning(content.channels.length);
+}
+
+/* ---------- CH 00 clock + test tone ---------- */
+let oaWired = false, oaAudio = null, oaOsc = null;
+function wireOffAir() {
+  const clock = document.getElementById('oaClock');
+  const toneBtn = document.getElementById('oaTone');
+
+  function tick() {
+    const d = new Date();
+    clock.textContent = [d.getHours(), d.getMinutes(), d.getSeconds()]
+      .map(n => String(n).padStart(2, '0')).join(':');
+  }
+  tick();
+
+  toneBtn.addEventListener('click', () => {
+    if (oaOsc) { stopTone(); return; }
+    oaAudio = oaAudio || new (window.AudioContext || window.webkitAudioContext)();
+    const gain = oaAudio.createGain();
+    gain.gain.value = 0.025; /* quiet — it's a courtesy tone, not an alarm */
+    oaOsc = oaAudio.createOscillator();
+    oaOsc.type = 'sine';
+    oaOsc.frequency.value = 1000;
+    oaOsc.connect(gain).connect(oaAudio.destination);
+    oaOsc.start();
+    toneBtn.textContent = 'TONE: ON';
+    toneBtn.classList.add('on');
+  });
+
+  if (!oaWired) {
+    oaWired = true;
+    setInterval(tick, 1000);
+  }
+}
+function stopTone() {
+  if (!oaOsc) return;
+  oaOsc.stop();
+  oaOsc.disconnect();
+  oaOsc = null;
+  const btn = document.getElementById('oaTone');
+  if (btn) { btn.textContent = 'TONE: OFF'; btn.classList.remove('on'); }
 }
 
 /* ---------- tuning / static / OSD ---------- */
@@ -1090,8 +1233,10 @@ function wireTuning(count) {
   }
 
   function tune(ch) {
+    ch = Number(ch);
     const target = document.getElementById('ch' + ch);
     if (!target || target.classList.contains('on')) return;
+    stopTone(); /* leaving CH 00 kills the test tone */
     document.querySelectorAll('.dial button').forEach(b =>
       b.classList.toggle('active', b.dataset.ch === String(ch)));
     staticBurst(220, () => {
@@ -1104,8 +1249,10 @@ function wireTuning(count) {
       osdCh.classList.remove('blink');
       void osdCh.offsetWidth;
       osdCh.classList.add('blink');
+      currentCh = ch;
     });
   }
+  let currentCh = 1;
 
   if (!tuningWired) {
     tuningWired = true;
@@ -1114,6 +1261,9 @@ function wireTuning(count) {
       const b = e.target.closest('button');
       if (b) tune(b.dataset.ch);
     });
+    /* secret touch/click target: tapping the OSD channel number flips
+       between CH 00 and CH 01 */
+    osdCh.addEventListener('click', () => tune(currentCh === 0 ? 1 : 0));
     document.addEventListener('keydown', e => {
       /* pop-up owns the keyboard while open */
       if (pip.open) {
@@ -1125,12 +1275,20 @@ function wireTuning(count) {
         }
         return;
       }
+      /* number keys tune directly; 0 is the off-air channel */
+      if (/^[0-9]$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey
+          && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName)) {
+        tune(Number(e.key));
+        return;
+      }
       if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-      const active = document.querySelector('.dial button.active');
-      if (!active) return;
-      const cur = Number(active.dataset.ch);
+      /* channel surf wraps through CH 00, like flipping past the last
+         station on an old set: …CH04 → CH00 → CH01… */
       const total = document.querySelectorAll('.dial button').length;
-      const next = e.key === 'ArrowRight' ? (cur % total) + 1 : ((cur - 2 + total) % total) + 1;
+      const positions = total + 1; /* 0..total */
+      const next = e.key === 'ArrowRight'
+        ? (currentCh + 1) % positions
+        : (currentCh - 1 + positions) % positions;
       tune(next);
     });
   }
