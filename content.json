@@ -252,7 +252,28 @@
         "src": "",
         "caption": "MAIN FEATURE — REEL"
       },
-      "projects": []
+      "projects": [
+        {
+          "time": "19:00",
+          "title": "Beast Games: season 1",
+          "desc": "",
+          "tags": "Lead Carpenter",
+          "image": "assets/img_0076.jpg",
+          "caption": "CAM 1",
+          "writeup": "",
+          "gallery": []
+        },
+        {
+          "time": "19:30",
+          "title": "Yes, Chef!",
+          "desc": "",
+          "tags": "Construction Coordinator",
+          "image": "assets/img_0077.jpg",
+          "caption": "CAM 2",
+          "writeup": "",
+          "gallery": []
+        }
+      ]
     },
     {
       "id": "installation",
