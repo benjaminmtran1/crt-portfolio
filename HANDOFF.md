@@ -168,6 +168,14 @@ carousel is manual (plus arrow keys). `prefers-reduced-motion` disables both
 the glitch and auto-advance. Hero slides are managed in the admin's SIGNAL
 editor (FEATURED CAROUSEL → `+ SLIDE`).
 
+The pop-up carousel is "natural" (`cls: 'natural'`): stills keep their
+original crop and aspect ratio (max 62vh tall, pillarboxed on black) rather
+than filling a 16:9 frame, and pop-up media drops both scanline layers — the
+per-media one and the pop-up window's own overlay (the carousel sits above it
+at z-index 8) — for a clearer read. The frame's vignette and the CRT colour
+grade stay. Video slides keep 16:9 so their players size correctly. The hero
+carousel is unchanged: 16:9, cover-cropped, full CRT treatment.
+
 Slides accept video too: a YouTube/Vimeo watch URL or a direct .mp4/.webm
 file becomes an embedded player (`slideVideoKind`/`slideMediaHtml`). On video
 slides the nav zones shrink to 12% edge strips so player controls stay

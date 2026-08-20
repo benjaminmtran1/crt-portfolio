@@ -424,6 +424,23 @@ h2.ch-title {
   .tv-frame.retune img, .tv-frame.retune video, .tv-frame.retune iframe { animation: none; }
 }
 .pip-body .carousel { margin: 14px 0 18px; max-width: none; }
+/* Pop-up media reads clean: no per-media scanlines, and the pop-up's own
+   scanline/vignette overlays (z 6/7) don't sit over the picture either.
+   The frame keeps its own vignette, so it still reads as a tube. */
+.pip .tv-frame::before { display: none; }
+.pip-body .carousel { position: relative; z-index: 8; }
+/* "natural" carousels show stills uncropped, at the image's own aspect
+   ratio, instead of filling a fixed 16:9 frame. Video slides still need a
+   ratio to size their player, so they keep 16:9. */
+.carousel.natural .tv-frame:not(.has-video) {
+  aspect-ratio: auto; min-height: 200px;
+  display: flex; align-items: center; justify-content: center;
+}
+.carousel.natural .tv-frame:not(.has-video) .car-media { position: relative; }
+.carousel.natural .tv-frame:not(.has-video) .car-media img {
+  width: auto; max-width: 100%; height: auto; max-height: 62vh;
+  margin: 0 auto; object-fit: contain;
+}
 
 /* camcorder-style caption bar */
 .tv-caption {
@@ -592,55 +609,8 @@ h2.ch-title {
 }
 .pip-writeup p + p { margin-top: 0.9em; }
 
-/* gallery: main viewer + camera-select strip */
-.pip-viewer { position: relative; }
-.pip-viewer .tv-frame { aspect-ratio: 16 / 9; }
-.pip-viewer .tv-frame img { animation: pip-tune 0.3s ease-out; }
-@keyframes pip-tune {
-  0% { transform: scaleY(0.01); filter: brightness(5) saturate(0.55) contrast(1.08) sepia(0.18) hue-rotate(-8deg); }
-  100% { transform: scaleY(1); }
-}
-.pip-nav {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  z-index: 5;
-  background: rgba(3,5,4,0.6);
-  border: 1px solid rgba(168,191,160,0.35);
-  color: var(--phosphor);
-  font-family: var(--osd-font);
-  font-size: 22px;
-  width: 40px; height: 40px;
-  cursor: pointer;
-}
-.pip-nav:hover { color: var(--amber); border-color: rgba(194,163,92,0.7); }
-.pip-nav.prev { left: 10px; }
-.pip-nav.next { right: 10px; }
-
-.pip-strip {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  padding-bottom: 4px;
-}
-.pip-strip::-webkit-scrollbar { display: none; }
-.pip-strip .tv-frame {
-  width: clamp(76px, 12vw, 110px);
-  aspect-ratio: 4 / 3;
-  flex: 0 0 auto;
-  cursor: pointer;
-  opacity: 0.55;
-  transition: opacity 0.15s;
-}
-.pip-strip .tv-frame:hover { opacity: 0.85; }
-.pip-strip .tv-frame.sel {
-  opacity: 1;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 0 0 1px rgba(194,163,92,0.8);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pip { animation: none; }
-  .pip-viewer .tv-frame img { animation: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1469,7 +1439,7 @@ function openProject(chid, pi) {
   pip.body.innerHTML = `
     <h3 class="pip-title" id="pipTitle">${esc(p.title)}</h3>
     <div class="pip-meta">${esc(p.tags || '')}</div>
-    ${carouselHtml(slides, { id: 'pip' })}
+    ${carouselHtml(slides, { id: 'pip', cls: 'natural' })}
     ${paras ? `<div class="pip-writeup">${paras}</div>` : ''}`;
   pip.backdrop.classList.add('open');
   pip.open = true;
