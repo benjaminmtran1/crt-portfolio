@@ -199,8 +199,8 @@
           ]
         },
         {
-          "time": "Mcdonald's - It's McValue",
-          "title": "",
+          "time": "18:00",
+          "title": "Mcdonald's - It's McValue",
           "desc": "",
           "tags": "",
           "image": "assets/screenshot-2026-08-20-at-3.37.40-pm.jpg",
@@ -250,18 +250,7 @@
         "src": "",
         "caption": "MAIN FEATURE — REEL"
       },
-      "projects": [
-        {
-          "time": "19:00",
-          "title": "Competition Workshop Set",
-          "desc": "Modular workshop bays for a fabrication competition series. Identical stations, overnight resets between episodes, camera hides built into the racking.",
-          "tags": "MODULAR · QUICK RESET · CAMERA HIDES",
-          "image": "https://picsum.photos/seed/workshopset/640/480",
-          "caption": "CAM 1",
-          "writeup": "",
-          "gallery": []
-        }
-      ]
+      "projects": []
     },
     {
       "id": "installation",
@@ -275,16 +264,6 @@
         "caption": "MAIN FEATURE — REEL"
       },
       "projects": [
-        {
-          "time": "19:00",
-          "title": "Brand Activation Facade",
-          "desc": "Walk-through storefront installation for a product launch — three rooms, practical lighting, built to survive six weeks of foot traffic instead of six days of shooting.",
-          "tags": "EXPERIENTIAL · PUBLIC · DURABLE",
-          "image": "https://picsum.photos/seed/activation/640/480",
-          "caption": "CAM 1",
-          "writeup": "",
-          "gallery": []
-        },
         {
           "time": "19:00",
           "title": "Toronto Raptors x Häagen-Dazs",
@@ -324,7 +303,7 @@
         },
         {
           "kind": "text",
-          "text": "With over a decade of experience as a carpenter, in the real world and on set .Most days you'll find me somewhere between the drafting table and the shop floor."
+          "text": "With over a decade of experience as a carpenter, in the real world and on set. Most days you'll find me somewhere between the drafting table and the shop floor."
         },
         {
           "kind": "text",
