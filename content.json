@@ -114,35 +114,28 @@
       ]
     },
     {
-      "id": "process",
-      "label": "PROCESS",
-      "type": "process",
-      "title": "BEHIND THE PICTURE",
-      "sub": "HOW A SET GETS MADE",
-      "steps": [
+      "id": "about",
+      "label": "ABOUT",
+      "type": "custom",
+      "title": "STATION PROFILE",
+      "sub": "THE GUY BEHIND THE BUILDS",
+      "blocks": [
         {
-          "timecode": "00:00:00:01 — DRAFT",
-          "text": "Every build starts on paper — or these days, on screen. Working drawings from the art department get translated into cut lists, material orders, and a build schedule that survives contact with the shooting calendar.",
-          "image": "",
-          "caption": ""
+          "kind": "image",
+          "src": "assets/about-ben.jpg",
+          "caption": "OFF SET — GOLDEN HOUR"
         },
         {
-          "timecode": "00:04:12:08 — BUILD",
-          "text": "Framing, skinning, finishing. The trick is building something that reads as a hundred years old but comes apart in an afternoon. Wild walls, removable ceilings, everything labeled for the truck.",
-          "image": "https://picsum.photos/seed/workshop/1280/720",
-          "caption": "SHOP FLOOR — DAY 12"
+          "kind": "text",
+          "text": "I'm Ben — carpenter, rigger, and general solver of impossible requests for film and television construction. When a script calls for a place that doesn't exist, my job is to make it exist by call time."
         },
         {
-          "timecode": "00:09:47:22 — SHOOT",
-          "text": "On set for the shoot days — pulling walls between setups, resetting breakaways, keeping the standby carpenter's kit within arm's reach of the first AD.",
-          "image": "",
-          "caption": ""
+          "kind": "text",
+          "text": "I came up through scenic shops and location builds, and twelve years later I still like the same two things: honest joinery and a deadline everyone swears can't be made. Most days you'll find me somewhere between the drafting table and the shop floor."
         },
         {
-          "timecode": "00:14:03:15 — STRIKE",
-          "text": "What took three weeks to build comes down in two days. Materials sorted for salvage, stage swept, on to the next one.",
-          "image": "",
-          "caption": ""
+          "kind": "text",
+          "text": "Off the clock it's balcony geraniums, a black cat who supervises all my sketching, and a glass of something cold while the sun goes down. The tools get put away — the habit of building things doesn't."
         }
       ]
     },
