@@ -313,21 +313,67 @@ $('btnAddChannel').onclick = () => {
    MEDIA PICKER (shared)
    ============================================================ */
 function pickMedia(cb) { mediaTarget = cb; $('mediaPicker').click(); }
-$('mediaPicker').onchange = e => {
+$('mediaPicker').onchange = async e => {
   const f = e.target.files[0]; if (!f || !mediaTarget) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    const base64 = reader.result.split(',')[1];
-    const safe = f.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
-    const path = 'assets/' + safe;
-    pendingAssets[path] = { base64, mime: f.type };
-    mediaTarget(path, reader.result);
-    mediaTarget = null;
-    e.target.value = '';
-    renderPending();
-  };
-  reader.readAsDataURL(f);
+  try {
+    const { base64, mime, name } = await prepareMedia(f);
+    const path = 'assets/' + name;
+    pendingAssets[path] = { base64, mime };
+    mediaTarget(path, 'data:' + mime + ';base64,' + base64);
+  } catch (err) {
+    alert('CAN\'T QUEUE THIS FILE\n\n' + err.message);
+  }
+  mediaTarget = null;
+  e.target.value = '';
+  renderPending();
 };
+
+/* Normalize media before it's queued: big photos get downscaled and
+   re-encoded as JPEG (HEIC converts too, where the browser can decode it),
+   so uploads stay small and everything renders on the live site. */
+const IMG_MAX_DIM = 1920, IMG_JPEG_Q = 0.82, VIDEO_MAX_MB = 25;
+async function prepareMedia(f) {
+  const safe = f.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+  const isVideo = f.type.startsWith('video/') || /\.(mp4|webm|mov|m4v)$/i.test(f.name);
+  if (isVideo) {
+    if (f.size > VIDEO_MAX_MB * 1024 * 1024)
+      throw new Error(`This video is ${(f.size / 1048576).toFixed(0)} MB — too big to commit through the GitHub API. Host it on YouTube or Vimeo (Showreel supports both), or compress it under ${VIDEO_MAX_MB} MB.`);
+    if (/\.(mov|m4v)$/i.test(safe))
+      throw new Error('MOV files don\'t play in every browser. Export as MP4 (H.264) and upload that instead.');
+    return { base64: await blobB64(f), mime: f.type || 'video/mp4', name: safe };
+  }
+  if (/\.(gif|svg)$/i.test(safe))  /* keep animation / vectors untouched */
+    return { base64: await blobB64(f), mime: f.type, name: safe };
+  let bmp;
+  try { bmp = await createImageBitmap(f); }
+  catch {
+    const heic = /heic|heif/i.test(f.name + ' ' + f.type);
+    throw new Error(heic
+      ? 'This is a HEIC photo, which this browser can\'t read (and the live site can\'t display). On iPhone: share via AirDrop/Mail with "Most Compatible", or screenshot it — or convert to JPEG and re-upload.'
+      : 'Couldn\'t decode this image in this browser. Convert it to JPEG or PNG and try again.');
+  }
+  const scale = Math.min(1, IMG_MAX_DIM / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(bmp.width * scale);
+  cv.height = Math.round(bmp.height * scale);
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#000';               /* transparency → tube black */
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
+  bmp.close();
+  const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', IMG_JPEG_Q));
+  if (!blob) throw new Error('Image re-encode failed — try converting to JPEG manually.');
+  const name = safe.replace(/\.(heic|heif|png|webp|jpe?g|tiff?|avif|bmp)$/i, '') + '.jpg';
+  return { base64: await blobB64(blob), mime: 'image/jpeg', name };
+}
+function blobB64(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Could not read the file.'));
+    r.readAsDataURL(blob);
+  });
+}
 function previewSrc(path) {
   if (pendingAssets[path]) return 'data:' + pendingAssets[path].mime + ';base64,' + pendingAssets[path].base64;
   return path;
@@ -650,6 +696,13 @@ async function ghPut(owner, repo, branch, token, path, base64, message) {
   let sha;
   const get = await fetch(url + '?ref=' + branch, { headers });
   if (get.ok) sha = (await get.json()).sha;
+  else if (get.status !== 404) {
+    /* files >1 MB can't be fetched via the JSON API — find the sha
+       through the parent directory listing instead */
+    const dir = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
+    const ls = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${dir}?ref=${branch}`, { headers });
+    if (ls.ok) sha = ((await ls.json()).find(x => x.path === path) || {}).sha;
+  }
   const put = await fetch(url, {
     method: 'PUT', headers,
     body: JSON.stringify({ message, content: base64, branch, ...(sha ? { sha } : {}) })
