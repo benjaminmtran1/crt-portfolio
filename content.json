@@ -64,7 +64,51 @@
         "src": "",
         "caption": "MAIN FEATURE — REEL"
       },
-      "projects": []
+      "projects": [
+        {
+          "time": "19:00",
+          "title": "Deathstalker (2025)",
+          "desc": "",
+          "tags": "Construction Coordinator",
+          "image": "assets/img_0075.jpg",
+          "caption": "CAM 1",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "assets/img_0983.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0973.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0976.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0814.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0809.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0952.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_1046.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0773.jpg",
+              "caption": ""
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "commercial",
