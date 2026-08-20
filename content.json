@@ -261,7 +261,44 @@
           "image": "assets/img_0076.jpg",
           "caption": "CAM 1",
           "writeup": "",
-          "gallery": []
+          "gallery": [
+            {
+              "src": "assets/img_7661.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7662.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7679.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7773.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7836.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7825.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0236.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0239.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7886.jpg",
+              "caption": ""
+            }
+          ]
         },
         {
           "time": "19:30",
