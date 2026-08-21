@@ -75,7 +75,11 @@ html, body {
   align-items: center;
   justify-content: center;
   padding: clamp(8px, 2vw, 28px);
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 45%, rgba(var(--split-warm),0.05), transparent 72%),
+    #050605;
 }
+
 
 .crt {
   position: relative;
@@ -88,6 +92,29 @@ html, body {
     inset 0 0 clamp(60px, 12vw, 180px) rgba(0,0,0,0.6),
     inset 0 0 12px rgba(0,0,0,0.75),
     0 0 46px rgba(var(--ink-rgb),0.08);
+
+  /* Halation — light scattering in the emulsion and bouncing off the film
+     backing. It is never one glow: a tight bloom hugging the letterform, a
+     wider halo, then a broad wash that skews warm, because the
+     anti-halation layer absorbs blue and green harder than red. Declared
+     here rather than on :root so it resolves against the --ink-rgb that
+     paintInk() writes onto this element — on :root it would freeze at the
+     default ink, the way the old --amber alias did. */
+  --halation:
+    0 0 0.16em rgba(var(--ink-rgb), 0.45),
+    0 0 0.5em  rgba(var(--ink-rgb), 0.3),
+    0 0 1.2em  rgba(var(--ink-rgb), 0.16),
+    0 0 2.4em  rgba(var(--split-warm), 0.12);
+}
+/* A set was 4:3. On a landscape screen the tube takes that ratio and the
+   cabinet fills the pillars either side. Portrait and small screens keep
+   filling the window — 4:3 there would leave a letterbox strip rather than a
+   television. */
+@media (min-width: 900px) and (min-aspect-ratio: 4/3) {
+  .crt {
+    width: auto;
+    aspect-ratio: 4 / 3;
+  }
 }
 
 /* screen content sits inside the tube */
@@ -100,6 +127,7 @@ html, body {
   color: var(--phosphor);
   scrollbar-width: none;
   text-shadow: 0 0 5px rgba(var(--burn-rgb),0.18);
+  container-type: inline-size;    /* pillarboxing decouples tube from window */
 }
 .screen::-webkit-scrollbar { display: none; }
 
@@ -245,7 +273,7 @@ html, body {
   color: var(--ink);
   text-shadow:
     0.06em 0.06em 0 color-mix(in srgb, var(--ink) 30%, #000),
-    0 0 0.6em rgba(var(--ink-rgb), 0.4);
+    var(--halation);
 }
 .ident-rule {
   width: min(38%, 280px);
@@ -432,7 +460,7 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
   text-shadow:
     0.062em 0.062em 0 color-mix(in srgb, var(--ink) 30%, #000),
     0 0 0.09em rgba(0,0,0,0.8),
-    0 0 0.6em rgba(var(--ink-rgb), 0.38);
+    var(--halation);
 }
 .hero-rule {
   position: relative;
@@ -538,7 +566,7 @@ h2.ch-title {
   text-shadow:
     0.05em 0.05em 0 color-mix(in srgb, var(--ink) 28%, #000),
     0 0 0.08em rgba(0,0,0,0.7),
-    0 0 0.5em rgba(var(--ink-rgb), 0.3);
+    var(--halation);
   margin: clamp(20px, 6vh, 56px) 0 10px;
 }
 .ch-sub {
@@ -845,7 +873,7 @@ h2.ch-title {
    roughly twice the programmes visible before scrolling, and the dead half
    of the screen put to work. Grid rows align across both columns, so the
    hairlines line up the way they would on a printed page. */
-@media (min-width: 1000px) {
+@container (min-width: 900px) {
   .guide {
     display: grid;
     grid-template-columns: 1fr 1fr;

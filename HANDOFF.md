@@ -103,7 +103,8 @@ channels: [
 Channel numbers (CH 01…) come from array order. All text is HTML-escaped at
 render time except `heroName`'s `<br>`.
 
-Guide channels lay their listings out in **two columns above 1000px**, like a
+Guide channels lay their listings out in **two columns once the tube is at
+least 900px wide** (a container query, not a viewport one — see above), like a
 printed guide page — roughly twice the programmes visible before scrolling,
 and the dead half of a wide tube put to work. Grid rows align across both
 columns so the hairlines line up the way they would in print; a row whose
@@ -181,6 +182,37 @@ riding above the dial. Stations watermark *programming*, not idents or title
 cards, so it shows on the guide channels only —
 `.crt:has(.ch-guide.on) .bug` — and stays off on the hero, ABOUT, CONTACT
 and the off-air test card.
+
+## Halation
+
+`--halation` holds the glow stack shared by the hero title, the channel
+headings and the ident wordmark. Halation is light scattering in the
+emulsion and bouncing off the film backing, and it is never one glow — a
+tight bloom hugging the letterform, a wider halo, a broad wash. The outer
+wash skews warm because the anti-halation layer absorbs blue and green
+harder than red, but the ink's own hue carries the first three radii:
+weighting the wash any heavier makes a cool ink (CH 04) read as a
+misregistered red shadow rather than a glow.
+
+It is declared **on `.crt`**, not `:root`, so it resolves against the
+`--ink-rgb` that `paintInk()` writes onto that element. On `:root` it would
+compute once against the default ink and inherit frozen — the same trap the
+old `--amber` alias fell into.
+
+## The 4:3 tube
+
+A set was 4:3, so on a landscape window ≥900px the tube takes that ratio and
+the cabinet fills the pillars either side. Portrait and small screens keep
+filling the window, since 4:3 on a phone would give a letterbox strip rather
+than a television. The rule has to sit **after** `.crt`'s own `width: 100%`
+— same specificity, so source order decides it.
+
+Pillarboxing decouples the tube from the window, which breaks any viewport
+media query describing layout *inside* the tube. `.screen` is therefore a
+container (`container-type: inline-size`) and the guide's two-column rule is
+`@container (min-width: 900px)`. A 1280x720 window gives an 892px tube and
+correctly drops to one column, where a viewport query would have forced two
+into a tube too narrow for them.
 
 ## CRT effect layers (index.html)
 
