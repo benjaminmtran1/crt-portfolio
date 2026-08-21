@@ -249,6 +249,17 @@ grade stay. Video slides keep 16:9 so their players size correctly. The hero
 carousel is CH 01's picture window (see above): a stock 16:9 frame beside
 the credits, full CRT treatment.
 
+Passing `strip: true` to `carouselHtml` adds a **filmstrip** under the
+frame — every slide as a small thumbnail, dimmed like a contact sheet, the
+current one lit in the channel ink, so the viewer always sees the few stills
+behind and ahead of the one on air. The strip scrolls sideways with faded
+edges and keeps the active frame centred (`carStripSync`); clicking a thumb
+jumps straight to that slide (`carSet`, which `carGo` now steps through).
+Stills thumb themselves, YouTube slides use the ytimg thumbnail service
+(falling back to a ▶ tile if it fails), Vimeo and raw files get the ▶ tile.
+The project pop-up's gallery carousel has it on; the hero window stays
+clean.
+
 Slides accept video too: a YouTube/Vimeo watch URL or a direct .mp4/.webm
 file becomes an embedded player (`slideVideoKind`/`slideMediaHtml`). On video
 slides the nav zones shrink to 12% edge strips so player controls stay

@@ -640,6 +640,61 @@ h2.ch-title {
   margin: 0 auto; object-fit: contain;
 }
 
+/* filmstrip: the few stills behind and ahead of the one on air, dimmed
+   like a contact sheet; the current frame is lit in the channel ink.
+   Scrolls sideways when the gallery outgrows the row, with the edges
+   fading out so it reads as a strip, not a grid. */
+.car-strip {
+  display: flex;
+  gap: 7px;
+  margin-top: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* side padding matches the mask fade, so a frame at either end of the
+     strip can still sit fully lit */
+  padding: 3px 30px;
+  -webkit-mask-image: linear-gradient(to right,
+    transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right,
+    transparent, #000 28px, #000 calc(100% - 28px), transparent);
+}
+.car-strip::-webkit-scrollbar { display: none; }
+.car-thumb {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(52px, 8vw, 76px);
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  background: var(--deep);
+  border: 1px solid rgba(var(--phosphor-rgb),0.25);
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.15s, border-color 0.15s;
+}
+.car-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: var(--grade);
+}
+.car-thumb-play {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--osd-font);
+  font-size: 15px;
+  color: var(--burn);
+  text-shadow: 0 0 6px rgba(0,0,0,0.9);
+}
+.car-thumb:hover { opacity: 0.85; }
+.car-thumb:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; opacity: 0.85; }
+.car-thumb.on {
+  opacity: 1;
+  border-color: var(--ink);
+  box-shadow: 0 0 8px rgba(var(--ink-rgb),0.45);
+}
+
 /* camcorder-style caption bar */
 .tv-caption {
   position: absolute;
@@ -1273,6 +1328,24 @@ function slideMediaHtml(s) {
   return `<img src="${esc(s.src)}" alt="${esc(s.caption || 'Featured still')}">`;
 }
 
+/* a thumbnail for the filmstrip: stills use the image itself; YouTube has a
+   thumbnail service; Vimeo and raw files get a dark ▶ tile */
+function slideThumbHtml(s, i, active) {
+  const kind = slideVideoKind(s.src);
+  let inner;
+  if (!kind) {
+    inner = `<img src="${esc(s.src)}" alt="" loading="lazy">`;
+  } else if (kind === 'youtube') {
+    const id = s.src.replace(/^.*(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]+).*$/, '$1');
+    inner = `<img src="https://i.ytimg.com/vi/${esc(id)}/mqdefault.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="car-thumb-play">▶</span>`;
+  } else {
+    inner = `<span class="car-thumb-play">▶</span>`;
+  }
+  return `<button class="car-thumb${active ? ' on' : ''}" data-goto="${i}"
+    role="tab" aria-selected="${active}"
+    aria-label="${esc(s.caption || ('Still ' + (i + 1)))}">${inner}</button>`;
+}
+
 function carouselHtml(items, opts = {}) {
   items = (items || []).filter(s => s && s.src);
   if (!items.length) return '';
@@ -1280,6 +1353,10 @@ function carouselHtml(items, opts = {}) {
   CAR.reg[id] = items;
   const first = items[0];
   const multi = items.length > 1;
+  const strip = (opts.strip && multi) ? `
+      <div class="car-strip" role="tablist" aria-label="Stills">
+        ${items.map((s, i) => slideThumbHtml(s, i, i === 0)).join('')}
+      </div>` : '';
   return `
     <div class="carousel${opts.cls ? ' ' + opts.cls : ''}" data-carid="${id}" data-idx="0"${opts.auto && multi ? ' data-auto="1"' : ''}>
       <div class="tv-frame wide${slideVideoKind(first.src) ? ' has-video' : ''}">
@@ -1289,7 +1366,7 @@ function carouselHtml(items, opts = {}) {
         ${multi ? `
         <button class="car-zone prev" aria-label="Previous still"><span class="car-hint">◀ TRACK</span></button>
         <button class="car-zone next" aria-label="Next still"><span class="car-hint">TRACK ▶</span></button>` : ''}
-      </div>
+      </div>${strip}
     </div>`;
 }
 
@@ -1297,7 +1374,12 @@ function carGo(el, dir) {
   if (!el) return;
   const items = CAR.reg[el.dataset.carid];
   if (!items || items.length < 2) return;
-  const idx = (Number(el.dataset.idx) + dir + items.length) % items.length;
+  carSet(el, (Number(el.dataset.idx) + dir + items.length) % items.length);
+}
+
+function carSet(el, idx) {
+  const items = CAR.reg[el.dataset.carid];
+  if (!items || !items[idx] || idx === Number(el.dataset.idx)) return;
   el.dataset.idx = idx;
   el._lastNav = Date.now();
   const s = items[idx];
@@ -1311,6 +1393,7 @@ function carGo(el, dir) {
     frame.querySelector('.car-osd').textContent =
       'STILL ' + String(idx + 1).padStart(2, '0') + '/' + String(items.length).padStart(2, '0');
   };
+  carStripSync(el, idx);
   if (REDUCED_MOTION) { apply(); return; }
   frame.classList.remove('retune'); void frame.offsetWidth;
   frame.classList.add('retune');
@@ -1319,9 +1402,28 @@ function carGo(el, dir) {
   frame._retuneT = setTimeout(() => frame.classList.remove('retune'), 450);
 }
 
+/* keep the filmstrip's active frame marked and centred, so the viewer
+   always sees the few stills behind and ahead of the one on air */
+function carStripSync(el, idx) {
+  const strip = el.querySelector('.car-strip');
+  if (!strip) return;
+  strip.querySelectorAll('.car-thumb').forEach((t, i) => {
+    t.classList.toggle('on', i === idx);
+    t.setAttribute('aria-selected', i === idx);
+  });
+  const cur = strip.children[idx];
+  if (!cur) return;
+  strip.scrollTo({
+    left: cur.offsetLeft - (strip.clientWidth - cur.offsetWidth) / 2,
+    behavior: REDUCED_MOTION ? 'auto' : 'smooth'
+  });
+}
+
 document.addEventListener('click', e => {
   const zone = e.target.closest('.car-zone');
-  if (zone) carGo(zone.closest('.carousel'), zone.classList.contains('prev') ? -1 : 1);
+  if (zone) { carGo(zone.closest('.carousel'), zone.classList.contains('prev') ? -1 : 1); return; }
+  const thumb = e.target.closest('.car-thumb');
+  if (thumb) carSet(thumb.closest('.carousel'), Number(thumb.dataset.goto));
 });
 document.addEventListener('touchstart', e => {
   const car = e.target.closest('.carousel');
@@ -1730,7 +1832,7 @@ function openProject(chid, pi) {
   pip.body.innerHTML = `
     <h3 class="pip-title" id="pipTitle">${esc(p.title)}</h3>
     <div class="pip-meta">${esc(p.tags || '')}</div>
-    ${carouselHtml(slides, { id: 'pip', cls: 'natural' })}
+    ${carouselHtml(slides, { id: 'pip', cls: 'natural', strip: true })}
     ${paras ? `<div class="pip-writeup">${paras}</div>` : ''}`;
   pip.backdrop.classList.add('open');
   pip.open = true;
