@@ -572,6 +572,15 @@ const EDITORS = {
             ${field('Image caption (e.g. CAM 1)', `p.${i}.caption`, p.caption)}
             ${mediaWidget(p.image, 'proj:' + i)}
             ${field('Pop-up write-up (blank line = new paragraph; leave empty to disable pop-up)', `p.${i}.writeup`, p.writeup || '', 'textarea')}
+            <label class="f">Programme information (ROLE comes from Tags automatically)</label>
+            ${(p.meta || []).map((m, mi) => `
+              <div class="card">
+                <div class="card-head"><span class="grow">${esc(m.k || 'FIELD')}</span>
+                  <button data-meta-del="${i}:${mi}">✕ remove</button></div>
+                ${field('Label (YEAR / CLIENT / DIRECTOR…)', `p.${i}.meta.${mi}.k`, m.k)}
+                ${field('Value', `p.${i}.meta.${mi}.v`, m.v)}
+              </div>`).join('')}
+            <button class="act small" data-meta-add="${i}">+ INFO FIELD</button>
             <label class="f">Pop-up gallery (${nGal})</label>
             ${(p.gallery || []).map((g, gi) => `
               <div class="card${isOpen(g) ? '' : ' collapsed'}">
@@ -668,6 +677,7 @@ function setByPath(obj, path, val) {
     else if (key === 's') t = t.steps[Number(parts[++i])];
     else if (key === 'r') t = t.rows[Number(parts[++i])];
     else if (key === 't') t = t.tx[Number(parts[++i])];
+    else if (key === 'meta') { if (!t.meta) t.meta = []; t = t.meta[Number(parts[++i])]; }
     else if (key === 'b') t = t.blocks[Number(parts[++i])];
     else if (key === 'c') t = t.carousel[Number(parts[++i])];
     else { if (!t[key]) t[key] = {}; t = t[key]; }
@@ -736,6 +746,14 @@ function wireEditor(ch) {
     }
     if (d.rowDel !== undefined) { ch.rows.splice(Number(d.rowDel), 1); renderEditor(); return; }
     if (d.txDel !== undefined) { (ch.tx || []).splice(Number(d.txDel), 1); renderEditor(); return; }
+    if (d.metaAdd !== undefined) {
+      const p = ch.projects[Number(d.metaAdd)];
+      (p.meta = p.meta || []).push({ k:'', v:'' }); renderEditor(); return;
+    }
+    if (d.metaDel !== undefined) {
+      const [pi, mi] = d.metaDel.split(':').map(Number);
+      (ch.projects[pi].meta || []).splice(mi, 1); renderEditor(); return;
+    }
     /* gallery ops (target format "projIdx:galIdx") */
     const galOp = (key, fn) => {
       if (d[key] === undefined) return false;
@@ -764,7 +782,7 @@ function wireEditor(ch) {
       renderEditor(); return;
     }
     if (e.target.id === 'addProject') {
-      const p = { time:'', title:'', desc:'', tags:'', image:'', caption:'CAM ' + (ch.projects.length + 1), writeup:'', gallery:[] };
+      const p = { time:'', title:'', desc:'', tags:'', image:'', caption:'CAM ' + (ch.projects.length + 1), writeup:'', meta:[], gallery:[] };
       ch.projects.push(p); openItem(p); renderEditor(); return;
     }
     if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); return; }

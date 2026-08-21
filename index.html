@@ -1091,6 +1091,43 @@ h2.ch-title {
   letter-spacing: 0.08em;
   margin-bottom: 14px;
 }
+/* PROGRAM INFORMATION — the listing metadata under a programme. Same
+   label/value idea as CH 07's contact slate, set smaller: these are facts to
+   scan, not a number someone has to dial. */
+.info-slate {
+  margin: clamp(10px, 1.6vh, 16px) 0 clamp(14px, 2.2vh, 22px);
+  border-top: 1px solid rgba(var(--ink-rgb),0.35);
+  border-bottom: 1px solid rgba(var(--ink-rgb),0.2);
+  padding: clamp(10px, 1.6vh, 16px) 0;
+}
+.info-head {
+  font-family: var(--body-font);
+  font-size: clamp(9px, 1vw, 11px);
+  letter-spacing: 0.34em;
+  text-indent: 0.34em;
+  color: var(--ink);
+  margin-bottom: clamp(8px, 1.4vh, 14px);
+}
+.info-row {
+  display: grid;
+  grid-template-columns: clamp(84px, 11vw, 128px) 1fr;
+  gap: clamp(8px, 1.6vw, 20px);
+  padding: 5px 0;
+  align-items: baseline;
+}
+.info-row + .info-row { border-top: 1px solid rgba(var(--phosphor-rgb),0.12); }
+.info-k {
+  font-family: var(--osd-font);
+  font-size: clamp(13px, 1.5vw, 16px);
+  letter-spacing: 0.12em;
+  color: var(--phosphor-dim);
+}
+.info-v {
+  font-size: clamp(12px, 1.4vw, 15px);
+  line-height: 1.6;
+  color: var(--burn);
+}
+
 .pip-writeup {
   font-size: clamp(12px, 1.5vw, 14px);
   line-height: 1.8;
@@ -2108,9 +2145,23 @@ function openProject(chid, pi) {
   pip.osd.textContent = `PROGRAM DETAIL — ${p.time || ''}`.trim();
   const paras = (p.writeup || '').split(/\n\s*\n/).filter(Boolean)
     .map(t => `<p>${esc(t)}</p>`).join('');
+  /* ROLE is derived from `tags` rather than copied into `meta`, so editing
+     the tags in the admin keeps the slate in step instead of leaving two
+     copies to drift apart. */
+  const metaRows = [
+    ...(p.tags && p.tags.trim() ? [{ k: 'ROLE', v: p.tags }] : []),
+    ...(p.meta || []).filter(m => m && (m.k || m.v))
+  ];
+  const info = metaRows.length ? `
+    <div class="info-slate">
+      <div class="info-head">PROGRAM INFORMATION</div>
+      ${metaRows.map(m => `
+        <div class="info-row"><span class="info-k">${esc(m.k)}</span><span class="info-v">${esc(m.v)}</span></div>`).join('')}
+    </div>` : '';
+
   pip.body.innerHTML = `
     <h3 class="pip-title" id="pipTitle">${esc(p.title)}</h3>
-    <div class="pip-meta">${esc(p.tags || '')}</div>
+    ${info}
     ${carouselHtml(slides, { id: 'pip', cls: 'natural', strip: true })}
     ${paras ? `<div class="pip-writeup">${paras}</div>` : ''}`;
   pip.backdrop.classList.add('open');

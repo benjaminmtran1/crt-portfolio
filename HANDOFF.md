@@ -91,7 +91,8 @@ channels: [
   { type:"guide",   label, title, sub,
                     reel:{ kind:none|youtube|vimeo|file, src, caption },
                     projects:[{ time, title, desc, tags, image, caption,
-                                writeup, gallery:[{ src, caption }] }] }
+                                writeup, meta:[{ k, v }],
+                                gallery:[{ src, caption }] }] }
   { type:"process", label, title, sub,
                     steps:[{ timecode, text, image, caption }] }
   { type:"contact", label, title, sub, rows:[{ k, label, href }],
@@ -183,6 +184,23 @@ riding above the dial. Stations watermark *programming*, not idents or title
 cards, so it shows on the guide channels only —
 `.crt:has(.ch-guide.on) .bug` — and stays off on the hero, ABOUT, CONTACT
 and the off-air test card.
+
+## Programme information (pop-up)
+
+The pop-up carries a **PROGRAM INFORMATION** slate between the title and the
+gallery — listing metadata, where the old tags line used to sit. Header
+position is deliberate: below the gallery it fell under the fold on every
+project, since a natural-crop carousel runs up to 62vh.
+
+`ROLE` is **derived live from the project's `tags`**, not copied into `meta`,
+so editing tags in the admin keeps the slate in step instead of leaving two
+copies to drift. Everything else comes from `meta: [{ k, v }]` — free-form,
+so a project can carry YEAR / CLIENT / DIRECTOR / AGENCY or nothing at all.
+With no tags and no meta the slate does not render.
+
+Same label/value idea as CH 07's contact slate, set smaller: these are facts
+to scan, not a number someone has to dial. Edit them per project in the
+admin's guide editor under the write-up field.
 
 ## CH 07 — the continuity slate
 
