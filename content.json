@@ -175,6 +175,45 @@
               "caption": ""
             }
           ]
+        },
+        {
+          "time": "21:30",
+          "title": "We’re From The Internet",
+          "desc": "",
+          "tags": "Construction Coordinator ",
+          "image": "assets/img_9344.jpg",
+          "caption": "CAM 6",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/1vJsNvQ_7BU?si=sTmCAKcbTcH62qx0",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4563.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4585.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4636.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4639.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4642.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4548.dng.jpg",
+              "caption": ""
+            }
+          ]
         }
       ]
     },
