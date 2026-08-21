@@ -1,7 +1,7 @@
 {
   "site": {
     "pageTitle": "BENJAMIN TRAN",
-    "heroName": "BEN —<br>FILM CONSTRUCTION"
+    "heroName": "BENJAMIN TRAN"
   },
   "channels": [
     {
@@ -20,23 +20,7 @@
           "caption": ""
         },
         {
-          "src": "assets/img_7762.dng.jpg",
-          "caption": ""
-        },
-        {
-          "src": "assets/img_4242.dng.jpg",
-          "caption": ""
-        },
-        {
-          "src": "assets/img_3626.jpg",
-          "caption": ""
-        },
-        {
-          "src": "assets/img_3586.jpg",
-          "caption": ""
-        },
-        {
-          "src": "assets/img_4237.dng.jpg",
+          "src": "assets/img_6030.jpg",
           "caption": ""
         },
         {
@@ -44,11 +28,11 @@
           "caption": ""
         },
         {
-          "src": "assets/img_4037.dng.jpg",
+          "src": "assets/img_3582.jpg",
           "caption": ""
         },
         {
-          "src": "assets/img_5639.jpg",
+          "src": "assets/img_0807.jpg",
           "caption": ""
         }
       ]
@@ -108,6 +92,86 @@
             },
             {
               "src": "assets/img_0773.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "time": "19:30",
+          "title": "You Gotta Believe (2024)",
+          "desc": "",
+          "tags": "Lead Carpenter",
+          "image": "assets/img_0084.jpg",
+          "caption": "CAM 2",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/0r_nbHSOyDE?si=whv-nybZeYcFhoai",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "time": "20:00",
+          "title": "It Feeds (2025)",
+          "desc": "",
+          "tags": "Lead Carpenter",
+          "image": "assets/img_0085.jpg",
+          "caption": "CAM 3",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/spLyHdJ_SyE?si=g6MhxScd7WvhNlyy",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "time": "20:30",
+          "title": "Honey Bunch (2025)",
+          "desc": "",
+          "tags": "Carpenter",
+          "image": "assets/img_0086.jpg",
+          "caption": "CAM 4",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/2SqWRpoUGAk?si=0cL6_GqoISQOP4lL",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5848.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6021.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5849.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6030.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/imagejpeg_1.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "time": "21:00",
+          "title": "Mother Father Sister Brother Frank (2024)",
+          "desc": "",
+          "tags": "Carpenter",
+          "image": "assets/img_0087.jpg",
+          "caption": "CAM 5",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/SCem8UD0K8g?si=hfVKv0CIbmE_7Eh-",
               "caption": ""
             }
           ]
@@ -294,6 +358,133 @@
             },
             {
               "src": "assets/img_6517.dng.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "time": "20:30",
+          "title": "WhiteCastle - Crave Thy Castle",
+          "desc": "",
+          "tags": "",
+          "image": "assets/img_9339.jpg",
+          "caption": "CAM 5",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/ixsBPHILjjc?si=3HIjyFUkoWN04zsI",
+              "caption": ""
+            },
+            {
+              "src": "https://youtu.be/WNlAq276Ess?si=VVdVxjvUJ1DTIsq2",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6436.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6465.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6470.dng.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "time": "21:00",
+          "title": "Princess Margaret Cancer Foundation - Carry The Fire",
+          "desc": "",
+          "tags": "Construction Coordinator",
+          "image": "assets/img_9340.jpg",
+          "caption": "CAM 6",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/YJ3owyjYvZo?si=6p1w_WNpTGZDQ5qW",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5640.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5612.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5575.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5549.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "time": "21:30",
+          "title": "Hinge - it’s funny we met on hinge ",
+          "desc": "",
+          "tags": "Art Coordinator ",
+          "image": "assets/img_9341.jpg",
+          "caption": "CAM 7",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/GMBwQW2v9ys?si=v6LGmYmtwlxEfXA4",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "time": "22:00",
+          "title": "Gain Flings x Wicked",
+          "desc": "",
+          "tags": "Construction Coordinator",
+          "image": "assets/img_9342.jpg",
+          "caption": "CAM 8",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/vN_g3BOxAF4?si=ZDtDciD35X4X1_ae",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3586.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3583.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3515.dng.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "time": "22:30",
+          "title": "Transparent Labs - Protein without the weird stuff",
+          "desc": "",
+          "tags": "Construction Coordinator",
+          "image": "assets/img_9343.jpg",
+          "caption": "CAM 9",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/C5vcG_nG2Q4?si=KyqqNd3YeyNQoRAd",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_8119.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_8117.jpg",
               "caption": ""
             }
           ]
