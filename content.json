@@ -341,6 +341,37 @@
               "caption": ""
             }
           ]
+        },
+        {
+          "time": "20:30",
+          "title": "WhiteCastle - Crave Thy Castle",
+          "desc": "",
+          "tags": "",
+          "image": "assets/img_9339.jpg",
+          "caption": "CAM 5",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/ixsBPHILjjc?si=3HIjyFUkoWN04zsI",
+              "caption": ""
+            },
+            {
+              "src": "https://youtu.be/WNlAq276Ess?si=VVdVxjvUJ1DTIsq2",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6436.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6465.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6470.dng.jpg",
+              "caption": ""
+            }
+          ]
         }
       ]
     },
