@@ -38,10 +38,6 @@
         {
           "src": "assets/img_8630.jpg",
           "caption": ""
-        },
-        {
-          "src": "assets/img_9350.jpg",
-          "caption": ""
         }
       ]
     },
@@ -471,6 +467,10 @@
             },
             {
               "src": "assets/img_8630.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_9349.jpg",
               "caption": ""
             }
           ]
