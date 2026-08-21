@@ -430,10 +430,20 @@ a { color: inherit; }
 .lift-sheet h3{ font-size: clamp(22px, 2.7vw, 32px); letter-spacing: -.015em; margin: 2px 0 14px; }
 .gal{ position: relative; margin: 20px 0 24px; }
 .gal-nav{ position: absolute; inset: 0; display: flex; z-index: 3; }
-.gal-nav button{ flex: 1; border: 0; background: none; cursor: pointer; font: inherit; font-size: 10px; letter-spacing: .24em; color: #fff; opacity: 0; transition: opacity 200ms ease; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
-.gal:hover .gal-nav button{ opacity: .85; }
-.gal-nav button:first-child{ flex: 0 0 34%; }
-.gal-count{ position: absolute; right: 12px; bottom: 12px; z-index: 4; font-size: 10px; letter-spacing: .2em; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.7); }
+/* A natural-crop still is pillarboxed on paper, so white controls
+   disappear on exactly the slides they sit over. The glyphs carry
+   their own dark chip instead and read on stock or photograph. */
+.gal-nav button{ flex: 1; border: 0; background: none; cursor: pointer; font: inherit;
+  display: flex; align-items: center; padding: 0 14px;
+  opacity: 0; transition: opacity 200ms ease; }
+.gal-nav button:last-child{ justify-content: flex-end; }
+.gal-nav button span{
+  background: rgba(var(--soot-rgb), .72); color: #fdf4e8;
+  font-size: 10px; letter-spacing: .2em; padding: 9px 12px;
+}
+.gal:hover .gal-nav button, .gal-nav button:focus-visible{ opacity: 1; }
+.gal-count{ position: absolute; right: 12px; bottom: 13px; z-index: 4;
+  font-size: 10px; letter-spacing: .2em; color: var(--faded); }
 
 /* ── The slate: label / value rows. Shared by job detail,
    about, and contact, so facts look the same everywhere. ── */
@@ -836,7 +846,9 @@ function go(i, { instant } = {}){
 
   setSun(sections[i].sun);          /* the light moves first */
   cur = i;
-  history.replaceState(null, '', '#' + slug(sections[i].label));
+  /* a sandboxed or file:// host can refuse this; the deep link is a
+     convenience, not a dependency */
+  try { history.replaceState(null, '', '#' + slug(sections[i].label)); } catch {}
   [...$('rail').querySelectorAll('.tab')].forEach((t, n) => t.classList.toggle('on', n === i));
 
   const land = () => {
@@ -926,8 +938,8 @@ function openLift(job){
     ${galItems.length ? `<div class="gal" id="gal">
       ${frameHtml(galItems[0], { natural: true, cls: 'l4' })}
       ${galItems.length > 1 ? `<div class="gal-nav">
-        <button data-step="-1" aria-label="Previous">◀</button>
-        <button data-step="1" aria-label="Next">▶</button>
+        <button data-step="-1" aria-label="Previous image"><span>◀ PREV</span></button>
+        <button data-step="1" aria-label="Next image"><span>NEXT ▶</span></button>
       </div><div class="gal-count">1 / ${galItems.length}</div>` : ''}
     </div>` : ''}
     ${job.writeup ? `<div class="body-copy">${paras(String(job.writeup).split(/\n{2,}/))}</div>` : ''}`;
