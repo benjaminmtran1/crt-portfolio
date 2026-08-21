@@ -6,7 +6,7 @@
 <title>BEN — FILM CONSTRUCTION</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&family=Bowlby+One+SC&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&family=League+Spartan:wght@800&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    CRT PORTFOLIO — design tokens
@@ -54,7 +54,8 @@
   --grade: saturate(0.95) contrast(1.05) brightness(0.97) sepia(0.12) hue-rotate(-5deg);
 
   --osd-font: 'VT323', monospace;
-  --display-font: 'Bowlby One SC', 'Arial Black', sans-serif;
+  --display-font: 'League Spartan', 'Arial Black', sans-serif;
+  --display-weight: 800;          /* single-weight faces want 400 here */
   --body-font: 'IBM Plex Mono', monospace;
 }
 
@@ -285,8 +286,9 @@ html, body {
 }
 .lt-name {
   font-family: var(--display-font);
+  font-weight: var(--display-weight);
   font-size: clamp(15px, 1.9vw, 25px);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--burn);
   line-height: 1.05;
@@ -480,8 +482,9 @@ html, body {
 }
 .ident-mark {
   font-family: var(--display-font);
+  font-weight: var(--display-weight);
   font-size: clamp(38px, 7vw, 92px);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   color: var(--ink);
   text-shadow:
     0.06em 0.06em 0 color-mix(in srgb, var(--ink) 30%, #000),
@@ -590,7 +593,7 @@ html, body {
 }
 
 /* ---------- TYPE ---------- */
-h1, h2 { font-family: var(--display-font); font-weight: 400; }
+h1, h2 { font-family: var(--display-font); font-weight: var(--display-weight); }
 h3 { font-family: var(--osd-font); font-weight: 400; }
 
 /* ---------- CH 01 — TITLE CARD OVER BLACK ----------
@@ -660,11 +663,12 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
 }
 .hero-title {
   font-family: var(--display-font);
+  font-weight: var(--display-weight);
   white-space: nowrap;
   text-transform: uppercase;
-  font-size: clamp(34px, min(6.6vw, 10vh), 96px);
-  line-height: 0.94;
-  letter-spacing: 0.008em;
+  font-size: clamp(34px, min(7.4vw, 12vh), 112px);
+  line-height: 0.96;
+  letter-spacing: 0.03em;
   color: var(--ink);
   margin: 0;
   /* hard offset shadow in a darkened tone of the ink — the way a title
@@ -771,9 +775,9 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
 .test-bars span { flex: 1; }
 
 h2.ch-title {
-  font-size: clamp(32px, 5.4vw, 60px);
+  font-size: clamp(32px, 5.6vw, 64px);
   text-transform: uppercase;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.03em;
   color: var(--ink);
   text-shadow:
     0.05em 0.05em 0 color-mix(in srgb, var(--ink) 28%, #000),

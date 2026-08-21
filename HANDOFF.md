@@ -164,13 +164,21 @@ stock, not just the accent colour. Tune the depth with the veil's alpha
 closest pair in the ink cycle, so those two read most alike.
 
 Fonts: **VT323** (OSD chrome — channel numbers, dial, captions),
-**Bowlby One SC** via `--display-font` (headings and the hero title — the fat
-rounded grotesque the title cards use), **IBM Plex Mono** (body copy and the
-tracked credit line above the hero title).
+**League Spartan 800** via `--display-font` (the hero title, channel
+headings, the ident wordmark and the CH 06 lower third), **IBM Plex Mono**
+(body copy and the tracked credit line above the hero title).
 
-Swap the display face by changing `--display-font` and the `family=` list in
-the Google Fonts `<link>`; the hero title re-fits itself to whatever face
-loads, so no sizes need touching.
+The display face is geometric rather than the fat rounded grotesque it
+started as — the round bowls and soft strokes of that first choice read as a
+toy at this scale. Geometry with flat, precise joins reads like broadcast
+typography.
+
+Swap the face by changing `--display-font`, `--display-weight` and the
+`family=` list in the Google Fonts `<link>` — nothing else. Every display
+element reads the weight from the token (a single-weight face wants 400
+there), and `fitHeroTitle()` re-fits the hero to whatever loads, so sizes
+need no touching. Note the size clamp is tuned for this face's width: a much
+wider face will simply fit smaller rather than break.
 
 ## Station identity
 
