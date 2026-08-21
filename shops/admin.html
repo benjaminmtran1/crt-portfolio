@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SHOPS — The Bench</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23e7dac4'/%3E%3Crect x='5' y='7' width='22' height='4' fill='%23b96f45'/%3E%3Crect x='5' y='14' width='22' height='4' fill='%23241c17' opacity='.5'/%3E%3Crect x='5' y='21' width='14' height='4' fill='%23241c17' opacity='.3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────────────────────
+   THE BENCH — the editor for SHOPS.
+
+   Same stock as the site, worked harder: denser, squarer, and
+   with every control visible rather than composed. A workbench
+   is not a title card.
+
+   It loads content.json, lets you edit it through forms built
+   from a schema, and commits the result (plus any media you
+   upload) straight to GitHub. The token stays in the browser.
+   ───────────────────────────────────────────────────────── */
+:root{
+  --plaster:#e7dac4; --plaster-lo:#dbc9ac;
+  --paper:#f4ecdf; --paper-lo:#eadcc6;
+  --sand:#d2b993; --clay:#b96f45; --rust:#8d472a;
+  --soot:#241c17; --soot-rgb:36,28,23; --faded:#7a6a5b;
+  --sky:#93b9d6; --good:#5c7f52; --bad:#a8452c;
+  --f:'Jost', 'Futura', system-ui, sans-serif;
+}
+*,*::before,*::after{ box-sizing:border-box; }
+body{
+  margin:0; font-family:var(--f); color:var(--soot);
+  background:var(--plaster); font-size:14px;
+  height:100vh; overflow:hidden;
+}
+.bench{ display:grid; grid-template-columns:230px minmax(0,1fr) 300px; height:100vh; }
+.col{ overflow-y:auto; padding:18px; }
+.col + .col{ border-left:1px solid rgba(var(--soot-rgb),.16); }
+.col.mid{ background:rgba(255,252,246,.4); }
+
+h1{ font-size:15px; letter-spacing:.3em; font-weight:700; margin:0 0 4px; }
+h1 small{ display:block; font-size:9px; letter-spacing:.24em; color:var(--faded); font-weight:400; margin-top:5px; }
+.hd{ font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:var(--faded);
+     margin:22px 0 10px; padding-bottom:6px; border-bottom:1px solid rgba(var(--soot-rgb),.16); }
+.hd:first-child{ margin-top:0; }
+
+button{ font:inherit; cursor:pointer; }
+.act{
+  border:0; background:var(--paper-lo); color:var(--soot);
+  padding:9px 13px; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  box-shadow:1px 2px 0 rgba(var(--soot-rgb),.10), 2px 4px 7px rgba(var(--soot-rgb),.12);
+}
+.act:hover{ background:var(--paper); }
+.act.go{ background:var(--clay); color:#fdf4e8; }
+.act.go:hover{ background:var(--rust); }
+.act.warn{ color:var(--bad); }
+.act.tiny{ padding:5px 8px; font-size:9px; letter-spacing:.1em; box-shadow:none; }
+.act:disabled{ opacity:.45; cursor:default; }
+.row{ display:flex; gap:7px; flex-wrap:wrap; align-items:center; }
+
+/* ── section list ── */
+.sec{
+  display:flex; align-items:center; gap:4px; padding:10px 9px; margin-bottom:6px;
+  background:var(--paper-lo); cursor:pointer;
+  box-shadow:1px 2px 0 rgba(var(--soot-rgb),.08), 2px 4px 6px rgba(var(--soot-rgb),.10);
+}
+.sec.on{ background:var(--paper); box-shadow:2px 3px 0 rgba(var(--soot-rgb),.10), 4px 7px 12px rgba(var(--soot-rgb),.14); }
+.sec .lbl{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; }
+.sec .ty{ flex:none; font-size:8.5px; letter-spacing:.14em; color:var(--faded); }
+.sec.on .ty{ color:var(--clay); }
+.sec .mv{ flex:none; border:0; background:none; padding:2px 2px; font-size:10px; line-height:1; color:var(--faded); }
+.sec .mv:hover{ color:var(--soot); }
+
+/* ── fields ── */
+label.f{ display:block; margin:0 0 13px; }
+label.f > span{ display:block; font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--faded); margin-bottom:5px; }
+input[type=text], textarea, select{
+  width:100%; font:inherit; font-size:13.5px; color:var(--soot);
+  background:var(--paper); border:1px solid rgba(var(--soot-rgb),.2);
+  padding:9px 10px; border-radius:0;
+}
+input[type=text]:focus, textarea:focus, select:focus{ outline:2px solid var(--clay); outline-offset:-1px; border-color:transparent; }
+textarea{ min-height:92px; resize:vertical; line-height:1.5; }
+textarea.tall{ min-height:170px; }
+.two{ display:grid; grid-template-columns:1fr 1fr; gap:0 12px; }
+.hint{ font-size:11px; color:var(--faded); margin:-8px 0 13px; line-height:1.45; }
+
+/* ── the sun dial: each section declares where its light is ── */
+.dial{ display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+.dial .face{ position:relative; width:56px; height:56px; border:1px solid rgba(var(--soot-rgb),.25); border-radius:50%; flex:none; background:var(--paper); }
+.dial .face i{ position:absolute; left:50%; top:50%; width:9px; height:9px; margin:-4.5px; border-radius:50%; background:var(--clay); }
+.dial .face b{ position:absolute; left:50%; top:50%; width:14px; height:14px; margin:-7px; border-radius:2px; background:var(--sand); }
+/* the little square casts its own shadow, so the dial shows what
+   the setting actually does rather than just an angle */
+.dial .face b span{ z-index:-1; }
+.dial input[type=range]{ flex:1; accent-color:var(--clay); }
+.dial .deg{ font-size:11px; letter-spacing:.1em; color:var(--faded); width:44px; text-align:right; }
+
+/* ── list cards ── */
+details.card{
+  background:var(--paper); margin-bottom:9px;
+  box-shadow:1px 2px 0 rgba(var(--soot-rgb),.08), 3px 5px 9px rgba(var(--soot-rgb),.11);
+}
+details.card > summary{
+  list-style:none; cursor:pointer; padding:11px 13px;
+  display:flex; align-items:center; gap:10px;
+  font-size:12px; letter-spacing:.05em;
+}
+details.card > summary::-webkit-details-marker{ display:none; }
+details.card > summary::before{ content:'▸'; color:var(--clay); font-size:10px; }
+details.card[open] > summary::before{ content:'▾'; }
+details.card > summary .n{ font-size:9.5px; letter-spacing:.14em; color:var(--faded); }
+details.card > summary .t{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+details.card > summary .s{ font-size:9.5px; letter-spacing:.1em; color:var(--faded); }
+details.card > summary .s.miss{ color:var(--bad); }
+.card-body{ padding:4px 13px 14px; border-top:1px solid rgba(var(--soot-rgb),.12); }
+
+/* ── media slot ── */
+.media{ display:grid; grid-template-columns:132px 1fr; gap:11px; margin-bottom:13px; align-items:start; }
+.media .well{ position:relative; aspect-ratio:4/3; background:var(--paper-lo); overflow:hidden;
+  box-shadow:inset 0 0 0 1px rgba(var(--soot-rgb),.14); }
+.media .well img, .media .well video, .media .well iframe{ width:100%; height:100%; object-fit:cover; border:0; display:block;
+  filter:saturate(.84) contrast(1.05) sepia(.14); }
+.media .well .empty{ position:absolute; inset:0; display:grid; place-items:center; font-size:8.5px; letter-spacing:.24em; color:var(--faded);
+  background:repeating-linear-gradient(45deg, var(--paper-lo) 0 8px, var(--sand) 8px 16px); }
+.media .path{ font-size:10px; color:var(--faded); word-break:break-all; margin-top:7px; line-height:1.4; }
+
+/* ── kv rows ── */
+.kv{ display:grid; grid-template-columns:1fr 1.5fr auto; gap:6px; margin-bottom:6px; }
+.kv.three{ grid-template-columns:.7fr 1.3fr 1.3fr auto; }
+
+/* ── publish ── */
+.pub input[type=text]{ font-size:12.5px; padding:7px 9px; }
+.status{ margin-top:12px; padding:11px; font-size:11px; line-height:1.55; white-space:pre-wrap;
+  background:var(--paper); box-shadow:inset 0 0 0 1px rgba(var(--soot-rgb),.14); max-height:270px; overflow:auto; }
+.status.ok{ color:var(--good); } .status.err{ color:var(--bad); }
+.pending{ font-size:10.5px; color:var(--faded); margin-top:10px; line-height:1.6; word-break:break-all; }
+.pending b{ color:var(--soot); font-weight:500; }
+.chk{ display:flex; gap:8px; align-items:center; font-size:11px; color:var(--faded); margin:9px 0; }
+@media (max-width:1000px){
+  body{ overflow:auto; height:auto; }
+  .bench{ grid-template-columns:1fr; height:auto; }
+  .col{ overflow:visible; }
+  .col + .col{ border-left:0; border-top:1px solid rgba(var(--soot-rgb),.16); }
+}
+</style>
+</head>
+<body>
+<div class="bench">
+  <aside class="col">
+    <h1>THE BENCH<small>SHOPS · CONTENT</small></h1>
+    <div class="hd">Sections</div>
+    <div id="secList"></div>
+    <div class="row" style="margin-top:12px">
+      <select id="newType" style="width:118px">
+        <option value="title">Title</option>
+        <option value="work">Work</option>
+        <option value="services">Commissions</option>
+        <option value="process">Process</option>
+        <option value="about">About</option>
+        <option value="contact">Contact</option>
+        <option value="custom">Custom</option>
+      </select>
+      <button class="act" id="btnNewSec">+ ADD</button>
+    </div>
+    <div class="hd">Site</div>
+    <label class="f"><span>Page title</span><input type="text" id="siteTitle"></label>
+    <label class="f"><span>Corner mark</span><input type="text" id="siteMark"></label>
+    <label class="f"><span>Mark subtitle</span><input type="text" id="siteMarkSub"></label>
+    <div class="hd">Source</div>
+    <div class="row">
+      <button class="act" id="btnLoad">LOAD JSON FILE</button>
+    </div>
+    <input type="file" id="jsonPicker" accept=".json,application/json" hidden>
+  </aside>
+
+  <main class="col mid" id="editor"></main>
+
+  <aside class="col pub">
+    <div class="hd">Publish</div>
+    <label class="f"><span>Owner</span><input type="text" id="ghOwner" placeholder="benjaminmtran1"></label>
+    <label class="f"><span>Repo</span><input type="text" id="ghRepo" placeholder="shops"></label>
+    <label class="f"><span>Branch</span><input type="text" id="ghBranch" placeholder="main"></label>
+    <label class="f"><span>Token</span><input type="text" id="ghToken" placeholder="github_pat_…" autocomplete="off"></label>
+    <div class="hint">A fine-grained personal access token scoped to this repo, with
+      <b>Contents: Read and write</b>. It is sent to GitHub and nowhere else.</div>
+    <label class="chk"><input type="checkbox" id="ghRemember"> Remember these on this machine</label>
+    <div class="row">
+      <button class="act go" id="btnPublish">PUBLISH</button>
+      <button class="act" id="btnDownload">DOWNLOAD</button>
+    </div>
+    <div class="status" id="status">Loading content.json…</div>
+    <div class="pending" id="pendingList"></div>
+  </aside>
+</div>
+<input type="file" id="mediaPicker" accept="image/*,video/mp4,video/webm" hidden>
+<input type="file" id="mediaPickerMulti" accept="image/*,video/mp4,video/webm" multiple hidden>
+
+<script>
+/* ═════════════════════════════════════════════════════════════
+   THE BENCH
+
+   Every editor on this page is generated from SPEC below. A
+   section type is a list of fields; a field is [key, label,
+   type] and types nest, so a job's gallery is just another
+   list inside a list. Adding a section type to the site means
+   adding one entry here — there are no bespoke forms.
+   ═════════════════════════════════════════════════════════ */
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+let content = null, sel = 0, pendingAssets = {};
+const openCards = new Set();   /* which <details> are open, by path */
+
+/* ── the schema ───────────────────────────────────────────── */
+const MEDIA_LIST = (label, add) => ({ add, kind: 'media', label });
+
+const SPEC = {
+  title: { name:'Title card', fields:[
+    ['eyebrow','Eyebrow','text'],
+    ['name','Name (large type)','text'],
+    ['tagline','Strip line','text'],
+    ['paragraphs','Body copy','paras'],
+    ['plates','Print pile','list', MEDIA_LIST('Print pile','+ PRINT')],
+  ]},
+
+  work: { name:'Work', fields:[
+    ['title','Heading','text'],
+    ['sub','Subheading','text'],
+    ['items','Jobs','list', { add:'+ JOB', kind:'object', label:'Jobs', fields:[
+      ['title','Title','text'],
+      ['kind','Category','text'],
+      ['role','Role','text'],
+      ['year','Year','text'],
+      ['client','Client','text'],
+      ['image','Cover image','media'],
+      ['writeup','Write-up','textarea'],
+      ['meta','Extra facts','kv'],
+      ['gallery','Gallery','list', MEDIA_LIST('Gallery','+ IMAGE')],
+    ]}],
+  ]},
+
+  services: { name:'Commissions', fields:[
+    ['title','Heading','text'],
+    ['sub','Subheading','text'],
+    ['items','Offers','list', { add:'+ OFFER', kind:'object', label:'Offers', fields:[
+      ['title','Title','text'],
+      ['blurb','Description','textarea'],
+      ['points','Tags (one per line)','lines'],
+      ['lead','Lead time','text'],
+    ]}],
+    ['note','Footnote','textarea'],
+  ]},
+
+  process: { name:'Process', fields:[
+    ['title','Heading','text'],
+    ['sub','Subheading','text'],
+    ['steps','Stages','list', { add:'+ STAGE', kind:'object', label:'Stages', fields:[
+      ['title','Title','text'],
+      ['text','Description','textarea'],
+      ['src','Image','media'],
+      ['caption','Caption','text'],
+    ]}],
+  ]},
+
+  about: { name:'About', fields:[
+    ['title','Heading','text'],
+    ['sub','Subheading','text'],
+    ['name','Name (lower third)','text'],
+    ['role','Role (lower third)','text'],
+    ['portrait','Portrait','mediaobj'],
+    ['facts','Facts','kv'],
+    ['paragraphs','Body copy','paras'],
+  ]},
+
+  contact: { name:'Contact', fields:[
+    ['title','Heading','text'],
+    ['sub','Subheading','text'],
+    ['rows','Contact rows','kv3'],
+    ['meta','Side facts','kv'],
+    ['note','Footnote','text'],
+  ]},
+
+  custom: { name:'Custom', fields:[
+    ['title','Heading','text'],
+    ['sub','Subheading','text'],
+    ['blocks','Blocks','list', { add:'+ BLOCK', kind:'object', label:'Blocks', fields:[
+      ['kind','Kind (text / image / video)','text'],
+      ['text','Text','textarea'],
+      ['src','Media','media'],
+      ['caption','Caption','text'],
+    ]}],
+  ]},
+};
+
+/* Blank sections, so + ADD gives something that renders. */
+const BLANK = {
+  title:   () => ({ label:'TITLE', type:'title', sun:38, eyebrow:'', name:'SHOPS', tagline:'', paragraphs:[''], plates:[] }),
+  work:    () => ({ label:'WORK', type:'work', sun:118, title:'Work', sub:'', items:[] }),
+  services:() => ({ label:'COMMISSIONS', type:'services', sun:205, title:'Commissions', sub:'', items:[], note:'' }),
+  process: () => ({ label:'PROCESS', type:'process', sun:300, title:'Process', sub:'', steps:[] }),
+  about:   () => ({ label:'ABOUT', type:'about', sun:15, title:'About', sub:'', name:'', role:'', portrait:{src:'',caption:''}, facts:[], paragraphs:[''] }),
+  contact: () => ({ label:'CONTACT', type:'contact', sun:160, title:'Contact', sub:'', rows:[], meta:[], note:'' }),
+  custom:  () => ({ label:'SECTION', type:'custom', sun:80, title:'', sub:'', blocks:[] }),
+};
+
+/* ── dot paths into the selected section ──────────────────── */
+function get(path){
+  return path.split('.').reduce((o, k) => (o == null ? o : o[k]), content.sections[sel]);
+}
+function set(path, val){
+  const keys = path.split('.');
+  const last = keys.pop();
+  let o = content.sections[sel];
+  for (const k of keys) {
+    if (o[k] == null) o[k] = /^\d+$/.test(k) ? [] : {};
+    o = o[k];
+  }
+  o[last] = val;
+}
+
+/* ── field renderers ──────────────────────────────────────── */
+function previewSrc(p){
+  const a = pendingAssets[p];
+  return a ? 'data:' + a.mime + ';base64,' + a.base64 : p;
+}
+function wellHtml(src){
+  if (!src) return '<span class="empty">EMPTY</span>';
+  const s = previewSrc(src);
+  let m = String(src).match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]+)/);
+  if (m) return `<iframe src="https://www.youtube-nocookie.com/embed/${esc(m[1])}" title="preview"></iframe>`;
+  m = String(src).match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (m) return `<iframe src="https://player.vimeo.com/video/${esc(m[1])}" title="preview"></iframe>`;
+  if (/\.(mp4|webm|m4v)(\?|#|$)/i.test(src)) return `<video src="${esc(s)}" muted loop autoplay playsinline></video>`;
+  return `<img src="${esc(s)}" alt="">`;
+}
+function mediaField(path, label){
+  const src = get(path) || '';
+  return `<div class="media">
+    <div class="well">${wellHtml(src)}</div>
+    <div>
+      <span style="display:block;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faded);margin-bottom:6px">${esc(label)}</span>
+      <div class="row">
+        <button class="act tiny" data-media="${esc(path)}">${src ? 'REPLACE' : 'UPLOAD'}</button>
+        <button class="act tiny" data-url="${esc(path)}">USE URL</button>
+        ${src ? `<button class="act tiny warn" data-clear="${esc(path)}">CLEAR</button>` : ''}
+      </div>
+      <div class="path">${src ? esc(src) : 'no file'}</div>
+    </div>
+  </div>`;
+}
+function kvHtml(path, label, three){
+  const rows = get(path) || [];
+  return `<div style="margin-bottom:13px">
+    <span style="display:block;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--faded);margin-bottom:6px">${esc(label)}</span>
+    ${rows.map((r, i) => `<div class="kv${three ? ' three' : ''}">
+      <input type="text" data-p="${esc(path)}.${i}.k" value="${esc(r.k)}" placeholder="LABEL">
+      <input type="text" data-p="${esc(path)}.${i}.${three ? 'label' : 'v'}" value="${esc(three ? r.label : r.v)}" placeholder="${three ? 'Shown text' : 'Value'}">
+      ${three ? `<input type="text" data-p="${esc(path)}.${i}.href" value="${esc(r.href)}" placeholder="mailto: / tel: / https:">` : ''}
+      <button class="act tiny warn" data-del="${esc(path)}" data-i="${i}">✕</button>
+    </div>`).join('')}
+    <button class="act tiny" data-add="${esc(path)}" data-kind="${three ? 'kv3' : 'kv'}">+ ROW</button>
+  </div>`;
+}
+function listHtml(path, spec){
+  const arr = get(path) || [];
+  return `<div style="margin:18px 0">
+    <div class="hd" style="margin-bottom:8px">${esc(spec.label)} <span style="color:var(--clay)">(${arr.length})</span></div>
+    ${arr.map((item, i) => cardHtml(`${path}.${i}`, item, spec, i, arr.length)).join('')}
+    <div class="row" style="margin-top:8px">
+      <button class="act tiny" data-add="${esc(path)}" data-kind="${esc(spec.kind)}">${esc(spec.add)}</button>
+      ${spec.kind === 'media' ? `<button class="act tiny" data-batch="${esc(path)}">+ BATCH UPLOAD</button>` : ''}
+    </div>
+  </div>`;
+}
+function cardHtml(path, item, spec, i, total){
+  const media = spec.kind === 'media';
+  const title = media ? (item.caption || (item.src || '').split('/').pop() || '—')
+                      : (item[spec.fields[0][0]] || '—');
+  const missing = media ? !item.src : false;
+  const badge = media ? (missing ? 'NO FILE' : '')
+                      : (item.gallery ? `${item.gallery.length} IMG` : '');
+  const body = media
+    ? mediaField(`${path}.src`, 'File') +
+      fieldHtml(`${path}.caption`, 'Caption', 'text')
+    : spec.fields.map(f => fieldHtml(`${path}.${f[0]}`, f[1], f[2], f[3])).join('');
+  return `<details class="card" data-key="${esc(path)}"${openCards.has(path) ? ' open' : ''}>
+    <summary>
+      <span class="n">${String(i + 1).padStart(2,'0')}</span>
+      <span class="t">${esc(title)}</span>
+      ${badge ? `<span class="s${missing ? ' miss' : ''}">${esc(badge)}</span>` : ''}
+      <button class="act tiny" data-up="${esc(path.replace(/\.\d+$/,''))}" data-i="${i}"${i === 0 ? ' disabled' : ''}>▲</button>
+      <button class="act tiny" data-dn="${esc(path.replace(/\.\d+$/,''))}" data-i="${i}"${i === total - 1 ? ' disabled' : ''}>▼</button>
+      <button class="act tiny warn" data-del="${esc(path.replace(/\.\d+$/,''))}" data-i="${i}">✕</button>
+    </summary>
+    <div class="card-body">${body}</div>
+  </details>`;
+}
+function fieldHtml(path, label, type, extra){
+  const v = get(path);
+  const head = `<span>${esc(label)}</span>`;
+  switch (type) {
+    case 'text':
+      return `<label class="f">${head}<input type="text" data-p="${esc(path)}" value="${esc(v || '')}"></label>`;
+    case 'textarea':
+      return `<label class="f">${head}<textarea data-p="${esc(path)}">${esc(v || '')}</textarea></label>`;
+    case 'paras':
+      return `<label class="f">${head}<textarea class="tall" data-p="${esc(path)}" data-split="para">${esc((v || []).join('\n\n'))}</textarea></label>
+              <div class="hint">One blank line between paragraphs.</div>`;
+    case 'lines':
+      return `<label class="f">${head}<textarea data-p="${esc(path)}" data-split="line">${esc((v || []).join('\n'))}</textarea></label>
+              <div class="hint">One per line.</div>`;
+    case 'media':    return mediaField(path, label);
+    case 'mediaobj': return mediaField(path + '.src', label) + fieldHtml(path + '.caption', label + ' caption', 'text');
+    case 'kv':       return kvHtml(path, label, false);
+    case 'kv3':      return kvHtml(path, label, true);
+    case 'list':     return listHtml(path, extra);
+    default:         return '';
+  }
+}
+
+/* ── the three panels ─────────────────────────────────────── */
+function renderSecList(){
+  $('secList').innerHTML = (content.sections || []).map((s, i) => `
+    <div class="sec${i === sel ? ' on' : ''}" data-sel="${i}">
+      <span class="lbl">${esc(s.label || '—')}</span>
+      <span class="ty">${esc(s.type)}</span>
+      <button class="mv" data-secup="${i}" title="Up">▲</button>
+      <button class="mv" data-secdn="${i}" title="Down">▼</button>
+      <button class="mv" data-secdel="${i}" title="Delete">✕</button>
+    </div>`).join('');
+}
+function renderEditor(){
+  const s = content.sections[sel];
+  if (!s) { $('editor').innerHTML = '<div class="hd">No section selected</div>'; return; }
+  const spec = SPEC[s.type];
+  if (!spec) { $('editor').innerHTML = `<div class="hd">Unknown type “${esc(s.type)}”</div>`; return; }
+  const sun = Number.isFinite(+s.sun) ? +s.sun : 38;
+  const rad = sun * Math.PI / 180, dx = Math.sin(rad) * 17, dy = Math.cos(rad) * 17;
+  $('editor').innerHTML = `
+    <div class="hd">${esc(spec.name)} — section ${sel + 1}</div>
+    <label class="f"><span>Tab label</span><input type="text" data-p="label" value="${esc(s.label || '')}"></label>
+    <div class="dial">
+      <div class="face">
+        <b><span style="position:absolute;inset:0;background:rgba(var(--soot-rgb),.34);
+             transform:translate(${(dx * .55).toFixed(1)}px, ${(dy * .55).toFixed(1)}px)"></span></b>
+        <i style="transform:translate(${(-dx).toFixed(1)}px, ${(-dy).toFixed(1)}px)"></i></div>
+      <input type="range" id="sunRange" min="0" max="359" value="${sun}">
+      <span class="deg">${sun}°</span>
+    </div>
+    <div class="hint">Where this section's light comes from. Shadows fall the
+      opposite way, and every shadow on the page swings when someone
+      arrives here — that swing is the transition.</div>
+    ${spec.fields.map(f => fieldHtml(f[0], f[1], f[2], f[3])).join('')}`;
+}
+function renderAll(){ renderSecList(); renderEditor(); renderPending(); }
+
+/* ── typing ───────────────────────────────────────────────── */
+$('editor').addEventListener('input', (e) => {
+  const el = e.target;
+  if (el.id === 'sunRange') {
+    content.sections[sel].sun = +el.value;
+    renderEditor();
+    $('sunRange').focus();
+    return;
+  }
+  const p = el.dataset.p;
+  if (!p) return;
+  const split = el.dataset.split;
+  const val = split === 'para' ? el.value.split(/\n{2,}/).map(s => s.trim()).filter(Boolean)
+            : split === 'line' ? el.value.split('\n').map(s => s.trim()).filter(Boolean)
+            : el.value;
+  if (p === 'label') { content.sections[sel].label = val; renderSecList(); return; }
+  set(p, val);
+  /* keep the collapsed card's summary line honest while you type */
+  const card = el.closest('details.card');
+  if (card) {
+    const item = get(card.dataset.key);
+    const t = card.querySelector('summary .t');
+    if (item && t) {
+      t.textContent = (item.src !== undefined && item.caption !== undefined)
+        ? (item.caption || (item.src || '').split('/').pop() || '—')
+        : (item.title || item.kind || '—');
+    }
+  }
+});
+
+/* remember which cards are open across re-renders */
+$('editor').addEventListener('toggle', (e) => {
+  const d = e.target.closest('details.card');
+  if (!d) return;
+  d.open ? openCards.add(d.dataset.key) : openCards.delete(d.dataset.key);
+}, true);
+
+/* ── structural clicks ────────────────────────────────────── */
+$('editor').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const d = btn.dataset;
+
+  if (d.up || d.dn || d.del) e.preventDefault();   /* don't toggle the card */
+
+  if (d.add) {
+    const arr = get(d.add) || [];
+    arr.push(d.kind === 'media' ? { src:'', caption:'' }
+           : d.kind === 'kv'    ? { k:'', v:'' }
+           : d.kind === 'kv3'   ? { k:'', label:'', href:'' }
+           : {});
+    set(d.add, arr);
+    openCards.add(`${d.add}.${arr.length - 1}`);
+    return renderEditor();
+  }
+  if (d.del)  { const a = get(d.del); a.splice(+d.i, 1); return renderEditor(); }
+  if (d.up)   { const a = get(d.up); const i = +d.i; if (i > 0) a.splice(i - 1, 0, a.splice(i, 1)[0]); return renderEditor(); }
+  if (d.dn)   { const a = get(d.dn); const i = +d.i; if (i < a.length - 1) a.splice(i + 1, 0, a.splice(i, 1)[0]); return renderEditor(); }
+  if (d.clear){ set(d.clear, ''); return renderEditor(); }
+  if (d.url)  {
+    const v = prompt('Paste a URL — an image, an MP4, or a YouTube/Vimeo link:', get(d.url) || '');
+    if (v != null) { set(d.url, v.trim()); renderEditor(); }
+    return;
+  }
+  if (d.media){ pickOne(d.media, btn); return; }
+  if (d.batch){ pickMany(d.batch, btn); return; }
+});
+
+$('secList').addEventListener('click', (e) => {
+  const d = e.target.dataset;
+  const secs = content.sections;
+  if (d.secup !== undefined) { const i = +d.secup; if (i > 0) { secs.splice(i - 1, 0, secs.splice(i, 1)[0]); sel = i - 1; } return renderAll(); }
+  if (d.secdn !== undefined) { const i = +d.secdn; if (i < secs.length - 1) { secs.splice(i + 1, 0, secs.splice(i, 1)[0]); sel = i + 1; } return renderAll(); }
+  if (d.secdel !== undefined) {
+    const i = +d.secdel;
+    if (!confirm(`Delete “${secs[i].label}”? This cannot be undone from here.`)) return;
+    secs.splice(i, 1); sel = Math.max(0, Math.min(sel, secs.length - 1));
+    return renderAll();
+  }
+  const row = e.target.closest('[data-sel]');
+  if (row) { sel = +row.dataset.sel; openCards.clear(); renderAll(); }
+});
+
+$('btnNewSec').onclick = () => {
+  const t = $('newType').value;
+  content.sections.push(BLANK[t]());
+  sel = content.sections.length - 1;
+  openCards.clear();
+  renderAll();
+};
+
+['siteTitle:title','siteMark:mark','siteMarkSub:markSub'].forEach(pair => {
+  const [id, key] = pair.split(':');
+  $(id).addEventListener('input', () => { content.site[key] = $(id).value; });
+});
+
+/* ═════════════════════════════════════════════════════════════
+   MEDIA
+   Photos are downscaled and re-encoded before they are queued,
+   so a 12 MP phone shot does not become a 12 MB commit.
+   ═════════════════════════════════════════════════════════ */
+const IMG_MAX_DIM = 1920, IMG_JPEG_Q = 0.82, VIDEO_MAX_MB = 25;
+let onePath = null, oneBtn = null, manyPath = null, manyBtn = null;
+
+function blobB64(blob){
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Could not read the file.'));
+    r.readAsDataURL(blob);
+  });
+}
+async function prepareMedia(f){
+  const safe = f.name.toLowerCase().replace(/[^a-z0-9._-]+/g, '-');
+  const isVideo = f.type.startsWith('video/') || /\.(mp4|webm|mov|m4v)$/i.test(f.name);
+  if (isVideo) {
+    if (f.size > VIDEO_MAX_MB * 1024 * 1024)
+      throw new Error(`This video is ${(f.size / 1048576).toFixed(0)} MB — too big to commit through the GitHub API. Put it on YouTube or Vimeo and paste the link with USE URL, or compress it under ${VIDEO_MAX_MB} MB.`);
+    if (/\.(mov|m4v)$/i.test(safe))
+      throw new Error('MOV does not play in every browser. Export as MP4 (H.264) and upload that.');
+    return { base64: await blobB64(f), mime: f.type || 'video/mp4', name: safe };
+  }
+  if (/\.(gif|svg)$/i.test(safe)) return { base64: await blobB64(f), mime: f.type, name: safe };
+
+  let bmp;
+  try { bmp = await createImageBitmap(f); }
+  catch {
+    /* some browsers can't createImageBitmap from a File — decode via <img> */
+    bmp = await new Promise((res, rej) => {
+      const url = URL.createObjectURL(f);
+      const im = new Image();
+      im.onload = () => { URL.revokeObjectURL(url); res(im); };
+      im.onerror = () => {
+        URL.revokeObjectURL(url);
+        const heic = /heic|heif/i.test(f.name + ' ' + f.type);
+        rej(new Error(heic
+          ? 'HEIC photo — this browser cannot read it, and nor can the live site. On iPhone, share it with "Most Compatible", or convert to JPEG first.'
+          : 'Could not decode this image. Convert it to JPEG or PNG and try again.'));
+      };
+      im.src = url;
+    });
+  }
+  const bw = bmp.naturalWidth || bmp.width, bh = bmp.naturalHeight || bmp.height;
+  const scale = Math.min(1, IMG_MAX_DIM / Math.max(bw, bh));
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(bw * scale); cv.height = Math.round(bh * scale);
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#f4ecdf';                     /* transparency → paper, not black */
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
+  if (bmp.close) bmp.close();
+  const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', IMG_JPEG_Q));
+  if (!blob) throw new Error('Image re-encode failed — convert it to JPEG manually and retry.');
+  return { base64: await blobB64(blob), mime: 'image/jpeg',
+           name: safe.replace(/\.(heic|heif|png|webp|jpe?g|tiff?|avif|bmp)$/i, '') + '.jpg' };
+}
+
+function pickOne(path, btn){ onePath = path; oneBtn = btn; $('mediaPicker').click(); }
+function pickMany(path, btn){ manyPath = path; manyBtn = btn; $('mediaPickerMulti').click(); }
+
+$('mediaPicker').onchange = async (e) => {
+  const f = e.target.files[0]; if (!f || !onePath) return;
+  const label = oneBtn.textContent; oneBtn.textContent = 'WORKING…';
+  try {
+    const { base64, mime, name } = await prepareMedia(f);
+    const path = 'assets/' + name;
+    pendingAssets[path] = { base64, mime };
+    set(onePath, path);
+    renderEditor();
+  } catch (err) {
+    oneBtn.textContent = label;
+    alert('✕ ' + err.message);
+  }
+  onePath = null; oneBtn = null; e.target.value = '';
+  renderPending();
+};
+$('mediaPickerMulti').onchange = async (e) => {
+  const files = [...(e.target.files || [])];
+  if (!files.length || !manyPath) return;
+  const label = manyBtn.textContent;
+  const arr = get(manyPath) || [];
+  const fails = [];
+  for (let i = 0; i < files.length; i++) {
+    manyBtn.textContent = `${i + 1}/${files.length}…`;
+    try {
+      const { base64, mime, name } = await prepareMedia(files[i]);
+      const path = 'assets/' + name;
+      pendingAssets[path] = { base64, mime };
+      arr.push({ src: path, caption: '' });
+    } catch (err) { fails.push(files[i].name + ' — ' + err.message); }
+  }
+  manyBtn.textContent = label;
+  set(manyPath, arr);
+  if (fails.length) alert(`SKIPPED ${fails.length} FILE(S)\n\n` + fails.join('\n\n'));
+  manyPath = null; manyBtn = null; e.target.value = '';
+  renderEditor(); renderPending();
+};
+
+function renderPending(){
+  const keys = Object.keys(pendingAssets);
+  $('pendingList').innerHTML = keys.length
+    ? `<b>${keys.length} file(s) waiting to be committed:</b><br>${keys.map(esc).join('<br>')}`
+    : '';
+}
+
+/* ═════════════════════════════════════════════════════════════
+   PUBLISH
+   content.json plus any queued media, committed straight to
+   the repo. The token is used for these requests and never
+   stored anywhere but this browser, and only if you ask.
+   ═════════════════════════════════════════════════════════ */
+function setStatus(msg, cls){
+  const el = $('status');
+  el.className = 'status' + (cls ? ' ' + cls : '');
+  el.textContent = msg;
+}
+async function ghPut(owner, repo, branch, token, path, base64, message){
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' };
+  let sha;
+  const got = await fetch(url + '?ref=' + branch, { headers });
+  if (got.ok) sha = (await got.json()).sha;
+  else if (got.status !== 404) {
+    /* files over 1 MB can't come back through the JSON API — find
+       the sha in the parent directory listing instead */
+    const dir = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
+    const ls = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${dir}?ref=${branch}`, { headers });
+    if (ls.ok) sha = ((await ls.json()).find(x => x.path === path) || {}).sha;
+  }
+  const put = await fetch(url, {
+    method: 'PUT', headers,
+    body: JSON.stringify({ message, content: base64, branch, ...(sha ? { sha } : {}) })
+  });
+  if (!put.ok) throw new Error(path + ': ' + ((await put.json()).message || put.status));
+}
+
+/* When a publish fails, ask GitHub who the token is and what it can
+   reach, so the box can say what is actually wrong instead of "Not Found". */
+async function diagnose(owner, repo, branch, token){
+  const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' };
+  const out = [];
+  try {
+    const u = await fetch('https://api.github.com/user', { headers });
+    if (u.status === 401) return ['⚠ TOKEN REJECTED — invalid or expired. Generate a fresh fine-grained token.'];
+    const user = await u.json();
+    out.push('Token belongs to: ' + user.login);
+    if (owner.toLowerCase() !== user.login.toLowerCase())
+      out.push(`⚠ OWNER says "${owner}" but the token is ${user.login}'s.`);
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
+    if (!r.ok) return out.concat([`⚠ ${owner}/${repo} NOT VISIBLE to this token — check the spelling, and that the token's repository access includes it.`]);
+    const info = await r.json();
+    out.push(`Repo reachable: ${info.full_name} (default branch: ${info.default_branch})`);
+    if (!(info.permissions || {}).push)
+      out.push('⚠ TOKEN IS READ-ONLY here. Edit it: Repository access → Only select repositories → this repo; Permissions → Contents → Read and write.');
+    else if (branch !== info.default_branch)
+      out.push(`⚠ BRANCH says "${branch}" — the repo default is "${info.default_branch}". Check that branch exists.`);
+  } catch (e) { out.push('Diagnostic error: ' + e.message); }
+  return out;
+}
+
+$('btnPublish').onclick = async () => {
+  if (!content) return;
+  const owner = $('ghOwner').value.trim(), repo = $('ghRepo').value.trim(),
+        branch = $('ghBranch').value.trim() || 'main', token = $('ghToken').value.trim();
+  if (!owner || !repo || !token) return setStatus('Fill in owner, repo, and token first.', 'err');
+
+  $('btnPublish').disabled = true;
+  try {
+    const assets = Object.entries(pendingAssets);
+    let n = 0;
+    for (const [path, { base64 }] of assets) {
+      setStatus(`Uploading media ${++n}/${assets.length}…\n${path}`);
+      await ghPut(owner, repo, branch, token, path, base64, 'Add media: ' + path.split('/').pop());
+    }
+    setStatus('Committing content.json…');
+    const json = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+    await ghPut(owner, repo, branch, token, 'content.json', json, 'Update site content');
+    pendingAssets = {}; renderPending();
+    setStatus('PUBLISHED. Live on Pages in about a minute.', 'ok');
+  } catch (err) {
+    setStatus('FAILED — ' + err.message + '\nChecking why…', 'err');
+    setStatus('FAILED — ' + err.message + '\n' + (await diagnose(owner, repo, branch, token)).join('\n'), 'err');
+  } finally {
+    $('btnPublish').disabled = false;
+  }
+};
+
+/* No-GitHub route: download content.json and any queued media,
+   drop them in the folder, commit by hand. */
+$('btnDownload').onclick = () => {
+  const save = (name, blob) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  };
+  save('content.json', new Blob([JSON.stringify(content, null, 2)], { type: 'application/json' }));
+  Object.entries(pendingAssets).forEach(([path, { base64, mime }], i) => {
+    setTimeout(() => {
+      const bin = atob(base64), buf = new Uint8Array(bin.length);
+      for (let j = 0; j < bin.length; j++) buf[j] = bin.charCodeAt(j);
+      save(path.split('/').pop(), new Blob([buf], { type: mime }));
+    }, 350 * (i + 1));
+  });
+  setStatus('Downloaded. Put the media in assets/ and commit both.', 'ok');
+};
+
+/* Publish settings, remembered only if asked. */
+['ghOwner','ghRepo','ghBranch','ghToken','ghRemember'].forEach(id => {
+  const saved = localStorage.getItem('shops.' + id);
+  if (saved != null) { if (id === 'ghRemember') $(id).checked = saved === 'true'; else $(id).value = saved; }
+  $(id).addEventListener('change', () => {
+    if (!$('ghRemember').checked) {
+      ['ghOwner','ghRepo','ghBranch','ghToken','ghRemember'].forEach(k => localStorage.removeItem('shops.' + k));
+      return;
+    }
+    localStorage.setItem('shops.' + id, id === 'ghRemember' ? $(id).checked : $(id).value);
+  });
+});
+
+/* ── loading ──────────────────────────────────────────────── */
+function adopt(data){
+  content = data;
+  content.site = content.site || {};
+  content.sections = content.sections || [];
+  $('siteTitle').value  = content.site.title || '';
+  $('siteMark').value   = content.site.mark || '';
+  $('siteMarkSub').value = content.site.markSub || '';
+  sel = 0; openCards.clear();
+  renderAll();
+  setStatus(`Loaded — ${content.sections.length} sections.`, 'ok');
+}
+$('btnLoad').onclick = () => $('jsonPicker').click();
+$('jsonPicker').onchange = (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try { adopt(JSON.parse(r.result)); }
+    catch (err) { setStatus('That file is not valid JSON — ' + err.message, 'err'); }
+  };
+  r.readAsText(f);
+  e.target.value = '';
+};
+
+(async () => {
+  try {
+    const res = await fetch('content.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    adopt(await res.json());
+  } catch (err) {
+    setStatus('Could not load content.json (' + err.message + ').\n\n' +
+      'Serve this folder over HTTP — python3 -m http.server — or use LOAD JSON FILE.', 'err');
+  }
+})();
+</script>
+</body>
+</html>
