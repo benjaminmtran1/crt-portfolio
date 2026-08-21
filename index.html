@@ -239,6 +239,118 @@ html, body {
 .osd-ch.blink { animation: osdblink 0.9s steps(2) 3; }
 @keyframes osdblink { 50% { opacity: 0; } }
 
+/* ---------- CH 06 — INTERVIEW SEGMENT ----------
+   Portrait with a broadcast lower third, personnel details in the same
+   .info-slate the pop-ups use, and the bio as a timecoded transcript.
+   Fixed to the tube; a segment is composed, not scrolled. */
+.channel.ch-profile { position: absolute; inset: 0; padding: 0; }
+.profile-card { position: absolute; inset: 0; overflow: hidden; }
+.profile-inner {
+  position: absolute;
+  left: 0; right: 0;
+  top: clamp(56px, 9vh, 100px);
+  bottom: calc(var(--dial-h, 94px) + clamp(14px, 2.5vh, 32px));
+  padding: 0 clamp(24px, 5vw, 84px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.profile-head .ch-title { margin: 0; }
+.profile-head .ch-sub { margin: clamp(6px, 1.2vh, 12px) 0 clamp(18px, 3vh, 34px); }
+.profile-body {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(24px, 4vw, 60px);
+  min-height: 0;
+}
+.profile-left { flex: 0 1 clamp(260px, 38%, 460px); min-width: 0; }
+
+/* the portrait, and the name plate television puts on people */
+.portrait { position: relative; }
+/* 4:3 echoes the tube, and a taller frame leaves the lower third somewhere
+   to sit — on 16:9 it lands across the subject's mouth */
+.portrait .tv-frame.wide { aspect-ratio: 4 / 3; }
+.lower-third {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: clamp(10px, 2vh, 20px);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(6px, 1.2vh, 10px) clamp(10px, 1.6vw, 18px);
+  border-left: 4px solid var(--ink);
+  background: linear-gradient(to right,
+    rgba(var(--deep-rgb),0.88) 0%, rgba(var(--deep-rgb),0.8) 62%, rgba(var(--deep-rgb),0) 100%);
+  pointer-events: none;
+}
+.lt-name {
+  font-family: var(--display-font);
+  font-size: clamp(15px, 1.9vw, 25px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--burn);
+  line-height: 1.05;
+}
+.lt-role {
+  font-family: var(--osd-font);
+  font-size: clamp(11px, 1.3vw, 16px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-top: 3px;
+}
+.profile-slate { margin: clamp(12px, 2vh, 20px) 0 0; border-bottom: 0; padding-bottom: 0; }
+
+/* the bio, read back as an interview transcript */
+.transcript {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.transcript::-webkit-scrollbar { display: none; }
+.tr-row {
+  display: grid;
+  grid-template-columns: clamp(66px, 8vw, 92px) 1fr;
+  gap: clamp(10px, 1.6vw, 20px);
+  padding: clamp(8px, 1.4vh, 14px) 0;
+}
+.tr-row + .tr-row { border-top: 1px solid rgba(var(--phosphor-rgb),0.12); }
+.tr-tc {
+  font-family: var(--osd-font);
+  font-size: clamp(13px, 1.5vw, 17px);
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  opacity: 0.85;
+}
+.tr-text {
+  font-size: clamp(12px, 1.4vw, 15px);
+  line-height: 1.8;
+  color: var(--phosphor);
+  max-width: 62ch;
+}
+
+/* Narrow screens genuinely cannot hold the segment, and a fixed card would
+   hide the rest of the transcript behind a scrollbar-less inner scroll. Drop
+   back to normal page flow so it scrolls the way every other channel does. */
+@media (max-width: 860px) {
+  .channel.ch-profile {
+    position: static;
+    padding-bottom: calc(var(--dial-h, 94px) + 28px);
+  }
+  .profile-card { position: static; overflow: visible; }
+  .profile-card .hero-safe { display: none; }
+  .profile-inner {
+    position: static;
+    padding: 0;
+    display: block;
+  }
+  .profile-body { flex-direction: column; gap: clamp(16px, 2.6vh, 24px); }
+  .profile-left { flex: none; width: 100%; }
+  .transcript { max-height: none; overflow: visible; }
+}
+
 /* ---------- CH 07 — CONTINUITY SLATE ----------
    A closedown slate was an engineering card: station ident, then the
    details in ruled label/value rows. That form is more legible than free
@@ -1559,6 +1671,8 @@ const esc = s => String(s ?? '')
   .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
   .replace(/"/g,'&quot;');
 
+function stripBr(s) { return String(s || '').replace(/<br\s*\/?>/gi, ' ').trim(); }
+
 /* heroName may contain <br>; allow only that tag */
 const escBr = s => esc(s).replace(/&lt;br\s*\/?&gt;/gi, '<br>');
 
@@ -1818,6 +1932,59 @@ const RENDERERS = {
           <div class="slate-box">${rows}</div>
           ${tx ? `<div class="tx-block">${tx}</div>` : ''}
           ${ch.note ? `<p class="smpte-note slate-note">${esc(ch.note)}</p>` : ''}
+        </div>
+      </div>`;
+  },
+  /* CH 06 — the interview segment. Every other channel now has a broadcast
+     form; this is the one the site was missing. Portrait carries a lower
+     third, the personnel details reuse the pop-up's .info-slate, and the bio
+     runs as a timecoded transcript beside it. */
+  profile(ch, site) {
+    const paras = (ch.paragraphs || []).filter(t => t && t.trim());
+    /* Timecodes are derived from cumulative reading time rather than
+       authored, so they stay plausible as the copy is edited and there is
+       one less field to keep in step. */
+    let secs = 12;
+    const transcript = paras.map(t => {
+      const tc = secs;
+      secs += Math.max(8, Math.round(t.trim().split(/\s+/).length / 2.4));
+      const hh = String(Math.floor(tc / 3600)).padStart(2, '0');
+      const mm = String(Math.floor(tc / 60) % 60).padStart(2, '0');
+      const ss = String(tc % 60).padStart(2, '0');
+      return `<div class="tr-row">
+        <span class="tr-tc">${hh}:${mm}:${ss}</span>
+        <p class="tr-text">${esc(t)}</p>
+      </div>`;
+    }).join('');
+
+    const slate = (ch.slate || []).filter(s => s && (s.k || s.v));
+    const name = ch.name || stripBr(site.heroName);
+    return `
+      <div class="profile-card">
+        <div class="hero-safe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="profile-inner">
+          <header class="profile-head">
+            <h2 class="ch-title">${esc(ch.title)}</h2>
+            <p class="ch-sub">${esc(ch.sub || '')}</p>
+          </header>
+          <div class="profile-body">
+            <div class="profile-left">
+              <div class="portrait">
+                ${mediaFrame(ch.portrait && ch.portrait.src, '', { wide: true, alt: name })}
+                ${(name || ch.role) ? `
+                <div class="lower-third">
+                  ${name ? `<span class="lt-name">${esc(name)}</span>` : ''}
+                  ${ch.role ? `<span class="lt-role">${esc(ch.role)}</span>` : ''}
+                </div>` : ''}
+              </div>
+              ${slate.length ? `
+              <div class="info-slate profile-slate">
+                ${slate.map(s => `
+                  <div class="info-row"><span class="info-k">${esc(s.k)}</span><span class="info-v">${esc(s.v)}</span></div>`).join('')}
+              </div>` : ''}
+            </div>
+            <div class="transcript">${transcript}</div>
+          </div>
         </div>
       </div>`;
   },

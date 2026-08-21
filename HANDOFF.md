@@ -97,6 +97,9 @@ channels: [
                     steps:[{ timecode, text, image, caption }] }
   { type:"contact", label, title, sub, rows:[{ k, label, href }],
                     tx:[{ k, v }], note }
+  { type:"profile", label, title, sub, name, role,
+                    portrait:{ src, caption }, slate:[{ k, v }],
+                    paragraphs:[] }
   { type:"custom",  label, title, sub,
                     blocks:[{ kind:text|image|video, ... }] }
 ]
@@ -184,6 +187,30 @@ riding above the dial. Stations watermark *programming*, not idents or title
 cards, so it shows on the guide channels only —
 `.crt:has(.ch-guide.on) .bug` — and stays off on the hero, ABOUT, CONTACT
 and the off-air test card.
+
+## CH 06 — the interview segment
+
+Every other channel has a broadcast form — title card, listings page,
+continuity slate, test card — and ABOUT had none, which is why it read as a
+webpage that wandered into a television. It is now the one form the site was
+missing: the interview segment. Fixed to the tube like CH 01 and CH 07.
+
+- **Lower third.** `name` and `role` on a bar across the bottom of the
+  portrait, ink rule down its left edge, fading to transparent at the right.
+  `name` falls back to `site.heroName` with any `<br>` stripped. The portrait
+  frame is forced to 4:3 (`.portrait .tv-frame.wide`) — it echoes the tube,
+  and on 16:9 the plate lands across the subject's mouth.
+- **Personnel slate.** `slate: [{ k, v }]` rendered through the same
+  `.info-slate` the pop-ups use. Three surfaces now share that component:
+  pop-up metadata, CH 07 contact, CH 06 profile.
+- **Timecoded transcript.** `paragraphs` read back as an interview
+  transcript. Timecodes are **derived from cumulative reading time**, not
+  authored, so they stay plausible as the copy changes and there is no extra
+  field to keep in step.
+
+Below 860px the segment drops back to normal page flow. A fixed card there
+would bury the rest of the transcript behind an inner scroll with no
+scrollbar — the content genuinely does not fit a phone.
 
 ## Programme information (pop-up)
 

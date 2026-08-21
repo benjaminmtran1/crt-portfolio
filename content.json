@@ -682,27 +682,33 @@
     {
       "id": "about",
       "label": "ABOUT",
-      "type": "custom",
+      "type": "profile",
       "title": "STATION PROFILE",
       "sub": "THE GUY BEHIND THE BUILDS",
-      "blocks": [
+      "name": "BENJAMIN TRAN",
+      "role": "CONSTRUCTION COORDINATOR",
+      "portrait": {
+        "src": "assets/img_2997.jpg",
+        "caption": ""
+      },
+      "slate": [
         {
-          "kind": "image",
-          "src": "assets/img_2997.jpg",
-          "caption": ""
+          "k": "BASED",
+          "v": "TORONTO, ON"
         },
         {
-          "kind": "text",
-          "text": "I'm Ben — carpenter, designer, and general solver of impossible requests for film and television construction. When a script calls for a place that doesn't exist, my job is to make it exist by call time."
+          "k": "TRADE",
+          "v": "CARPENTRY · SCENIC"
         },
         {
-          "kind": "text",
-          "text": "With over a decade of experience as a carpenter, in the real world and on set. Most days you'll find me somewhere between the drafting table and the shop floor."
-        },
-        {
-          "kind": "text",
-          "text": "Off the clock it's balcony geraniums, a cat who supervises all my sketching, and a glass of something cold while the sun goes down. The tools get put away — the habit of building things doesn't."
+          "k": "ACTIVE",
+          "v": "2013 —"
         }
+      ],
+      "paragraphs": [
+        "I'm Ben — carpenter, designer, and general solver of impossible requests for film and television construction. When a script calls for a place that doesn't exist, my job is to make it exist by call time.",
+        "With over a decade of experience as a carpenter, in the real world and on set. Most days you'll find me somewhere between the drafting table and the shop floor.",
+        "Off the clock it's balcony geraniums, a cat who supervises all my sketching, and a glass of something cold while the sun goes down. The tools get put away — the habit of building things doesn't."
       ]
     },
     {

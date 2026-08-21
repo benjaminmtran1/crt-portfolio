@@ -248,6 +248,8 @@ const BLANK = {
   guide:   { type:'guide', label:'BUILDS', title:'', sub:'', reel:{kind:'none',src:'',caption:'MAIN FEATURE — REEL'}, projects:[] },
   process: { type:'process', label:'PROCESS', title:'', sub:'', steps:[] },
   contact: { type:'contact', label:'CONTACT', title:'', sub:'', rows:[], tx:[], note:'' },
+  profile: { type:'profile', label:'ABOUT', title:'', sub:'', name:'', role:'',
+             portrait:{src:'',caption:''}, slate:[], paragraphs:[''] },
   custom:  { type:'custom', label:'NEW', title:'', sub:'', blocks:[] }
 };
 
@@ -315,7 +317,7 @@ function swap(a, b) {
   renderChannelList(); renderEditor();
 }
 $('btnAddChannel').onclick = () => {
-  const type = prompt('Channel type — one of: hero, guide, process, contact, custom\n(guide = project listings, custom = free-form text/image/video blocks)', 'custom');
+  const type = prompt('Channel type — one of: hero, guide, process, profile, contact, custom\n(guide = project listings, profile = interview segment, custom = free-form text/image/video blocks)', 'custom');
   if (!type || !BLANK[type]) return;
   const ch = JSON.parse(JSON.stringify(BLANK[type]));
   ch.id = 'ch-' + Date.now().toString(36);
@@ -636,6 +638,32 @@ const EDITORS = {
       + `<button class="act small" id="addTx">+ TRANSMITTER ROW</button>`
       + field('Sign-off line', 'note', ch.note);
   },
+  profile(ch) {
+    const por = ch.portrait || (ch.portrait = { src:'', caption:'' });
+    return field('Channel label', 'label', ch.label)
+      + field('Heading', 'title', ch.title)
+      + field('Subheading', 'sub', ch.sub)
+      + `<div class="card-head" style="margin-top:14px"><span class="grow">LOWER THIRD</span></div>`
+      + field('Name', 'name', ch.name)
+      + field('Role', 'role', ch.role)
+      + `<label class="f">Portrait</label>`
+      + mediaWidget(por.src, 'portrait', { wide:true })
+      + `<div class="card-head" style="margin-top:14px"><span class="grow">PERSONNEL SLATE</span></div>`
+      + (ch.slate || []).map((s, i) => `
+        <div class="card">
+          <div class="card-head"><span class="grow">${esc(s.k || 'ROW')}</span>
+            <button data-slate-del="${i}">✕ remove</button></div>
+          ${field('Label (BASED / TRADE / ACTIVE…)', `sl.${i}.k`, s.k)}
+          ${field('Value', `sl.${i}.v`, s.v)}
+        </div>`).join('')
+      + `<button class="act small" id="addSlate">+ SLATE ROW</button>`
+      + `<label class="f">Transcript paragraphs (timecodes are generated)</label>`
+      + (ch.paragraphs || []).map((p, i) => `
+          <div class="card"><div class="card-head"><span class="grow">¶ ${i+1}</span>
+            <button data-del-para="${i}">✕ remove</button></div>
+            <textarea data-para="${i}">${esc(p)}</textarea></div>`).join('')
+      + `<button class="act small" id="addPara">+ PARAGRAPH</button>`;
+  },
   custom(ch) {
     return field('Channel label', 'label', ch.label)
       + field('Heading', 'title', ch.title)
@@ -678,6 +706,7 @@ function setByPath(obj, path, val) {
     else if (key === 'r') t = t.rows[Number(parts[++i])];
     else if (key === 't') t = t.tx[Number(parts[++i])];
     else if (key === 'meta') { if (!t.meta) t.meta = []; t = t.meta[Number(parts[++i])]; }
+    else if (key === 'sl') { if (!t.slate) t.slate = []; t = t.slate[Number(parts[++i])]; }
     else if (key === 'b') t = t.blocks[Number(parts[++i])];
     else if (key === 'c') t = t.carousel[Number(parts[++i])];
     else { if (!t[key]) t[key] = {}; t = t[key]; }
@@ -746,6 +775,7 @@ function wireEditor(ch) {
     }
     if (d.rowDel !== undefined) { ch.rows.splice(Number(d.rowDel), 1); renderEditor(); return; }
     if (d.txDel !== undefined) { (ch.tx || []).splice(Number(d.txDel), 1); renderEditor(); return; }
+    if (d.slateDel !== undefined) { (ch.slate || []).splice(Number(d.slateDel), 1); renderEditor(); return; }
     if (d.metaAdd !== undefined) {
       const p = ch.projects[Number(d.metaAdd)];
       (p.meta = p.meta || []).push({ k:'', v:'' }); renderEditor(); return;
@@ -788,6 +818,7 @@ function wireEditor(ch) {
     if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); return; }
     if (e.target.id === 'addRow') { ch.rows.push({ k:'', label:'', href:'' }); renderEditor(); return; }
     if (e.target.id === 'addTx') { (ch.tx = ch.tx || []).push({ k:'', v:'' }); renderEditor(); return; }
+    if (e.target.id === 'addSlate') { (ch.slate = ch.slate || []).push({ k:'', v:'' }); renderEditor(); return; }
     if (e.target.id === 'addPara') { ch.paragraphs.push(''); renderEditor(); return; }
     if (e.target.id === 'addSlide') {
       if (!ch.carousel) ch.carousel = [];
@@ -810,6 +841,7 @@ function wireEditor(ch) {
 
 function applyMediaPath(ch, target, path) {
   if (target === 'reel') { ch.reel.src = path; return; }
+  if (target === 'portrait') { (ch.portrait = ch.portrait || {}).src = path; return; }
   const parts = target.split(':');
   const kind = parts[0], i = Number(parts[1]);
   if (kind === 'proj') ch.projects[i].image = path;
