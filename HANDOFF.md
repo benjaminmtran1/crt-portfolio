@@ -190,6 +190,16 @@ in the ink of the channel being tuned to. Surfing on before it clears
 cancels the pending timer, so idents never stack. Hidden entirely under
 `prefers-reduced-motion`.
 
+**The dial over content.** The buttons carry a translucent dark fill
+(`rgba(--deep-rgb, 0.84)` plus a backdrop blur) rather than being
+transparent — a TV OSD is a panel, and a transparent one let scrolling
+stills read straight through the labels. `.dial-shade` ramps to 0.86 by 62%
+of its height so it is already dark *where the buttons sit*; at its old 55%
+stop the shade was still half-transparent exactly there. The top `.osd`
+labels carry a dark halo in their text-shadow for the same reason — their
+shadow used to be pure glow with nothing dark in it, so the channel label
+and number washed out over a bright still.
+
 **The bug.** `.bug` is the translucent BEN·TV watermark in the bottom-right,
 riding above the dial. Stations watermark *programming*, not idents or title
 cards, so it shows on the guide channels only —
