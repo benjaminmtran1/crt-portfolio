@@ -103,6 +103,14 @@ channels: [
 Channel numbers (CH 01…) come from array order. All text is HTML-escaped at
 render time except `heroName`'s `<br>`.
 
+Guide channels lay their listings out in **two columns above 1000px**, like a
+printed guide page — roughly twice the programmes visible before scrolling,
+and the dead half of a wide tube put to work. Grid rows align across both
+columns so the hairlines line up the way they would in print; a row whose
+title wraps makes both cells taller. Below 1000px it returns to one column.
+`desc` and `tags` only render when set, so projects carrying just a role
+don't leave empty rows behind.
+
 ## Design tokens
 
 The palette comes off 60s–80s film title cards: one saturated ink printed
@@ -138,6 +146,17 @@ hardcoding it.
 `--grade` holds the film grade applied to every image, video and iframe —
 one definition, five call sites (base, hover, touch-bleed, retune, off-air).
 
+**The channel colour pass.** On top of `--grade`, `.tv-frame::after` layers a
+flat `--ink` veil under its vignette, so every picture on a channel is tinted
+toward that channel's ink and its blacks lift. Faded dye goes milky and
+coloured in the shadows while the highlights hold, which is why a flat veil
+reads as age rather than as a filter. It rides the existing pseudo-element,
+so it reaches every `.tv-frame` with no markup changes — hero window, guide
+thumbnails, pop-up galleries, reels. Flipping channels changes the film
+stock, not just the accent colour. Tune the depth with the veil's alpha
+(currently `0.13`); note that butter (CH 02) and marigold (CH 05) are the
+closest pair in the ink cycle, so those two read most alike.
+
 Fonts: **VT323** (OSD chrome — channel numbers, dial, captions),
 **Bowlby One SC** via `--display-font` (headings and the hero title — the fat
 rounded grotesque the title cards use), **IBM Plex Mono** (body copy and the
@@ -146,6 +165,22 @@ tracked credit line above the hero title).
 Swap the display face by changing `--display-font` and the `family=` list in
 the Google Fonts `<link>`; the hero title re-fits itself to whatever face
 loads, so no sizes need touching.
+
+## Station identity
+
+**The ident.** Tuning hands off from the static burst to a full-screen
+continuity card — BEN·TV over a rule, then `NOW TUNING` and the channel
+you have landed on — held 700ms, then faded. `showIdent()` runs inside
+`tune()`'s burst callback *after* `paintInk`, so the card is already painted
+in the ink of the channel being tuned to. Surfing on before it clears
+cancels the pending timer, so idents never stack. Hidden entirely under
+`prefers-reduced-motion`.
+
+**The bug.** `.bug` is the translucent BEN·TV watermark in the bottom-right,
+riding above the dial. Stations watermark *programming*, not idents or title
+cards, so it shows on the guide channels only —
+`.crt:has(.ch-guide.on) .bug` — and stays off on the hero, ABOUT, CONTACT
+and the off-air test card.
 
 ## CRT effect layers (index.html)
 

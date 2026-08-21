@@ -211,6 +211,87 @@ html, body {
 .osd-ch.blink { animation: osdblink 0.9s steps(2) 3; }
 @keyframes osdblink { 50% { opacity: 0; } }
 
+/* ---------- STATION IDENT + BUG ----------
+   Continuity: the static burst hands off to an ident card that names where
+   you have landed, then clears to the programme. Painted in the ink of the
+   channel being tuned to, since paintInk runs before it shows. */
+.ident {
+  position: absolute; inset: 0;
+  z-index: 17;                    /* over the dial and OSD, under the pop-up */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: var(--tube);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.ident.on { opacity: 1; transition: none; }   /* snap in, fade out */
+/* the ident is a broadcast image too, so it keeps the tube's line structure */
+.ident::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px, transparent 2px,
+    rgba(0,0,0,0.26) 3px, rgba(0,0,0,0.26) 4px);
+}
+.ident-mark {
+  font-family: var(--display-font);
+  font-size: clamp(38px, 7vw, 92px);
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  text-shadow:
+    0.06em 0.06em 0 color-mix(in srgb, var(--ink) 30%, #000),
+    0 0 0.6em rgba(var(--ink-rgb), 0.4);
+}
+.ident-rule {
+  width: min(38%, 280px);
+  height: 1px;
+  margin: clamp(14px, 2.4vh, 26px) 0;
+  background: linear-gradient(to right,
+    transparent, rgba(var(--ink-rgb),0.75) 15%,
+    rgba(var(--ink-rgb),0.75) 85%, transparent);
+}
+.ident-line {
+  font-family: var(--body-font);
+  font-size: clamp(9px, 1vw, 12px);
+  letter-spacing: 0.44em;
+  text-indent: 0.44em;
+  color: var(--phosphor-dim);
+  margin-bottom: clamp(8px, 1.4vh, 14px);
+}
+.ident-ch {
+  font-family: var(--osd-font);
+  font-size: clamp(18px, 2.4vw, 30px);
+  letter-spacing: 0.16em;
+  color: var(--burn);
+}
+
+/* The station bug: stations watermark programming, not idents or title
+   cards, so it rides the guide channels only. */
+.bug {
+  position: absolute;
+  right: clamp(20px, 5vw, 56px);
+  bottom: calc(var(--dial-h, 94px) + 16px);
+  z-index: 15;
+  font-family: var(--osd-font);
+  font-size: clamp(13px, 1.6vw, 18px);
+  letter-spacing: 0.14em;
+  color: var(--burn);
+  text-shadow: 0 0 8px rgba(0,0,0,0.95);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.crt:has(.ch-guide.on) .bug { opacity: 0.34; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ident { display: none; }
+}
+
 /* Scrolling content dissolves into the bottom of the tube rather than
    sliding under the dial. The hero channel paints its own dip, so it
    opts out. */
@@ -536,7 +617,12 @@ h2.ch-title {
     rgba(0,0,0,0.28) 3px, rgba(0,0,0,0.28) 4px
   );
 }
-/* per-media vignette + curvature */
+/* per-media vignette + curvature, plus the channel's colour pass.
+   The flat ink layer under the vignette tints the picture toward whatever
+   ink is on air and lifts its blacks — faded dye goes milky and coloured in
+   the shadows while the highlights hold, so a flat veil reads as age rather
+   than as a filter. Every .tv-frame on the site picks it up: hero window,
+   guide thumbnails, pop-up galleries, reels. */
 .tv-frame::after {
   content: "";
   position: absolute; inset: 0;
@@ -546,7 +632,8 @@ h2.ch-title {
     radial-gradient(ellipse at center,
       transparent 58%,
       rgba(0,0,0,0.3) 85%,
-      rgba(0,0,0,0.65) 100%);
+      rgba(0,0,0,0.65) 100%),
+    linear-gradient(rgba(var(--ink-rgb),0.13), rgba(var(--ink-rgb),0.13));
 }
 /* tracking glitch on hover */
 @keyframes tracking {
@@ -752,6 +839,29 @@ h2.ch-title {
   .guide-row.has-media {
     grid-template-columns: clamp(70px, 10vw, 110px) clamp(140px, 20vw, 220px) 1fr;
   }
+}
+
+/* Wide tubes run the listings in two columns, like a printed guide page —
+   roughly twice the programmes visible before scrolling, and the dead half
+   of the screen put to work. Grid rows align across both columns, so the
+   hairlines line up the way they would on a printed page. */
+@media (min-width: 1000px) {
+  .guide {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(30px, 4vw, 64px);
+  }
+  .guide-row.has-media {
+    grid-template-columns: clamp(46px, 4.2vw, 62px) clamp(112px, 11vw, 152px) 1fr;
+    gap: clamp(10px, 1.2vw, 18px);
+    padding: clamp(12px, 1.8vh, 20px) 0;
+    align-content: start;
+  }
+  .guide-time { font-size: clamp(15px, 1.35vw, 19px); }
+  .guide-title { font-size: clamp(16px, 1.5vw, 21px); }
+  .guide-desc { font-size: clamp(11px, 1vw, 13px); line-height: 1.6; }
+  .guide-tags { margin-top: 5px; }
+  .guide-more { font-size: clamp(11px, 1.1vw, 14px); margin-top: 4px; }
 }
 
 /* reel section */
@@ -1077,6 +1187,13 @@ h2.ch-title {
     <div class="vignette" aria-hidden="true"></div>
     <div class="flicker" aria-hidden="true"></div>
 
+    <div class="bug" aria-hidden="true">BEN·TV</div>
+    <div class="ident" id="ident" aria-hidden="true">
+      <div class="ident-mark">BEN·TV</div>
+      <div class="ident-rule"></div>
+      <div class="ident-line">NOW TUNING</div>
+      <div class="ident-ch" id="identCh"></div>
+    </div>
     <div class="dial-shade" aria-hidden="true"></div>
     <nav class="dial" id="dial" aria-label="Channels"></nav>
   </div>
@@ -1487,8 +1604,8 @@ const RENDERERS = {
         ${mediaFrame(p.image, p.caption, { thumb: true, alt: p.title })}
         <div>
           <div class="guide-title">${esc(p.title)}</div>
-          <div class="guide-desc">${esc(p.desc)}</div>
-          <div class="guide-tags">${esc(p.tags)}</div>
+          ${p.desc ? `<div class="guide-desc">${esc(p.desc)}</div>` : ''}
+          ${p.tags ? `<div class="guide-tags">${esc(p.tags)}</div>` : ''}
           ${openable ? '<div class="guide-more">⏵ PRESS FOR PROGRAM DETAIL</div>' : ''}
         </div>
       </div>`;
@@ -1750,6 +1867,21 @@ function wireTuning(count) {
     })(performance.now());
   }
 
+  /* Hold the ident long enough to actually read, and cancel a pending one
+     when the viewer surfs on before it clears. */
+  let identT;
+  function showIdent(ch, label) {
+    const el = document.getElementById('ident');
+    if (!el || reduced) return;
+    document.getElementById('identCh').textContent =
+      ('CH ' + String(ch).padStart(2, '0') + '  ' + (label || '')).trim();
+    el.classList.remove('on');
+    void el.offsetWidth;
+    el.classList.add('on');
+    clearTimeout(identT);
+    identT = setTimeout(() => el.classList.remove('on'), 700);
+  }
+
   function tune(ch) {
     ch = Number(ch);
     const target = document.getElementById('ch' + ch);
@@ -1768,6 +1900,7 @@ function wireTuning(count) {
       osdCh.classList.remove('blink');
       void osdCh.offsetWidth;
       osdCh.classList.add('blink');
+      showIdent(ch, target.dataset.label);
       currentCh = ch;
     });
   }
