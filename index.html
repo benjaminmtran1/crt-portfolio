@@ -239,6 +239,106 @@ html, body {
 .osd-ch.blink { animation: osdblink 0.9s steps(2) 3; }
 @keyframes osdblink { 50% { opacity: 0; } }
 
+/* ---------- CH 07 — CONTINUITY SLATE ----------
+   A closedown slate was an engineering card: station ident, then the
+   details in ruled label/value rows. That form is more legible than free
+   text, so the period reference and the one hard requirement here — the
+   address and number have to be unmissable — pull the same way.
+   Fixed to the tube like CH 01; a slate never scrolls. */
+.channel.ch-contact { position: absolute; inset: 0; padding: 0; }
+.slate-card { position: absolute; inset: 0; overflow: hidden; }
+.slate-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 50% at 50% 40%,
+    rgba(var(--ink-rgb),0.07), transparent 72%);
+}
+.slate-inner {
+  position: absolute;
+  left: 0; right: 0;
+  top: clamp(64px, 11vh, 120px);
+  bottom: calc(var(--dial-h, 94px) + clamp(14px, 2.5vh, 32px));
+  padding: 0 clamp(24px, 6vw, 110px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.slate-title { margin: 0; }
+.slate-sub { margin: clamp(8px, 1.4vh, 14px) 0 clamp(22px, 4vh, 44px); }
+
+/* the details themselves */
+.slate-box {
+  width: min(100%, 620px);
+  border: 1px solid rgba(var(--ink-rgb),0.5);
+  border-radius: 4px;
+  background: rgba(0,0,0,0.3);
+  text-align: left;
+}
+.slate-row {
+  display: grid;
+  grid-template-columns: clamp(66px, 8vw, 96px) 1fr;
+  gap: clamp(10px, 2vw, 22px);
+  align-items: baseline;
+  padding: clamp(13px, 2.2vh, 20px) clamp(14px, 2.4vw, 26px);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.slate-row + .slate-row { border-top: 1px solid rgba(var(--ink-rgb),0.3); }
+.slate-row:hover { background: rgba(var(--ink-rgb),0.09); }
+.slate-row:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.slate-k {
+  font-family: var(--osd-font);
+  font-size: clamp(13px, 1.5vw, 17px);
+  letter-spacing: 0.12em;
+  color: var(--phosphor-dim);
+}
+/* bone, not ink: a saturated ink on near-black is a far weaker contrast, and
+   this is the one thing on the site that has to be readable at a glance. The
+   underline carries the "this is a link" signal instead of the colour. */
+.slate-v {
+  font-family: var(--body-font);
+  font-size: clamp(15px, 2vw, 23px);
+  color: var(--burn);
+  overflow-wrap: anywhere;
+  justify-self: start;            /* so the rule hugs the text, not the cell */
+  border-bottom: 1px solid rgba(var(--ink-rgb),0.55);
+  padding-bottom: 2px;
+  transition: border-color 0.15s;
+}
+.slate-row:hover .slate-v { border-bottom-color: var(--ink); }
+
+/* transmitter data — flavour, kept well clear of the details above */
+.tx-block {
+  margin-top: clamp(20px, 3.4vh, 36px);
+  display: grid;
+  gap: 3px;
+  font-family: var(--osd-font);
+  font-size: clamp(12px, 1.35vw, 16px);
+  letter-spacing: 0.1em;
+  text-align: left;
+}
+.tx-row {
+  display: grid;
+  grid-template-columns: clamp(78px, 9vw, 112px) 1fr;
+  gap: clamp(8px, 1.4vw, 16px);
+}
+.tx-k { color: var(--phosphor-dim); }
+.tx-v { color: var(--ghost); }
+.slate-inner .slate-note { margin-top: clamp(20px, 3.4vh, 38px); }
+
+@media (max-height: 640px) {
+  .slate-inner { top: 54px; }
+  .slate-inner .slate-note { margin-top: 16px; }
+  .slate-sub { margin-bottom: 16px; }
+  .tx-block { display: none; }      /* the details keep the room */
+}
+@media (max-width: 640px) {
+  .slate-inner { padding: 0 22px; }
+}
+
 /* ---------- STATION IDENT + BUG ----------
    Continuity: the static burst hands off to an ident card that names where
    you have landed, then clears to the programme. Painted in the ink of the
@@ -1405,6 +1505,11 @@ const DEFAULT_CONTENT = {
           "href": "#"
         }
       ],
+      "tx": [
+        { "k": "SERVICE", "v": "BEN\u00b7TV-1" },
+        { "k": "LOCATION", "v": "TORONTO, ON" },
+        { "k": "STATUS", "v": "ON AIR" }
+      ],
       "note": "■ BROADCAST ENDS · TRANSMISSION RESUMES ON YOUR SCHEDULE ■"
     }
   ]
@@ -1655,13 +1760,26 @@ const RENDERERS = {
       <div class="vtr">${steps}</div>`;
   },
   contact(ch) {
+    /* the whole row is the target, not just the text — a phone number is a
+       thing people tap, often in a hurry */
     const rows = (ch.rows || []).map(r => `
-      <div><span class="k">${esc(r.k)}&nbsp;&nbsp;</span><a href="${esc(r.href)}">${esc(r.label)}</a></div>`).join('');
+      <a class="slate-row" href="${esc(r.href)}">
+        <span class="slate-k">${esc(r.k)}</span>
+        <span class="slate-v">${esc(r.label)}</span>
+      </a>`).join('');
+    const tx = (ch.tx || []).filter(t => t && (t.k || t.v)).map(t => `
+      <div class="tx-row"><span class="tx-k">${esc(t.k)}</span><span class="tx-v">${esc(t.v)}</span></div>`).join('');
     return `
-      <h2 class="ch-title">${esc(ch.title)}</h2>
-      <p class="ch-sub">${esc(ch.sub)}</p>
-      <div class="contact-card">${rows}</div>
-      <p class="smpte-note">${esc(ch.note)}</p>`;
+      <div class="slate-card">
+        <div class="hero-safe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="slate-inner">
+          <h2 class="ch-title slate-title">${esc(ch.title)}</h2>
+          <p class="ch-sub slate-sub">${esc(ch.sub)}</p>
+          <div class="slate-box">${rows}</div>
+          ${tx ? `<div class="tx-block">${tx}</div>` : ''}
+          ${ch.note ? `<p class="smpte-note slate-note">${esc(ch.note)}</p>` : ''}
+        </div>
+      </div>`;
   },
   custom(ch) {
     const blocks = (ch.blocks || []).map(b => {

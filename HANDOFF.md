@@ -94,7 +94,8 @@ channels: [
                                 writeup, gallery:[{ src, caption }] }] }
   { type:"process", label, title, sub,
                     steps:[{ timecode, text, image, caption }] }
-  { type:"contact", label, title, sub, rows:[{ k, label, href }], note }
+  { type:"contact", label, title, sub, rows:[{ k, label, href }],
+                    tx:[{ k, v }], note }
   { type:"custom",  label, title, sub,
                     blocks:[{ kind:text|image|video, ... }] }
 ]
@@ -182,6 +183,29 @@ riding above the dial. Stations watermark *programming*, not idents or title
 cards, so it shows on the guide channels only —
 `.crt:has(.ch-guide.on) .bug` — and stays off on the hero, ABOUT, CONTACT
 and the off-air test card.
+
+## CH 07 — the continuity slate
+
+A closedown slate was an engineering card: station ident, then the details in
+ruled label/value rows. That form is more legible than free text, so the
+period reference and the one hard requirement on this page — the address and
+number must be unmissable — pull the same way. Fixed to the tube like CH 01;
+a slate never scrolls.
+
+- `.slate-box` holds the `rows`. Values are set in **bone, not the channel
+  ink** — a saturated ink on near-black is a far weaker contrast, and this is
+  the one thing on the site that has to read at a glance. The ink carries the
+  "this is a link" signal as an underline instead, and `justify-self: start`
+  keeps that rule hugging the text rather than running the width of the grid
+  cell. The whole row is the tap target, not just the text.
+- `tx` is the transmitter-data block — `[{ k, v }]`, flavour only, sitting
+  well clear of the details above and hidden on short screens where the
+  contact rows need the room. Editable in the admin's contact editor
+  alongside the normal rows.
+- `.slate-inner .slate-note` is qualified deliberately: `.smpte-note` is
+  declared later in the sheet at equal specificity, so an unqualified
+  `.slate-note` would lose on source order and inherit the old scrolling
+  layout's much larger margin.
 
 ## Halation
 

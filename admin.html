@@ -247,7 +247,7 @@ const BLANK = {
   hero:    { type:'hero', label:'SIGNAL', sub:'', paragraphs:[''], carousel:[], showTestBars:true },
   guide:   { type:'guide', label:'BUILDS', title:'', sub:'', reel:{kind:'none',src:'',caption:'MAIN FEATURE — REEL'}, projects:[] },
   process: { type:'process', label:'PROCESS', title:'', sub:'', steps:[] },
-  contact: { type:'contact', label:'CONTACT', title:'', sub:'', rows:[], note:'' },
+  contact: { type:'contact', label:'CONTACT', title:'', sub:'', rows:[], tx:[], note:'' },
   custom:  { type:'custom', label:'NEW', title:'', sub:'', blocks:[] }
 };
 
@@ -616,6 +616,15 @@ const EDITORS = {
           ${field('Link (mailto:, tel:, https://…)', `r.${i}.href`, r.href)}
         </div>`).join('')
       + `<button class="act small" id="addRow">+ ROW</button>`
+      + `<div class="card-head" style="margin-top:14px"><span class="grow">TRANSMITTER DATA</span></div>`
+      + (ch.tx || []).map((t, i) => `
+        <div class="card">
+          <div class="card-head"><span class="grow">${esc(t.k || 'ROW')}</span>
+            <button data-tx-del="${i}">✕ remove</button></div>
+          ${field('Label (SERVICE / LOCATION / STATUS…)', `t.${i}.k`, t.k)}
+          ${field('Value', `t.${i}.v`, t.v)}
+        </div>`).join('')
+      + `<button class="act small" id="addTx">+ TRANSMITTER ROW</button>`
       + field('Sign-off line', 'note', ch.note);
   },
   custom(ch) {
@@ -658,6 +667,7 @@ function setByPath(obj, path, val) {
     if (key === 'p') t = t.projects[Number(parts[++i])];
     else if (key === 's') t = t.steps[Number(parts[++i])];
     else if (key === 'r') t = t.rows[Number(parts[++i])];
+    else if (key === 't') t = t.tx[Number(parts[++i])];
     else if (key === 'b') t = t.blocks[Number(parts[++i])];
     else if (key === 'c') t = t.carousel[Number(parts[++i])];
     else { if (!t[key]) t[key] = {}; t = t[key]; }
@@ -725,6 +735,7 @@ function wireEditor(ch) {
       if (d[k + 'Down'] !== undefined) { const i = Number(d[k + 'Down']); if (i < ch[prop].length-1) { [ch[prop][i+1], ch[prop][i]] = [ch[prop][i], ch[prop][i+1]]; renderEditor(); } return; }
     }
     if (d.rowDel !== undefined) { ch.rows.splice(Number(d.rowDel), 1); renderEditor(); return; }
+    if (d.txDel !== undefined) { (ch.tx || []).splice(Number(d.txDel), 1); renderEditor(); return; }
     /* gallery ops (target format "projIdx:galIdx") */
     const galOp = (key, fn) => {
       if (d[key] === undefined) return false;
@@ -758,6 +769,7 @@ function wireEditor(ch) {
     }
     if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); return; }
     if (e.target.id === 'addRow') { ch.rows.push({ k:'', label:'', href:'' }); renderEditor(); return; }
+    if (e.target.id === 'addTx') { (ch.tx = ch.tx || []).push({ k:'', v:'' }); renderEditor(); return; }
     if (e.target.id === 'addPara') { ch.paragraphs.push(''); renderEditor(); return; }
     if (e.target.id === 'addSlide') {
       if (!ch.carousel) ch.carousel = [];

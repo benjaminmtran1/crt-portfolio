@@ -723,7 +723,21 @@
           "href": "tel:+16475338726"
         }
       ],
-      "note": "■ BROADCAST ENDS · TRANSMISSION RESUMES ON YOUR SCHEDULE ■"
+      "note": "■ TRANSMISSION RESUMES ON YOUR SCHEDULE ■",
+      "tx": [
+        {
+          "k": "SERVICE",
+          "v": "BEN·TV-1"
+        },
+        {
+          "k": "LOCATION",
+          "v": "TORONTO, ON"
+        },
+        {
+          "k": "STATUS",
+          "v": "ON AIR"
+        }
+      ]
     }
   ]
 }
