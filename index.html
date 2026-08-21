@@ -1158,6 +1158,9 @@ h2.ch-title {
   line-height: 1.85;
 }
 .vtr p + p { margin-top: 1.1em; }
+/* custom channels wrap each text block in its own .vtr, so consecutive
+   blocks need the same gap that paragraphs inside one block get */
+.vtr + .vtr { margin-top: 1.1em; }
 .vtr .counter {
   font-family: var(--osd-font);
   color: var(--ink);
