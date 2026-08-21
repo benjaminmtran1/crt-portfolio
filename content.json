@@ -465,6 +465,29 @@
               "caption": ""
             }
           ]
+        },
+        {
+          "time": "22:30",
+          "title": "Transparent Labs - Protein without the weird stuff",
+          "desc": "",
+          "tags": "Construction Coordinator",
+          "image": "assets/img_9343.jpg",
+          "caption": "CAM 9",
+          "writeup": "",
+          "gallery": [
+            {
+              "src": "https://youtu.be/C5vcG_nG2Q4?si=KyqqNd3YeyNQoRAd",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_8119.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_8117.jpg",
+              "caption": ""
+            }
+          ]
         }
       ]
     },
