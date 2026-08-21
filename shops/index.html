@@ -5,944 +5,1040 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SHOPS</title>
 <meta name="description" content="Scenic fabrication for film, television and installation.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23e7dac4'/%3E%3Cellipse cx='19' cy='22' rx='9' ry='5' fill='%23241c17' opacity='.3'/%3E%3Crect x='6' y='8' width='16' height='11' fill='%2393b9d6'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23dfe6e6'/%3E%3Cpath d='M4 26 L14 8 L20 18 L24 13 L30 26 Z' fill='%23aebcc1'/%3E%3Ccircle cx='23' cy='8' r='4' fill='%23c8402c'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ─────────────────────────────────────────────────────────────
-   SHOPS — cut paper, warm ground, one cool sky, and a light
-   source that cannot be trusted.
+/* ═════════════════════════════════════════════════════════════
+   SHOPS — THE PILE
 
-   Everything here hangs off two numbers: --sun-x and --sun-y,
-   a unit vector for where the light is coming from. Every
-   shadow on the page is calc()'d off that pair. Each section
-   declares its own sun angle; changing section tweens the
-   vector, so every shadow in view swings at once. That swing
-   is the transition — the composition is lit from somewhere
-   new, and the paper follows.
-   ───────────────────────────────────────────────────────── */
+   Nothing here is a page. There is one heap of scraps along the
+   bottom of the screen, and a section is what happens when you
+   pull pieces out of it: they arc up, turn over, and settle into
+   an arrangement that makes sense. Leave, and they go back.
 
-@property --sun-x { syntax: '<number>'; inherits: true; initial-value: 0.62; }
-@property --sun-y { syntax: '<number>'; inherits: true; initial-value: 0.78; }
+   Two systems do the work.
+
+   THE LIGHT. Every shadow derives from --sun-x / --sun-y, a unit
+   vector for where the light is. Both are registered with
+   @property so CSS can tween them; each section declares its own
+   angle, so arriving somewhere new swings every shadow at once.
+
+   THE ARC. A scrap is two nested elements. The outer one carries
+   X and rotation, the inner one Y and scale, on different easing
+   curves. Two straight interpolations at different rates is a
+   curve — that is the whole trick, and it is why the pieces fly
+   rather than slide.
+   ═════════════════════════════════════════════════════════ */
+
+@property --sun-x { syntax:'<number>'; inherits:true; initial-value:0.42; }
+@property --sun-y { syntax:'<number>'; inherits:true; initial-value:0.9; }
 
 :root{
-  /* ── ground: warm, earthy, opaque. Nothing here is grey. ── */
-  --plaster:    #e7dac4;   /* the tabletop everything sits on */
-  --plaster-lo: #dbc9ac;   /* its shaded half */
-  --paper:      #f4ecdf;   /* a fresh sheet, top of the pile */
-  --paper-lo:   #e8dac2;   /* an older sheet, further down */
-  --sand:       #d2b993;
-  --clay:       #b96f45;   /* terracotta — the working accent */
-  --rust:       #8d472a;
-  --umber:      #6b4a33;
-  --soot:       #241c17;   /* type. warm black, never neutral */
-  --soot-rgb:   36, 28, 23;
-  --faded:      #7a6a5b;   /* secondary type */
+  /* the theatre: cold, deep, full of air */
+  --mist-hi:  #eef0ec;
+  --mist:     #dde5e6;
+  --mist-lo:  #c4d1d5;
+  --far:      #a9b8be;
+  --further:  #8d9ea6;
 
-  /* ── the one cool thing on the site ── */
-  --sky:        #93b9d6;
-  --sky-lo:     #6f9dc0;
+  /* the scraps: warm, aged, torn from something else */
+  --paper:    #f5edda;
+  --paper-2:  #ead9bb;
+  --kraft:    #d7bf99;
+  --board:    #bda37c;
 
-  --display-font: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
-  --body-font:    'Jost', 'Futura', system-ui, sans-serif;
+  /* lacquer and leaf — the saturated moments, used sparingly */
+  --vermilion:#c8402c;
+  --lacquer:  #8d2415;
+  --gold:     #c39a45;
+  --blossom:  #eec0cd;
+  --azure:    #6ea7c9;
+  --indigo:   #23375f;
 
-  --sun-x: 0.62;
-  --sun-y: 0.78;
-  --sun-tween: 1100ms;
+  --sumi:     #1e1b1d;          /* ink. the black swan, the hair */
+  --sumi-rgb: 30, 27, 29;
+  --ink-soft: #5f584f;
 
-  --rail-w: 232px;
-  --edge: clamp(20px, 4vw, 64px);
+  --display:'Shippori Mincho B1','Hiragino Mincho ProN',Georgia,serif;
+  --body:'Jost','Futura',system-ui,sans-serif;
 
-  color-scheme: light;
+  --sun-x: 0.42;
+  --sun-y: 0.9;
+  --swing: 1200ms;
+
+  --pile-h: 22vh;
+  --edge: clamp(16px, 3.2vw, 54px);
 }
 
-*, *::before, *::after { box-sizing: border-box; }
-
-html, body { height: 100%; }
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ height:100%; }
 body{
-  margin: 0;
-  font-family: var(--body-font);
-  color: var(--soot);
-  background: var(--plaster);
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  margin:0; overflow:hidden;
+  font-family:var(--body); color:var(--sumi);
+  background:var(--mist);
+  -webkit-font-smoothing:antialiased;
 }
 
-/* The ground is not flat colour — it is lit from wherever the
-   sun currently is, so even the empty table turns over when a
-   section changes. */
-body::before{
-  content:'';
-  position: fixed; inset: -20%;
+/* ─────────────────────────────────────────────────────────────
+   THE THEATRE
+   Six planes, back to front, each drifting at its own rate under
+   the pointer. Depth is the point: the reference images are all
+   air and haze between things, never a flat backdrop.
+   ───────────────────────────────────────────────────────── */
+.world{ position:fixed; inset:0; overflow:hidden; }
+.plane{ position:absolute; inset:-6%; will-change:transform; }
+/* The stage is the one plane that must map 1:1 to the viewport —
+   the overscan is for backdrops that need slack to slide behind. */
+#stages{ inset:0; }
+
+.sky{
   background:
-    radial-gradient(120% 90% at
-      calc(50% - var(--sun-x) * 34%)
-      calc(50% - var(--sun-y) * 34%),
-      #f0e5d1 0%, var(--plaster) 46%, var(--plaster-lo) 100%);
-  transition: background var(--sun-tween) cubic-bezier(.4,0,.2,1);
-  z-index: 0;
+    radial-gradient(120% 80% at
+      calc(50% + var(--sun-x) * 26%) calc(18% + var(--sun-y) * 8%),
+      #fbfaf4 0%, var(--mist-hi) 30%, var(--mist) 58%, var(--mist-lo) 100%);
+  transition:background var(--swing) cubic-bezier(.4,0,.2,1);
+}
+/* The rainbow is weather, not typography. Behind everything, low
+   contrast, doing what it does in the reference: sitting in the sky
+   over the mountains while the poster type stays lacquer red. */
+.bow{
+  position:absolute; left:50%; top:-56%; width:146%; aspect-ratio:1;
+  transform:translateX(-50%); opacity:.46; pointer-events:none;
+  background:radial-gradient(closest-side,
+    transparent 61.5%,
+    #7d72b8 62%, #6b8cc0 64%, #4f97c4 66%, #74ad63 68%,
+    #e6c447 70%, #e0903a 72%, #d8452f 74%, transparent 74.6%);
+  -webkit-mask:linear-gradient(#000 44%, rgba(0,0,0,0) 63%);
+  mask:linear-gradient(#000 44%, rgba(0,0,0,0) 63%);
+  filter:blur(1.5px);
 }
 
-/* Paper tooth. One turbulence, multiplied over the whole
-   surface, so flat fills read as stock rather than as CSS. */
-body::after{
-  content:'';
-  position: fixed; inset: 0;
-  pointer-events: none;
-  z-index: 90;
-  opacity: .34;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'>\
-<filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/>\
-<feColorMatrix type='saturate' values='0'/></filter>\
-<rect width='180' height='180' filter='url(%23g)' opacity='.42'/></svg>");
-}
+/* Painted ridges, the way a backdrop is painted — flat, receding,
+   and obviously scenery. This is a shop that builds scenery. */
+.ridges{ position:absolute; left:-4%; right:-4%; bottom:6%; opacity:.26; filter:blur(1px); }
+.ridges svg{ display:block; width:100%; height:auto; }
 
-/* ─────────────────────────────────────────────────────────────
-   THE SHEET
-   One component. A rectangle of stock with real thickness: a
-   lit edge on the side facing the sun, a hard contact shadow
-   where it meets the surface below, and two softer casts for
-   the air between. --lift says how many sheets up it sits.
-   ───────────────────────────────────────────────────────── */
-.sheet{
-  --lift: 2;
-  --sx: var(--sun-x);
-  --sy: var(--sun-y);
-  position: relative;
-  background: var(--paper);
-  box-shadow:
-    /* the lit edge — thickness of the stock, facing the light */
-    inset calc(var(--sx) * -1.5px) calc(var(--sy) * -1.5px) 0 rgba(255,253,247,.62),
-    /* contact: hard, no blur. This is what makes it cut, not drawn. */
-    calc(var(--sx) * var(--lift) * 2px) calc(var(--sy) * var(--lift) * 2px) 0 rgba(var(--soot-rgb), .07),
-    calc(var(--sx) * var(--lift) * 5px) calc(var(--sy) * var(--lift) * 5px) calc(var(--lift) * 5px) rgba(var(--soot-rgb), .15),
-    calc(var(--sx) * var(--lift) * 9px) calc(var(--sy) * var(--lift) * 9px) calc(var(--lift) * 13px) rgba(var(--soot-rgb), .10);
+.fog{ pointer-events:none; }
+.fog i{
+  position:absolute; display:block; border-radius:50%;
+  background:radial-gradient(closest-side, rgba(255,255,255,.92), rgba(255,255,255,0));
+}
+/* Haze belongs between the planes and along the floor, not over
+   the whole stage — at full strength it desaturated every scrap
+   and the tableau went to milk. */
+.fog-far i:nth-child(1){ left:-14%; top:44%; width:70%; height:26%; opacity:.5; }
+.fog-far i:nth-child(2){ right:-18%; top:36%; width:64%; height:28%; opacity:.42; }
+.fog-near i:nth-child(1){ left:-10%; bottom:-6%; width:80%; height:26%; opacity:.34; }
+.fog-near i:nth-child(2){ right:-16%; bottom:-2%; width:72%; height:22%; opacity:.26; }
+@keyframes drift{ from{ transform:translateX(-3%);} to{ transform:translateX(3%);} }
+.fog i{ animation:drift 34s ease-in-out infinite alternate; }
+.fog i:nth-child(2){ animation-duration:47s; animation-direction:alternate-reverse; }
+
+/* ═════════════════════════════════════════════════════════════
+   THE SCRAP
+   Every piece of every section is one of these. It knows where it
+   belongs (--x, --y, --w, --r, as percentages of the stage) and
+   where it came from (--pilex, --piler — its place in the heap).
+
+   The pile pose is pure CSS arithmetic against those two sets, in
+   vw/vh, so it survives any resize without JS recomputing a thing.
+   ═════════════════════════════════════════════════════════ */
+.stage{
+  position:absolute; inset:0;
+  pointer-events:none;
+}
+.stage.on{ pointer-events:auto; }
+
+.scrap{
+  --x:50; --y:50; --w:20; --r:0; --z:5;
+  --pilex:50; --piler:0; --d:0ms;
+  position:absolute;
+  left:calc(var(--x) * 1%);
+  top:calc(var(--y) * 1%);
+  width:calc(var(--w) * 1%);
+  z-index:var(--z);
+  /* outer: horizontal travel + the tumble */
+  transform:
+    translate(-50%,-50%)
+    translateX(calc((var(--pilex) - var(--x)) * 1vw))
+    rotate(calc(var(--piler) * 1deg));
+  opacity:0;
   transition:
-    transform 620ms cubic-bezier(.22,.9,.3,1),
-    /* the shadow is always a beat behind the paper */
-    box-shadow 620ms cubic-bezier(.22,.9,.3,1) 130ms;
+    transform 880ms cubic-bezier(.55,.06,.34,1) var(--d),
+    opacity   360ms ease var(--d);
+  will-change:transform;
+}
+.scrap-in{
+  display:block;
+  /* inner: the lift, on a springier curve than the outer. The
+     mismatch between the two is what bends the path. */
+  transform:translateY(calc((96 - var(--y)) * 1vh)) scale(.13);
+  transform-origin:50% 50%;
+  transition:transform 980ms cubic-bezier(.28,1.22,.4,1) var(--d);
+  will-change:transform;
+}
+.stage.on .scrap{
+  transform:translate(-50%,-50%) translateX(0) rotate(calc(var(--r) * 1deg));
+  opacity:1;
+}
+.stage.on .scrap-in{ transform:translateY(0) scale(1); }
+
+/* Going back is faster and less considered than coming out —
+   things are thrown at a pile, not placed on one. */
+.stage.out .scrap{ transition-duration:430ms, 220ms; transition-delay:var(--dOut); }
+.stage.out .scrap-in{ transition-duration:460ms; transition-delay:var(--dOut);
+  transition-timing-function:cubic-bezier(.6,0,.8,.4); }
+
+/* ── the material of a scrap ─────────────────────────────────
+   Warm stock, a lit edge facing the sun, a hard contact shadow
+   with no blur, and two softer casts for the air underneath. The
+   shadow runs 130ms behind the paper, so anything that moves
+   spends a moment casting nothing. */
+.stock{
+  --lift:3;
+  position:relative;
+  background:var(--paper);
+  box-shadow:
+    inset calc(var(--sun-x) * -1.5px) calc(var(--sun-y) * -1.5px) 0 rgba(255,253,247,.6),
+    calc(var(--sun-x) * var(--lift) * 2px)  calc(var(--sun-y) * var(--lift) * 2px)  0 rgba(var(--sumi-rgb), .09),
+    calc(var(--sun-x) * var(--lift) * 5px)  calc(var(--sun-y) * var(--lift) * 5px)  calc(var(--lift) * 5px)  rgba(var(--sumi-rgb), .17),
+    calc(var(--sun-x) * var(--lift) * 10px) calc(var(--sun-y) * var(--lift) * 10px) calc(var(--lift) * 14px) rgba(var(--sumi-rgb), .11);
+  transition:box-shadow 700ms cubic-bezier(.22,.9,.3,1) 130ms;
+}
+.stock.l1{ --lift:1; } .stock.l5{ --lift:5; } .stock.l7{ --lift:7; }
+.stock.kraft{ background:var(--paper-2); }
+.stock.board{ background:var(--kraft); }
+.stock.ink, .stock.indigo{ background:var(--indigo); color:var(--paper); }
+.stock.red{ background:var(--vermilion); color:#fdf3e6; }
+
+/* Torn, never cut. The displacement map eats the edge of whatever
+   it is applied to, so it goes on the face — never on a wrapper
+   that is also being transformed. */
+.torn{ filter:url(#torn); }
+
+/* ═════════════════════════════════════════════════════════════
+   THE HEAP
+   Always on screen, along the bottom. It is not decoration: it is
+   where every section comes from and goes back to, and it has to
+   be visible for that to read.
+   ═════════════════════════════════════════════════════════ */
+.pile{
+  position:absolute; left:0; right:0; bottom:0; height:var(--pile-h);
+  z-index:40; pointer-events:none;
+}
+.pile b{
+  position:absolute; display:block; bottom:0;
+  transform-origin:50% 100%;
+  transition:transform 700ms cubic-bezier(.3,1.1,.4,1);
+}
+/* the heap settles when something is taken out of it */
+@keyframes jostle{
+  0%  { transform:translateY(0) rotate(var(--jr)); }
+  28% { transform:translateY(-9px) rotate(calc(var(--jr) + 3deg)); }
+  100%{ transform:translateY(0) rotate(var(--jr)); }
+}
+.pile.disturbed b{ animation:jostle 780ms cubic-bezier(.3,.9,.4,1) both; }
+.pile-lip{
+  position:absolute; left:0; right:0; bottom:0; height:calc(var(--pile-h) * .5);
+  background:linear-gradient(to top, rgba(169,184,190,.5), rgba(169,184,190,0));
+  z-index:41; pointer-events:none;
 }
 
-/* Lift levels. */
-.sheet.l1 { --lift: 1; }
-.sheet.l3 { --lift: 3; }
-.sheet.l4 { --lift: 4; }
-.sheet.l6 { --lift: 6; }
+/* ═════════════════════════════════════════════════════════════
+   THE HANGINGS
+   Navigation as lantern columns dropped from the top of the
+   frame, the way the reference hangs everything vertically. They
+   sway on their own hinge and the current one hangs lower.
+   ═════════════════════════════════════════════════════════ */
+.hangings{
+  position:absolute; top:0; left:0; right:0; z-index:60;
+  display:flex; justify-content:center; align-items:flex-start;
+  gap:clamp(6px, 1.1vw, 18px);
+  padding:0 var(--edge);
+}
+.hang{
+  --drop:0px;
+  position:relative; flex:none; border:0; padding:0; cursor:pointer;
+  width:clamp(34px, 3.6vw, 52px);
+  height:clamp(128px, 20vh, 236px);
+  background:none;
+  transform-origin:50% 0%;
+  transform:translateY(var(--drop));
+  transition:transform 620ms cubic-bezier(.3,1.1,.4,1);
+}
+@keyframes sway{
+  from{ rotate:-.75deg; } to{ rotate:.75deg; }
+}
+.hang .col{
+  position:absolute; inset:0;
+  background:linear-gradient(100deg, var(--paper) 0%, var(--paper-2) 62%, var(--kraft) 100%);
+  border-radius:calc(var(--w, 22px)) calc(var(--w, 22px)) 3px 3px / 34px 34px 3px 3px;
+  clip-path:polygon(0 0, 100% 0, 100% calc(100% - 14px), 50% 100%, 0 calc(100% - 14px));
+  box-shadow:
+    calc(var(--sun-x) * 6px) calc(var(--sun-y) * 6px) 12px rgba(var(--sumi-rgb), .18),
+    inset -2px 0 0 rgba(var(--sumi-rgb), .07);
+  animation:sway 7s ease-in-out infinite alternate;
+  transition:box-shadow 700ms ease 130ms;
+}
+.hang:nth-child(2n) .col{ animation-duration:8.6s; animation-delay:-2s; }
+.hang:nth-child(3n) .col{ animation-duration:6.2s; animation-delay:-4s; }
+.hang .cord{
+  position:absolute; left:50%; top:-40vh; width:1px; height:40vh;
+  background:rgba(var(--sumi-rgb), .3);
+}
+.hang .lbl{
+  position:absolute; inset:14px 0 22px;
+  writing-mode:vertical-rl; text-orientation:mixed;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--display); font-weight:600;
+  font-size:clamp(10px, 1.05vw, 14px); letter-spacing:.26em;
+  color:var(--ink-soft); white-space:nowrap; overflow:hidden;
+}
+.hang .num{
+  position:absolute; bottom:26px; left:50%; transform:translateX(-50%);
+  font-family:var(--display); font-size:9px; letter-spacing:.1em; color:var(--board);
+}
+.hang:hover{ --drop:10px; }
+.hang:hover .lbl{ color:var(--sumi); }
+.hang.on{ --drop:clamp(20px, 4vh, 46px); }
+.hang.on .col{
+  background:linear-gradient(100deg, var(--vermilion), var(--lacquer));
+  box-shadow:
+    calc(var(--sun-x) * 10px) calc(var(--sun-y) * 10px) 22px rgba(var(--sumi-rgb), .26);
+}
+.hang.on .lbl{ color:#fdf1e2; }
+.hang.on .num{ color:rgba(253,241,226,.7); }
+.hang:focus-visible{ outline:2px solid var(--vermilion); outline-offset:4px; }
 
-/* ── The light is not consistent, and nobody mentions it. ──
-   .contra is lit from behind, .cross from ninety degrees off.
-   Every section carries at least one. Look straight at it and
-   it is obviously wrong; look at the page and it just reads as
-   depth. */
-.contra { --sx: calc(var(--sun-x) * -1); --sy: calc(var(--sun-y) * -1); }
-.cross  { --sx: calc(var(--sun-y) * -1); --sy: var(--sun-x); }
+/* ═════════════════════════════════════════════════════════════
+   WHAT A SCRAP CAN BE
+   ═════════════════════════════════════════════════════════ */
 
-/* Stock variants — same cut, different paper. */
-.sheet.kraft { background: var(--paper-lo); }
-.sheet.card  { background: var(--sand); }
-.sheet.blue  { background: var(--sky); }
-.sheet.clay  { background: var(--clay); color: #fdf6ea; }
-.sheet.soot  { background: var(--soot); color: var(--paper); }
-.sheet.soot  { box-shadow:
-    inset calc(var(--sx) * -1.5px) calc(var(--sy) * -1.5px) 0 rgba(255,253,247,.16),
-    calc(var(--sx) * var(--lift) * 2px) calc(var(--sy) * var(--lift) * 2px) 0 rgba(var(--soot-rgb), .10),
-    calc(var(--sx) * var(--lift) * 5px) calc(var(--sy) * var(--lift) * 5px) calc(var(--lift) * 5px) rgba(var(--soot-rgb), .20),
-    calc(var(--sx) * var(--lift) * 9px) calc(var(--sy) * var(--lift) * 9px) calc(var(--lift) * 13px) rgba(var(--soot-rgb), .13); }
-
-/* ─────────────────────────────────────────────────────────────
-   TYPE — geometric, deadpan. It states things; it doesn't
-   perform them. Everything structural is tracked capitals.
-   ───────────────────────────────────────────────────────── */
-h1, h2, h3, .display { font-family: var(--display-font); font-weight: 600; margin: 0; }
-.eyebrow{
-  font-size: 11px; font-weight: 500; letter-spacing: .34em;
-  text-transform: uppercase; color: var(--faded);
+/* ── a photograph, torn out of something ── */
+.shot{ position:relative; display:block; overflow:hidden; background:var(--paper-2); }
+.shot img, .shot video{
+  display:block; width:100%; height:100%; object-fit:cover;
+  filter:saturate(.9) contrast(1.04) sepia(.08);
 }
-.rule{ height: 1px; background: rgba(var(--soot-rgb), .22); border: 0; margin: 0; }
-p { margin: 0 0 1em; line-height: 1.62; }
-p:last-child { margin-bottom: 0; }
-a { color: inherit; }
-
-.plate-head{ margin-bottom: 26px; }
-.plate-head h2{
-  font-size: clamp(30px, 4.4vw, 56px);
-  letter-spacing: -.02em; line-height: .96; margin: 6px 0 10px;
+.shot.arch{ border-radius:50% 50% 4px 4px / 30% 30% 4px 4px; }
+.shot.round{ border-radius:50%; }
+.mount{ padding:9px 9px 0; }
+.mount .cap{
+  padding:8px 2px 9px; font-size:9.5px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--board);
 }
-.plate-head .sub{ font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: var(--faded); }
-
-/* ─────────────────────────────────────────────────────────────
-   THE RAIL — navigation as a stack of index tabs down the
-   left edge. Each tab is its own sheet, so the nav is made of
-   the same material as the work.
-   ───────────────────────────────────────────────────────── */
-.rail{
-  position: fixed; z-index: 40;
-  left: var(--edge); top: 50%; transform: translateY(-50%);
-  width: var(--rail-w);
-  display: flex; flex-direction: column; gap: 9px;
-}
-.rail-mark{
-  font-family: var(--display-font); font-weight: 700;
-  font-size: 20px; letter-spacing: .3em; margin-bottom: 16px;
-  padding-left: 2px;
-}
-.rail-mark small{
-  display: block; font-size: 10px; font-weight: 400;
-  letter-spacing: .26em; color: var(--faded); margin-top: 5px;
-}
-.tab{
-  --lift: 1;
-  display: flex; align-items: baseline; gap: 12px;
-  padding: 13px 16px; border: 0; width: 100%;
-  font: inherit; font-size: 13px; font-weight: 500;
-  letter-spacing: .2em; text-transform: uppercase;
-  text-align: left; cursor: pointer;
-  background: var(--paper-lo); color: var(--faded);
-}
-.tab .n{ font-size: 10px; letter-spacing: .1em; opacity: .6; }
-.tab:hover{ --lift: 2; transform: translate(calc(var(--sun-x) * -2px), calc(var(--sun-y) * -2px)); color: var(--soot); }
-.tab.on{
-  --lift: 4; background: var(--paper); color: var(--soot);
-  transform: translate(calc(var(--sun-x) * -5px), calc(var(--sun-y) * -5px));
-}
-.tab.on .n{ color: var(--clay); opacity: 1; }
-.tab:focus-visible{ outline: 2px solid var(--clay); outline-offset: 3px; }
-
-/* ─────────────────────────────────────────────────────────────
-   THE TABLE + PLATES
-   One composition at a time. Plates stack in the same space;
-   only one is on. Pieces inside fly in on a stagger and their
-   shadows arrive late — for about a tenth of a second a piece
-   sits on the table casting nothing at all.
-   ───────────────────────────────────────────────────────── */
-.table{
-  position: fixed; z-index: 20;
-  inset: 0 0 0 calc(var(--rail-w) + var(--edge) * 2);
-  padding: var(--edge) var(--edge) var(--edge) 0;
-}
-.plate{
-  position: absolute; inset: 0;
-  padding: var(--edge) var(--edge) var(--edge) 0;
-  overflow-y: auto; overflow-x: hidden;
-  opacity: 0; pointer-events: none;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(var(--soot-rgb), .28) transparent;
-}
-.plate.on{ opacity: 1; pointer-events: auto; }
-/* An exiting plate stays visible while its pieces leave — fading
-   the whole plate would cut the exit off at the first frame. */
-.plate.out{ opacity: 1; pointer-events: none; }
-.plate::-webkit-scrollbar{ width: 9px; }
-.plate::-webkit-scrollbar-thumb{ background: rgba(var(--soot-rgb), .26); }
-.plate-inner{ max-width: 1120px; padding-bottom: 40px; }
-/* A composition that is meant to be looked at whole — the title
-   card, the contact slate — centres in the plate instead of
-   stacking from the top. */
-.plate-inner.centred{
-  display: flex; flex-direction: column; justify-content: center;
-  min-height: 100%; padding-bottom: 0;
+.nothing{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-size:9px; letter-spacing:.28em; color:var(--board);
+  background:repeating-linear-gradient(48deg, var(--paper-2) 0 9px, var(--kraft) 9px 18px);
 }
 
-/* A piece is anything the composition is assembled from. It
-   enters from an offset that alternates by index, so the
-   collage rebuilds itself rather than fading up. */
-.piece{
-  --i: 0;
-  --ox: 0px; --oy: 26px; --orot: 0deg;
-  opacity: 0;
-  transform: translate(var(--ox), var(--oy)) rotate(var(--orot));
-  transition: opacity 520ms ease, transform 640ms cubic-bezier(.2,.86,.3,1);
+/* ── the title, sitting in a blob rather than on a baseline ──
+   One saturated moment on a pale ground, borrowed straight from
+   the reference. It appears once, on the title tableau, and
+   nowhere else — a rainbow used twice stops being surreal. */
+.blob{
+  position:relative; padding:15% 13% 16%;
+  filter:drop-shadow(calc(var(--sun-x) * 15px) calc(var(--sun-y) * 15px) 24px rgba(var(--sumi-rgb), .34));
+  transition:filter 700ms ease 130ms;
 }
-.plate.on .piece{
-  opacity: 1;
-  transform: none;
-  transition-delay: calc(var(--i) * 62ms + 90ms);
-}
-/* Exit: the pieces are blown along the current light. The
-   plate leaves in the direction the sun is pointing. */
-.plate.out .piece{
-  opacity: 0;
-  transform: translate(calc(var(--sun-x) * 70px), calc(var(--sun-y) * 70px)) rotate(calc(var(--orot) * -1));
-  transition-duration: 340ms, 380ms;
-  transition-delay: calc(var(--i) * 26ms);
-}
-.piece:nth-child(even){ --ox: -22px; --orot: .5deg; }
-.piece:nth-child(3n){ --ox: 20px; --oy: 34px; --orot: -.45deg; }
-
-/* ── The signature. A flat sky-blue rectangle whose shadow is
-   a cloud. Nothing casts it; it is simply the shadow that
-   rectangle has. It recurs at three sizes across the site. ── */
-.cloudplate{ position: relative; display: inline-block; }
-.cloudplate .face{
-  position: relative; z-index: 2;
-  display: block; background: var(--sky);
-  box-shadow: inset calc(var(--sun-x) * -1.5px) calc(var(--sun-y) * -1.5px) 0 rgba(255,255,255,.5);
-}
-.cloudplate .cast{
-  position: absolute; z-index: 1; inset: 0;
-  opacity: .34;
-  filter: blur(2.5px);
-  transform: translate(calc(var(--sun-x) * 52px), calc(var(--sun-y) * 52px)) scale(1.24);
-  transition: transform 700ms cubic-bezier(.22,.9,.3,1) 160ms;
-}
-/* The cloud is built from four opaque lobes rather than masked
-   out of one shape: opaque siblings overlap without darkening
-   each other, so the group blurs and fades as a single object.
-   Percentages, so it scales with whatever .face is set to. */
-.cloudplate .cast i{ position: absolute; display: block; background: #3a2a1c; border-radius: 50%; }
-.cloudplate .cast i:nth-child(1){ left:  7%; top: 30%; width: 38%; height: 64%; }
-.cloudplate .cast i:nth-child(2){ left: 27%; top:  2%; width: 48%; height: 84%; }
-.cloudplate .cast i:nth-child(3){ left: 56%; top: 28%; width: 37%; height: 62%; }
-.cloudplate .cast i:nth-child(4){ left: 10%; top: 50%; width: 79%; height: 36%; border-radius: 999px; }
-
-/* ─────────────────────────────────────────────────────────────
-   MOUNTED PRINTS
-   Photographs are never bare — they sit on a mount with a
-   border, the way a print sits on card. One grade holds every
-   image in the palette so photography and paper agree.
-   ───────────────────────────────────────────────────────── */
-:root{ --grade: saturate(.84) contrast(1.05) sepia(.14) brightness(1.02); }
-.frame{ --lift: 3; padding: 10px 10px 0; background: var(--paper); }
-.frame .shot, .job .shot{
-  position: relative; display: block; width: 100%;
-  aspect-ratio: 4 / 3; overflow: hidden; background: var(--paper-lo);
-}
-.frame .shot img, .frame .shot video, .frame .shot iframe,
-.job .shot img, .job .shot video, .job .shot iframe{
-  width: 100%; height: 100%; object-fit: cover; display: block;
-  border: 0; filter: var(--grade);
-}
-.frame .shot.natural{ aspect-ratio: auto; }
-/* A face wants a portrait crop; 4:3 puts the lower third across
-   the subject's mouth. */
-.portrait .frame .shot{ aspect-ratio: 4 / 5; }
-.frame .shot.natural img{ height: auto; max-height: 58vh; object-fit: contain; }
-.frame .cap{
-  padding: 9px 2px 10px; font-size: 10.5px; letter-spacing: .17em;
-  text-transform: uppercase; color: var(--faded);
-}
-.frame .shot .none, .job .shot .none{
-  position: absolute; inset: 0; display: grid; place-items: center;
-  font-size: 10px; letter-spacing: .3em; color: var(--faded);
-  background: repeating-linear-gradient(45deg, var(--paper-lo) 0 9px, var(--sand) 9px 18px);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   CH 01 — THE TITLE PLATE
-   Name on the left, a pile of prints on the right, and one
-   rectangle of sky with a cloud for a shadow.
-   ───────────────────────────────────────────────────────── */
-.title-plate{ display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(28px, 5vw, 72px); align-items: center; min-height: 100%; }
-.title-copy{ max-width: 34em; }
-.bigname{
-  font-size: clamp(52px, 9.5vw, 132px);
-  line-height: .84; letter-spacing: -.035em; font-weight: 700;
-  margin: 14px 0 20px;
-  /* type is printed, not floating: it carries the same light */
+/* Three stacked clouds: cream halo, ink edge, then the lacquer
+   face — the reference's double outline, done with scale rather
+   than a stroke, because a gooed shape has no stroke to give. */
+.goo{ position:absolute; inset:0; filter:url(#goo); }
+.goo i{ position:absolute; display:block; border-radius:50%; }
+.goo i:nth-child(1){ left:0%;  top:17%; width:43%; height:66%; }
+.goo i:nth-child(2){ left:21%; top:0%;  width:41%; height:79%; }
+.goo i:nth-child(3){ left:47%; top:5%;  width:39%; height:73%; }
+.goo i:nth-child(4){ left:61%; top:21%; width:39%; height:62%; }
+.goo i:nth-child(5){ left:13%; top:33%; width:74%; height:60%; }
+.goo.halo{ transform:scale(1.15); }
+.goo.halo i{ background:#fdf6e8; }
+.goo.edge{ transform:scale(1.075); }
+.goo.edge i{ background:var(--sumi); }
+/* Different colours on different lobes: the gooey blur mixes them,
+   so the blob gets its gradient from its own construction. */
+.goo.face i:nth-child(1){ background:#bf3327; }
+.goo.face i:nth-child(2){ background:#c93c28; }
+.goo.face i:nth-child(3){ background:#d0602b; }
+.goo.face i:nth-child(4){ background:#d89a36; }
+.goo.face i:nth-child(5){ background:#cb5b2b; }
+.blob-copy{ position:relative; z-index:2; }
+.blob h1{
+  margin:0; text-align:center;
+  font-family:var(--display); font-weight:800;
+  font-size:clamp(34px, 6.4vw, 96px); line-height:.9; letter-spacing:.01em;
+  color:var(--indigo);
   text-shadow:
-    calc(var(--sun-x) * 3px) calc(var(--sun-y) * 3px) 0 rgba(var(--soot-rgb), .13),
-    calc(var(--sun-x) * 9px) calc(var(--sun-y) * 9px) 14px rgba(var(--soot-rgb), .12);
-  transition: text-shadow var(--sun-tween) cubic-bezier(.4,0,.2,1);
+    -2px -2px 0 #fdf6e8, 2px -2px 0 #fdf6e8, -2px 2px 0 #fdf6e8, 2px 2px 0 #fdf6e8,
+     0 -3px 0 #fdf6e8, 0 3px 0 #fdf6e8, -3px 0 0 #fdf6e8, 3px 0 0 #fdf6e8,
+     0 6px 0 rgba(var(--sumi-rgb), .55);
 }
-.title-copy .lede{ font-size: clamp(15px, 1.5vw, 18px); color: #453a30; }
-.title-strip{ display: inline-block; margin-top: 26px; padding: 12px 20px; font-size: 11px; letter-spacing: .28em; text-transform: uppercase; }
+.blob .eyebrow{
+  display:block; text-align:center; margin-bottom:.5em;
+  font-family:var(--body); font-size:clamp(8px,.85vw,11px);
+  font-weight:500; letter-spacing:.4em; text-transform:uppercase;
+  color:#fdf6e8; text-shadow:0 1px 3px rgba(var(--sumi-rgb),.55);
+}
 
-/* The pile: prints dropped on the table, squared up by hand
-   and not quite square. Top one is the one you're looking at. */
-.pile{ position: relative; aspect-ratio: 4 / 3.4; width: 100%; max-width: 560px; margin-left: auto; }
-.print{
-  position: absolute; inset: 0; cursor: pointer;
-  transition: transform 720ms cubic-bezier(.24,.9,.3,1),
-              opacity 420ms ease,
-              box-shadow 720ms cubic-bezier(.24,.9,.3,1) 150ms;
+/* ── the ensō — a circle drawn in one breath ── */
+.enso{ position:relative; width:100%; aspect-ratio:1; }
+.enso svg{ width:100%; height:100%; display:block; overflow:visible; }
+.enso .inner{
+  position:absolute; inset:19%; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; gap:.5em;
 }
-.print[data-slot="0"]{ --lift: 6; transform: rotate(-1.1deg); z-index: 4; }
-.print[data-slot="1"]{ --lift: 4; transform: rotate(2.2deg) translate(16px, 12px) scale(.975); z-index: 3; }
-.print[data-slot="2"]{ --lift: 3; transform: rotate(-3.4deg) translate(-14px, 22px) scale(.955); z-index: 2; }
-.print[data-slot="3"]{ --lift: 2; transform: rotate(1.4deg) translate(6px, 32px) scale(.935); z-index: 1; }
-.print[data-slot="x"]{ --lift: 1; transform: rotate(0deg) translateY(40px) scale(.92); opacity: 0; z-index: 0; pointer-events: none; }
-.print[data-slot="0"]:hover{ transform: rotate(-1.1deg) translate(calc(var(--sun-x) * -7px), calc(var(--sun-y) * -7px)); }
-.pile-count{
-  position: absolute; right: -6px; bottom: -30px; z-index: 5;
-  font-size: 10px; letter-spacing: .3em; color: var(--faded);
-}
-/* Sat over the pile the cloud had nowhere to fall — the joke
-   only works on open ground, where the whole silhouette shows. */
-.cloud-sig{ position: absolute; z-index: 6; left: -58px; bottom: -128px; }
-.cloud-sig .face{ width: 140px; height: 80px; }
-.cloud-sig .cast{ transform: translate(calc(var(--sun-x) * 68px), calc(var(--sun-y) * 68px)) scale(1.26); }
 
-/* ─────────────────────────────────────────────────────────────
-   WORK — a contact sheet of jobs.
-   ───────────────────────────────────────────────────────── */
-.filters{ display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
-.chip{
-  --lift: 1; border: 0; padding: 9px 15px; cursor: pointer;
-  font: inherit; font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase;
-  background: var(--paper-lo); color: var(--faded);
-}
-.chip:hover{ --lift: 2; color: var(--soot); }
-.chip.on{ --lift: 3; background: var(--clay); color: #fdf4e8; transform: translate(calc(var(--sun-x) * -3px), calc(var(--sun-y) * -3px)); }
-.chip:focus-visible{ outline: 2px solid var(--clay); outline-offset: 3px; }
+/* ── a panel of copy ── */
+.panel{ padding:clamp(14px,1.5vw,26px) clamp(16px,1.7vw,30px); }
+.panel p{ margin:0 0 .85em; line-height:1.66; font-size:clamp(12px,1.02vw,15px); color:#3f382f; }
+.panel p:last-child{ margin:0; }
+.panel .lede p{ font-size:clamp(13px,1.16vw,17px); }
 
-.jobs{ display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: clamp(20px, 2.6vw, 34px); }
-.job{ --lift: 3; padding: 10px 10px 0; background: var(--paper); text-align: left; border: 0; font: inherit; color: inherit; cursor: pointer; display: block; width: 100%; }
-.job[data-flat="1"]{ cursor: default; }
-.job:hover{ --lift: 6; transform: translate(calc(var(--sun-x) * -8px), calc(var(--sun-y) * -8px)); }
-.job:focus-visible{ outline: 2px solid var(--clay); outline-offset: 4px; }
-.job .meta{ padding: 11px 2px 14px; }
-.job .jt{ font-family: var(--display-font); font-weight: 600; font-size: 15.5px; line-height: 1.2; }
-.job .jr{ margin-top: 6px; font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--faded); }
-.job .jy{ color: var(--clay); }
-.job .open{
-  display: block; margin-top: 9px; font-size: 9.5px; letter-spacing: .26em;
-  text-transform: uppercase; color: var(--clay); opacity: 0;
-  transition: opacity 240ms ease;
+/* ── a vertical label rail ── */
+.tate{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  font-family:var(--display); font-weight:600;
+  letter-spacing:.34em; white-space:nowrap;
+  color:var(--ink-soft);
 }
-.job:hover .open, .job:focus-visible .open{ opacity: 1; }
+.tate.big{ font-size:clamp(13px,1.5vw,22px); color:var(--sumi); }
+.tate.red{ color:var(--vermilion); }
 
-/* ── Detail: one job lifted clean off the pile. ── */
+/* ── a strip of lacquer with a line of type ── */
+.strip{
+  padding:.75em 1.2em; text-align:center;
+  font-size:clamp(9px,.86vw,12px); font-weight:500;
+  letter-spacing:.28em; text-transform:uppercase;
+}
+
+/* ── a work item, as a scrap you can pull further out ── */
+.card{ display:block; width:100%; border:0; padding:9px 9px 0; font:inherit; color:inherit;
+  text-align:left; background:var(--paper); cursor:pointer; }
+.card[data-deep="0"]{ cursor:default; }
+.card .meta{ padding:9px 2px 11px; }
+.card .t{ font-family:var(--display); font-weight:700; font-size:clamp(11px,1.02vw,15px); line-height:1.18; }
+.card .r{ margin-top:5px; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--board); }
+.card .r em{ font-style:normal; color:var(--vermilion); }
+.card:hover{ z-index:30; }
+.scrap:has(.card:hover){ z-index:30; }
+.card:hover .t{ color:var(--lacquer); }
+.card:focus-visible{ outline:2px solid var(--vermilion); outline-offset:4px; }
+
+/* ── a hanging scroll for a commission ── */
+.scroll-top{
+  height:12px; border-radius:6px; background:linear-gradient(var(--board), var(--kraft));
+  box-shadow:calc(var(--sun-x)*4px) calc(var(--sun-y)*4px) 8px rgba(var(--sumi-rgb),.2);
+}
+.scroll-body{ padding:16px 14px 20px; }
+.scroll-body .n{ font-family:var(--display); font-size:11px; letter-spacing:.2em; color:var(--vermilion); }
+.scroll-body h3{ margin:8px 0 0; font-family:var(--display); font-weight:700;
+  font-size:clamp(12px,1.1vw,17px); line-height:1.25; }
+.scroll-body .lead{ margin-top:10px; font-size:9px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--board); }
+.scroll-body .blurb{ margin-top:11px; font-size:clamp(11px,.94vw,13.5px); line-height:1.6; color:#3f382f; }
+.scroll-body .pts{ list-style:none; margin:12px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:5px; }
+.scroll-body .pts li{ font-size:8.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-soft); background:var(--paper-2); padding:5px 8px; }
+.fringe{ display:flex; gap:2px; padding:0 10px; }
+.fringe i{ flex:1; height:clamp(18px,3vh,34px);
+  background:linear-gradient(var(--kraft), rgba(215,191,153,0)); }
+
+/* ── the button that goes back to the heap for more ── */
+.more{
+  border:0; cursor:pointer; font:inherit; padding:11px 18px;
+  font-size:9.5px; letter-spacing:.24em; text-transform:uppercase;
+  background:var(--sumi); color:var(--paper);
+  box-shadow:calc(var(--sun-x)*5px) calc(var(--sun-y)*5px) 12px rgba(var(--sumi-rgb),.28);
+  transition:box-shadow 700ms ease 130ms, background 200ms ease;
+}
+.more:hover{ background:var(--lacquer); }
+.more:focus-visible{ outline:2px solid var(--vermilion); outline-offset:3px; }
+
+/* ── the standing rail: where you are, set vertically ── */
+.where{
+  position:absolute; right:calc(var(--edge) * .5); top:21%; z-index:55;
+  display:flex; align-items:center; gap:14px; pointer-events:none;
+}
+.where .n{ font-family:var(--display); font-size:11px; letter-spacing:.2em; color:var(--vermilion); }
+.where .rule{ width:1px; height:clamp(40px,9vh,90px); background:rgba(var(--sumi-rgb),.28); }
+
+/* ── torn, not cut ───────────────────────────────────────────
+   A clip-path would eat a box-shadow, so ragged stock drops the
+   cast shadows and rebuilds them as chained drop-shadows, which
+   follow the clipped silhouette instead of the box. The lit edge
+   stays an inset shadow — that one is meant to be clipped. */
+.stock.ragged{
+  clip-path:polygon(
+    0.5% 2.2%, 13% 0.4%, 27% 2.8%, 41% 0.3%, 56% 2.6%, 71% 0.5%, 86% 2.9%, 99.5% 1.1%,
+    98.4% 15%, 100% 30%, 98.2% 46%, 99.7% 61%, 98% 77%, 99.5% 97.2%,
+    85% 99.5%, 70% 97.3%, 54% 99.8%, 38% 97.4%, 22% 99.6%, 8% 97.6%, 0.6% 99%,
+    1.8% 80%, 0% 64%, 1.9% 47%, 0.3% 31%, 1.5% 16%);
+  box-shadow:inset calc(var(--sun-x) * -1.5px) calc(var(--sun-y) * -1.5px) 0 rgba(255,253,247,.55);
+  filter:
+    drop-shadow(calc(var(--sun-x) * var(--lift) * 2px) calc(var(--sun-y) * var(--lift) * 2px) 0 rgba(var(--sumi-rgb), .10))
+    drop-shadow(calc(var(--sun-x) * var(--lift) * 5px) calc(var(--sun-y) * var(--lift) * 5px) calc(var(--lift) * 4px) rgba(var(--sumi-rgb), .19));
+  transition:filter 700ms cubic-bezier(.22,.9,.3,1) 130ms;
+}
+.stock.ragged.alt{
+  clip-path:polygon(
+    1.4% 1%, 16% 3%, 30% 0.4%, 46% 2.8%, 60% 0.3%, 76% 2.6%, 90% 0.5%, 99% 2.4%,
+    99.6% 18%, 98% 33%, 99.8% 50%, 98.3% 66%, 100% 82%, 98.6% 98.8%,
+    83% 97%, 67% 99.6%, 51% 97.2%, 35% 99.7%, 19% 97.4%, 5% 99.5%, 1% 97.6%,
+    0.4% 81%, 2% 65%, 0.2% 49%, 1.7% 33%, 0.5% 17%);
+}
+
+/* ── a section's name, set the way a poster sets it ── */
+.headline{
+  padding:.42em .62em .5em;
+  font-family:var(--display); font-weight:800;
+  font-size:clamp(19px, 2.5vw, 42px); line-height:1.0; letter-spacing:-.005em;
+  text-wrap:balance;
+}
+.headline .over{
+  display:block; margin-bottom:.5em;
+  font-family:var(--body); font-size:9px; font-weight:500;
+  letter-spacing:.34em; text-transform:uppercase; color:var(--vermilion);
+}
+.headline .under{
+  display:block; margin-top:.55em;
+  font-family:var(--body); font-size:clamp(9.5px,.82vw,12px); font-weight:400;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--board);
+}
+.panel p{ color:#332d26; }
+
+/* ═════════════════════════════════════════════════════════════
+   PULLED RIGHT OUT
+   A work item opened is not a modal over a page — the tableau
+   scatters and this one piece comes forward on its own.
+   ═════════════════════════════════════════════════════════ */
 .lift{
-  position: fixed; inset: 0; z-index: 70;
-  display: grid; place-items: center; padding: clamp(14px, 3vw, 44px);
-  background: rgba(58, 42, 30, .42);
-  backdrop-filter: blur(3px);
-  opacity: 0; pointer-events: none; transition: opacity 300ms ease;
+  position:absolute; inset:0; z-index:80;
+  display:grid; place-items:center; padding:clamp(12px,3vw,40px);
+  background:radial-gradient(120% 90% at 50% 40%, rgba(160,175,182,.5), rgba(120,136,144,.82));
+  backdrop-filter:blur(4px);
+  opacity:0; pointer-events:none; transition:opacity 320ms ease;
 }
-.lift.open{ opacity: 1; pointer-events: auto; }
+.lift.open{ opacity:1; pointer-events:auto; }
 .lift-sheet{
-  --lift: 6; width: min(880px, 100%); max-height: 100%;
-  overflow-y: auto; padding: clamp(22px, 3vw, 40px);
-  transform: translateY(26px) scale(.985);
-  transition: transform 420ms cubic-bezier(.2,.86,.3,1);
+  width:min(880px,100%); max-height:100%; overflow-y:auto;
+  padding:clamp(20px,2.8vw,38px);
+  transform:translateY(34px) rotate(-1.2deg) scale(.97);
+  transition:transform 460ms cubic-bezier(.24,1.15,.36,1);
+  scrollbar-width:thin; scrollbar-color:rgba(var(--sumi-rgb),.3) transparent;
 }
-.lift.open .lift-sheet{ transform: none; }
+.lift.open .lift-sheet{ transform:none; }
 .lift-close{
-  position: sticky; top: 0; float: right; margin: -8px -8px 0 0;
-  border: 0; background: none; cursor: pointer; font: inherit;
-  font-size: 10px; letter-spacing: .26em; color: var(--faded); padding: 6px;
+  position:sticky; top:0; float:right; margin:-6px -6px 0 0; z-index:3;
+  border:0; background:none; cursor:pointer; font:inherit; padding:6px;
+  font-size:9.5px; letter-spacing:.24em; color:var(--board);
 }
-.lift-close:hover{ color: var(--rust); }
-.lift-sheet h3{ font-size: clamp(22px, 2.7vw, 32px); letter-spacing: -.015em; margin: 2px 0 14px; }
-.gal{ position: relative; margin: 20px 0 24px; }
-.gal-nav{ position: absolute; inset: 0; display: flex; z-index: 3; }
-/* A natural-crop still is pillarboxed on paper, so white controls
-   disappear on exactly the slides they sit over. The glyphs carry
-   their own dark chip instead and read on stock or photograph. */
-.gal-nav button{ flex: 1; border: 0; background: none; cursor: pointer; font: inherit;
-  display: flex; align-items: center; padding: 0 14px;
-  opacity: 0; transition: opacity 200ms ease; }
-.gal-nav button:last-child{ justify-content: flex-end; }
-.gal-nav button span{
-  background: rgba(var(--soot-rgb), .72); color: #fdf4e8;
-  font-size: 10px; letter-spacing: .2em; padding: 9px 12px;
-}
-.gal:hover .gal-nav button, .gal-nav button:focus-visible{ opacity: 1; }
-.gal-count{ position: absolute; right: 12px; bottom: 13px; z-index: 4;
-  font-size: 10px; letter-spacing: .2em; color: var(--faded); }
+.lift-close:hover{ color:var(--lacquer); }
+.lift-sheet h3{ margin:2px 0 12px; font-family:var(--display); font-weight:700;
+  font-size:clamp(19px,2.5vw,32px); line-height:1.14; }
+.lift-sheet .eyebrow{ font-size:9.5px; letter-spacing:.3em; text-transform:uppercase; color:var(--vermilion); }
+.slate{ display:grid; grid-template-columns:auto 1fr; gap:0 20px; margin:16px 0 20px; }
+.slate dt{ font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:var(--board);
+  padding:8px 0; border-top:1px solid rgba(var(--sumi-rgb),.14); }
+.slate dd{ margin:0; padding:8px 0; font-size:13.5px;
+  border-top:1px solid rgba(var(--sumi-rgb),.14); }
+.gal{ position:relative; margin:18px 0 22px; }
+.gal .shot{ background:var(--paper-2); }
+.gal .shot img{ height:auto; max-height:56vh; object-fit:contain; }
+.gal-nav{ position:absolute; inset:0; display:flex; z-index:3; }
+.gal-nav button{ flex:1; border:0; background:none; cursor:pointer; font:inherit;
+  display:flex; align-items:center; padding:0 12px; opacity:0; transition:opacity 200ms ease; }
+.gal-nav button:last-child{ justify-content:flex-end; }
+.gal-nav span{ background:rgba(var(--sumi-rgb),.74); color:#fdf3e6;
+  font-size:9px; letter-spacing:.2em; padding:8px 11px; }
+.gal:hover .gal-nav button, .gal-nav button:focus-visible{ opacity:1; }
+.gal-count{ position:absolute; right:11px; bottom:11px; z-index:4;
+  font-size:9.5px; letter-spacing:.2em; color:var(--board); }
+.lift-sheet .body p{ margin:0 0 .9em; line-height:1.66; font-size:14px; color:#3f382f; max-width:42em; }
 
-/* ── The slate: label / value rows. Shared by job detail,
-   about, and contact, so facts look the same everywhere. ── */
-.slate{ display: grid; grid-template-columns: auto 1fr; gap: 0 22px; margin: 18px 0; }
-.slate dt{ font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--faded); padding: 9px 0; border-top: 1px solid rgba(var(--soot-rgb), .14); }
-.slate dd{ margin: 0; padding: 9px 0; font-size: 14px; border-top: 1px solid rgba(var(--soot-rgb), .14); }
-.body-copy{ max-width: 40em; font-size: 15px; }
-
-/* ─────────────────────────────────────────────────────────────
-   COMMISSIONS — what you can ask the shop for.
-   ───────────────────────────────────────────────────────── */
-.offers{ display: grid; gap: 16px; }
-.offer{ --lift: 2; display: grid; grid-template-columns: 62px 1fr auto; gap: 0 24px; padding: 24px 26px; align-items: start; }
-.offer:hover{ --lift: 4; transform: translate(calc(var(--sun-x) * -5px), calc(var(--sun-y) * -5px)); }
-.offer .num{ font-family: var(--display-font); font-size: 30px; font-weight: 300; color: var(--clay); line-height: 1; }
-.offer h3{ font-size: 20px; letter-spacing: -.01em; margin-bottom: 8px; }
-.offer .blurb{ font-size: 14.5px; color: #4b3f34; max-width: 46em; }
-.offer .points{ list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 7px; }
-.offer .points li{ font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--faded); background: var(--paper-lo); padding: 6px 11px; }
-.offer .lead-t{ font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--faded); text-align: right; white-space: nowrap; }
-.offers-note{ margin-top: 26px; padding: 20px 24px; font-size: 13.5px; }
-
-/* ─────────────────────────────────────────────────────────────
-   PROCESS — stages, laid out as a strip of cards that steps
-   down the page. Even-numbered stages are lit from the wrong
-   side; the sequence disagrees with itself about the time of
-   day.
-   ───────────────────────────────────────────────────────── */
-.steps{ display: grid; gap: clamp(22px, 3vw, 40px); }
-.step{ display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px, 3vw, 44px); align-items: center; }
-.step:nth-child(even) .step-copy{ order: 2; }
-.step-copy .n{ font-family: var(--display-font); font-size: 13px; letter-spacing: .3em; color: var(--clay); }
-.step-copy h3{ font-size: clamp(21px, 2.4vw, 30px); letter-spacing: -.015em; margin: 10px 0 12px; }
-.step-copy p{ font-size: 14.5px; color: #4b3f34; max-width: 34em; }
-
-/* ─────────────────────────────────────────────────────────────
-   ABOUT + CONTACT
-   ───────────────────────────────────────────────────────── */
-.about-plate{ display: grid; grid-template-columns: minmax(240px, .8fr) 1.2fr; gap: clamp(28px, 4vw, 60px); align-items: start; }
-.portrait{ position: relative; }
-.lower-third{
-  position: absolute; left: 10px; right: 10px; bottom: 54px; z-index: 3;
-  padding: 12px 16px; background: rgba(36,28,23,.86); color: var(--paper);
-  border-left: 3px solid var(--clay);
-}
-.lower-third .nm{ font-family: var(--display-font); font-weight: 600; font-size: 17px; letter-spacing: .02em; }
-.lower-third .rl{ font-size: 10px; letter-spacing: .24em; text-transform: uppercase; opacity: .75; margin-top: 4px; }
-
-.contact-plate{ min-height: 100%; display: flex; flex-direction: column; justify-content: center; max-width: 780px; }
-.card-rows{ margin: 26px 0 0; padding: 8px 30px 22px; }
-.crow{ display: grid; grid-template-columns: 110px 1fr; gap: 20px; align-items: baseline; padding: 20px 0; border-bottom: 1px solid rgba(var(--soot-rgb), .14); text-decoration: none; }
-.crow:last-child{ border-bottom: 0; }
-.crow .k{ font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--faded); }
-.crow .v{ font-family: var(--display-font); font-size: clamp(19px, 2.4vw, 29px); letter-spacing: -.01em; }
-a.crow:hover .v{ color: var(--rust); }
-a.crow:hover .v::after{ content: ''; display: block; height: 2px; background: var(--clay); margin-top: 5px; }
-.contact-note{ margin-top: 26px; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--faded); }
-
-/* Free-form blocks (custom sections). */
-.block-text{ padding: 26px 30px; max-width: 46em; font-size: 15px; }
-.block-img{ max-width: 700px; }
-
-/* ─────────────────────────────────────────────────────────────
-   THE SUNMARK
-   A paper disc in the corner sitting where the light is
-   coming from. It is the only object on the site that casts
-   no shadow at all.
-   ───────────────────────────────────────────────────────── */
-.sunmark{
-  position: fixed; z-index: 45; right: var(--edge); bottom: var(--edge);
-  width: 74px; height: 74px; pointer-events: none;
-  display: grid; place-items: center;
-}
-.sunmark .disc{
-  width: 15px; height: 15px; border-radius: 50%; background: var(--sand);
-  transform: translate(calc(var(--sun-x) * -22px), calc(var(--sun-y) * -22px));
-  transition: transform var(--sun-tween) cubic-bezier(.4,0,.2,1);
-}
-.sunmark .ring{ position: absolute; inset: 0; border: 1px solid rgba(var(--soot-rgb), .18); border-radius: 50%; }
-.sunmark .lbl{ position: absolute; bottom: -16px; right: 0; font-size: 8.5px; letter-spacing: .28em; color: var(--faded); }
-
-/* ─────────────────────────────────────────────────────────────
-   SMALLER TABLES
-   Below 980px the rail lies down along the top and the plates
-   take the full width. Below 620px the compositions unstack
-   into single columns — a collage that needs two columns is
-   not a collage on a phone.
-   ───────────────────────────────────────────────────────── */
-@media (max-width: 980px){
-  :root{ --rail-w: 0px; }
-  .rail{
-    position: fixed; left: 0; right: 0; top: 0; transform: none;
-    width: auto; flex-direction: row; gap: 6px;
-    padding: 12px var(--edge); overflow-x: auto;
-    background: linear-gradient(var(--plaster) 62%, rgba(231,218,196,0));
-    align-items: center;
+/* ═════════════════════════════════════════════════════════════
+   A SMALLER THEATRE
+   Percentage tableaux collapse on a phone, so below 820px the
+   compositions reflow into one column and the stage scrolls. The
+   scraps still come out of the pile — that never changes.
+   ═════════════════════════════════════════════════════════ */
+@media (max-width:820px){
+  :root{ --pile-h:16vh; }
+  .stage{ overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
+  .stage.on{ padding:calc(clamp(128px,20vh,236px) + 28px) var(--edge) calc(var(--pile-h) + 40px); }
+  .scrap{
+    position:relative; left:auto; top:auto; width:auto;
+    margin:0 auto clamp(16px,3.4vh,30px); max-width:520px;
+    transform:translateX(calc((var(--pilex) - 50) * .8vw)) rotate(calc(var(--piler) * 1deg));
   }
-  .rail-mark{ margin: 0 18px 0 0; font-size: 15px; white-space: nowrap; }
-  .rail-mark small{ display: none; }
-  .tab{ width: auto; white-space: nowrap; padding: 10px 14px; font-size: 11px; }
-  .table{ inset: 74px 0 0 0; padding: 0; }
-  /* .plate is absolutely positioned, so it sits inside .table's
-     padding box and has to carry its own gutters here. */
-  .plate{ padding: 12px var(--edge) 0; }
-  .title-plate, .about-plate, .step{ grid-template-columns: 1fr; }
-  .step:nth-child(even) .step-copy{ order: 0; }
-  .pile{ margin: 30px auto 44px; }
-  .cloud-sig{ left: -6px; bottom: -96px; }
-  .cloud-sig .face{ width: 104px; height: 60px; }
-  .sunmark{ display: none; }
-}
-@media (max-width: 620px){
-  .offer{ grid-template-columns: 1fr; gap: 12px; }
-  .offer .lead-t{ text-align: left; }
-  .crow{ grid-template-columns: 1fr; gap: 5px; }
-  .jobs{ grid-template-columns: 1fr 1fr; gap: 14px; }
-  .job .jt{ font-size: 13.5px; }
+  .stage.on .scrap{ transform:translateX(0) rotate(calc(var(--r) * .5deg)); }
+  .scrap-in{ transform:translateY(34vh) scale(.4); }
+  .hangings{ overflow-x:auto; justify-content:flex-start; scrollbar-width:none; }
+  .hangings::-webkit-scrollbar{ display:none; }
+  .where{ display:none; }
+  .ridges{ bottom:12%; }
 }
 
-/* Reduced motion: the paper stops flying, the sun stops
-   travelling, the shadows stop arriving late. The material
-   stays — depth was never the animation. */
-@media (prefers-reduced-motion: reduce){
-  *, *::before, *::after{
-    transition-duration: 1ms !important;
-    transition-delay: 0ms !important;
-    animation-duration: 1ms !important;
+/* The pieces stop flying, the light stops travelling, the shadows
+   stop arriving late. Everything is still made of torn paper. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    transition-duration:1ms !important; transition-delay:0ms !important;
+    animation-duration:1ms !important; animation-iteration-count:1 !important;
   }
-  .piece{ opacity: 1; transform: none; }
+  .scrap{ opacity:1; transform:translate(-50%,-50%) rotate(calc(var(--r) * 1deg)); }
+  .scrap-in{ transform:none; }
 }
 </style>
 </head>
 <body>
 
-<nav class="rail" id="rail" aria-label="Sections"></nav>
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs>
+    <!-- The torn edge. Turbulence displaces the alpha of whatever it
+         is applied to, so a rectangle stops being a rectangle. -->
+    <filter id="torn" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016 0.022" numOctaves="4" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="11" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- Gooey merge: blur a group of lobes, then throw the alpha
+         through a steep curve so the blurred overlaps snap back to
+         a single hard silhouette. Five circles become one cloud. -->
+    <filter id="goo">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b"/>
+      <feColorMatrix in="b" type="matrix" result="g"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -12"/>
+    </filter>
+    <filter id="torn2" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.021 0.014" numOctaves="3" seed="23" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
 
-<main class="table" id="table"></main>
+<div class="world" id="world">
+  <div class="plane sky" data-depth="2">
+    <div class="bow" aria-hidden="true"></div>
+    <div class="ridges">
+      <svg viewBox="0 0 1200 300" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 300 L0 196 L118 128 L214 178 L318 96 L432 172 L536 122 L648 190 L742 140 L864 200 L968 152 L1074 206 L1200 160 L1200 300 Z" fill="#8d9ea6" opacity=".55"/>
+        <path d="M0 300 L0 232 L140 178 L262 226 L376 168 L498 224 L618 182 L738 232 L860 190 L986 238 L1104 200 L1200 236 L1200 300 Z" fill="#a9b8be" opacity=".8"/>
+      </svg>
+    </div>
+  </div>
+  <div class="plane fog fog-far" data-depth="6" aria-hidden="true"><i></i><i></i></div>
 
-<div class="sunmark" aria-hidden="true">
-  <span class="ring"></span><span class="disc"></span><span class="lbl">LIGHT</span>
+  <div class="plane" data-depth="10" id="stages"></div>
+
+  <div class="plane fog fog-near" data-depth="16" aria-hidden="true"><i></i><i></i></div>
+
+  <nav class="hangings" id="hangings" aria-label="Sections"></nav>
+
+  <div class="where" id="where" aria-hidden="true"></div>
+
+  <div class="pile" id="pile" aria-hidden="true"></div>
+  <div class="pile-lip" aria-hidden="true"></div>
+
+  <div class="lift" id="lift" role="dialog" aria-modal="true" aria-label="Detail" hidden>
+    <div class="stock l7 lift-sheet" id="liftSheet"></div>
+  </div>
 </div>
 
-<div class="lift" id="lift" role="dialog" aria-modal="true" aria-label="Job detail" hidden>
-  <div class="sheet lift-sheet" id="liftSheet"></div>
-</div>
-
-<noscript style="position:fixed;inset:0;display:grid;place-items:center;padding:40px;font-family:Jost,sans-serif;">
+<noscript style="position:fixed;inset:0;display:grid;place-items:center;padding:40px;font-family:Jost,sans-serif">
   This site assembles itself in the browser. Please enable JavaScript.
 </noscript>
 
 <script>
 /* ═════════════════════════════════════════════════════════════
-   SHOPS — the assembler.
+   THE ASSEMBLER
 
-   The page has no markup of its own worth speaking of. It
-   fetches content.json, builds one plate per section, and
-   hands each plate to a renderer keyed on its type. Adding a
-   section type means one function here and one editor in
-   admin.html — nothing else.
+   Sections are not laid out; they are composed. Each one is a
+   hand-placed arrangement of scraps in a 100×100 stage space,
+   and every scrap knows both where it belongs and where in the
+   heap it came from. Choosing a section is a choreography, not
+   a render.
    ═════════════════════════════════════════════════════════ */
 
-const $  = (id) => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s == null ? '' : s)
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ── The light ────────────────────────────────────────────────
-   `sun` is the angle the shadows fall, in degrees clockwise
-   from straight down. 0 drops them below an object, 90 throws
-   them to the right. Sections each declare one; tweening
-   between them is the transition. */
-const DEFAULT_SUN = 38;
-function setSun(deg){
-  const t = (Number.isFinite(+deg) ? +deg : DEFAULT_SUN) * Math.PI / 180;
-  const r = document.documentElement.style;
-  r.setProperty('--sun-x', Math.sin(t).toFixed(4));
-  r.setProperty('--sun-y', Math.cos(t).toFixed(4));
+/* Deterministic scatter — the heap must look tossed, but it has
+   to look identically tossed on every load. */
+function rng(seed){
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 
-/* ── Media ───────────────────────────────────────────────────
-   A src is a local file, an mp4, or a video URL. One function
-   decides which, everywhere. */
+/* ── the light ───────────────────────────────────────────── */
+const DEFAULT_SUN = 24;
+function setSun(deg){
+  const t = (Number.isFinite(+deg) ? +deg : DEFAULT_SUN) * Math.PI / 180;
+  document.documentElement.style.setProperty('--sun-x', Math.sin(t).toFixed(4));
+  document.documentElement.style.setProperty('--sun-y', Math.cos(t).toFixed(4));
+}
+
+/* ── media ───────────────────────────────────────────────── */
 function mediaHtml(src){
   const s = String(src || '');
   let m = s.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]+)/);
-  if (m) return `<iframe src="https://www.youtube-nocookie.com/embed/${esc(m[1])}" allowfullscreen loading="lazy" title="Video"></iframe>`;
+  if (m) return `<iframe src="https://www.youtube-nocookie.com/embed/${esc(m[1])}" allowfullscreen loading="lazy" title="Video" style="width:100%;height:100%;border:0"></iframe>`;
   m = s.match(/vimeo\.com\/(?:video\/)?(\d+)/);
-  if (m) return `<iframe src="https://player.vimeo.com/video/${esc(m[1])}" allowfullscreen loading="lazy" title="Video"></iframe>`;
+  if (m) return `<iframe src="https://player.vimeo.com/video/${esc(m[1])}" allowfullscreen loading="lazy" title="Video" style="width:100%;height:100%;border:0"></iframe>`;
   if (/\.(mp4|webm|m4v)(\?|#|$)/i.test(s)) return `<video src="${esc(s)}" muted loop autoplay playsinline></video>`;
   return `<img src="${esc(s)}" alt="" loading="lazy">`;
 }
-function frameHtml(item, opts = {}){
+const isStill = (src) => !/(?:youtu|vimeo)|\.(?:mp4|webm|m4v)(?:\?|#|$)/i.test(String(src || ''));
+
+function shotHtml(item, { ratio = '4/3', shape = '', torn = true } = {}){
   const it = item || {};
-  const cls = ['sheet', 'frame', opts.cls].filter(Boolean).join(' ');
-  /* Only a still can keep its own crop. A player with no aspect
-     ratio collapses to nothing, so video always takes the frame. */
-  const still = !/(?:youtube|youtu\.be|vimeo)|\.(?:mp4|webm|m4v)(?:\?|#|$)/i.test(String(it.src || ''));
-  const shot = ['shot', opts.natural && still ? 'natural' : ''].filter(Boolean).join(' ');
-  return `<figure class="${cls}" style="${opts.style || ''}">
-    <div class="${shot}">${it.src ? mediaHtml(it.src) : '<span class="none">NOTHING HERE YET</span>'}</div>
-    ${it.caption ? `<figcaption class="cap">${esc(it.caption)}</figcaption>` : '<div class="cap"></div>'}
-  </figure>`;
-}
-function slateHtml(rows){
-  const list = (rows || []).filter(r => r && (r.k || r.v));
-  if (!list.length) return '';
-  return `<dl class="slate">${list.map(r =>
-    `<dt>${esc(r.k)}</dt><dd>${esc(r.v)}</dd>`).join('')}</dl>`;
-}
-function paras(arr){
-  return (arr || []).filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('');
-}
-function headHtml(sec, n){
-  return `<header class="plate-head piece">
-    <div class="eyebrow">${esc(String(n).padStart(2, '0'))} — ${esc(sec.label || '')}</div>
-    <h2>${esc(sec.title || sec.label || '')}</h2>
-    ${sec.sub ? `<div class="sub">${esc(sec.sub)}</div>` : ''}
-  </header>`;
-}
-const cloudHtml = (cls) =>
-  `<span class="cloudplate ${cls || ''}">
-     <span class="cast"><i></i><i></i><i></i><i></i></span>
-     <span class="face"></span>
-   </span>`;
-
-/* ── Renderers ─────────────────────────────────────────────── */
-const RENDER = {};
-
-RENDER.title = (sec) => {
-  const prints = (sec.plates || []).filter(p => p && p.src);
-  return `<div class="title-plate">
-    <div class="title-copy">
-      <div class="piece">
-        ${sec.eyebrow ? `<div class="eyebrow">${esc(sec.eyebrow)}</div>` : ''}
-        <h1 class="bigname">${esc(sec.name || 'SHOPS')}</h1>
-        <hr class="rule">
-      </div>
-      <div class="piece lede body-copy" style="margin-top:22px">${paras(sec.paragraphs)}</div>
-      ${sec.tagline ? `<div class="piece"><span class="sheet clay title-strip">${esc(sec.tagline)}</span></div>` : ''}
-    </div>
-    <div class="piece">
-      <div class="pile" id="pile">
-        ${cloudHtml('cloud-sig')}
-        ${prints.map((p, i) => `<figure class="sheet frame print" data-slot="${i < 4 ? i : 'x'}" data-idx="${i}">
-            <div class="shot">${mediaHtml(p.src)}</div>
-            <figcaption class="cap">${esc(p.caption || '')}</figcaption>
-          </figure>`).join('')}
-        ${prints.length > 1 ? `<div class="pile-count">${prints.length} PRINTS — CLICK TO SHUFFLE</div>` : ''}
-      </div>
-    </div>
+  const cls = ['shot', shape, torn && isStill(it.src) ? 'torn' : ''].filter(Boolean).join(' ');
+  return `<div class="${cls}" style="aspect-ratio:${ratio}">
+    ${it.src ? mediaHtml(it.src) : '<span class="nothing">NOT YET</span>'}
   </div>`;
+}
+function photoScrap(item, opts){
+  const it = item || {};
+  return `<div class="stock ragged mount ${opts.alt ? 'alt' : ''} ${opts.stock || ''}">${shotHtml(it, opts)}
+    ${it.caption ? `<div class="cap">${esc(it.caption)}</div>` : '<div class="cap"></div>'}</div>`;
+}
+const ensoHtml = (color, inner) => `<div class="enso">
+  <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="41" fill="none"
+    stroke="${color}" stroke-width="5.5" stroke-linecap="round"
+    stroke-dasharray="228 32" transform="rotate(-38 50 50)" opacity=".82"/></svg>
+  ${inner ? `<div class="inner">${inner}</div>` : ''}</div>`;
+const paras = (arr) => (arr || []).filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('');
+const tate = (t, cls) => `<div class="tate ${cls || ''}">${esc(t)}</div>`;
+
+/* ═════════════════════════════════════════════════════════════
+   THE COMPOSITIONS
+   x, y are the centre of a scrap as a percentage of the stage;
+   w is its width; r its resting angle. Hand-placed, because a
+   composition assembled by a loop is a grid wearing a costume.
+   ═════════════════════════════════════════════════════════ */
+const COMPOSE = {};
+
+/* Every section but the title card opens with its name set as a
+   poster would set it — top left, clear of the hangings. The
+   vertical rails are for labels only: rotated Latin is a spine,
+   and a spine is no place for a sentence. */
+const headline = (sec, n) => ({
+  x:16, y:17, w:27, r:-1.2, z:30, html:
+  `<div class="stock ragged headline l5">
+     <span class="over">${String(n).padStart(2,'0')} — ${esc(sec.label || '')}</span>
+     ${esc(sec.title || sec.label || '')}
+     ${sec.sub ? `<span class="under">${esc(sec.sub)}</span>` : ''}
+   </div>` });
+
+COMPOSE.title = (s) => {
+  const p = (s.plates || []).filter(x => x && x.src);
+  const out = [];
+  if (p[2]) out.push({ x:33, y:25, w:10, r:8, z:8, html:photoScrap(p[2], { shape:'round', ratio:'1/1' }) });
+  out.push({ x:66, y:26, w:12, r:0, z:7, html:ensoHtml('var(--vermilion)') });
+  if (p[1]) out.push({ x:12, y:35, w:18, r:-6, z:11, html:photoScrap(p[1], { ratio:'3/4' }) });
+  if (p[0]) out.push({ x:81, y:52, w:18, r:4, z:12, html:photoScrap(p[0], { shape:'arch', ratio:'3/4', alt:1 }) });
+  out.push({ x:51, y:44, w:38, r:-1.5, z:20, html:
+    `<div class="blob">
+       <div class="goo halo">${'<i></i>'.repeat(5)}</div>
+       <div class="goo edge">${'<i></i>'.repeat(5)}</div>
+       <div class="goo face">${'<i></i>'.repeat(5)}</div>
+       <div class="blob-copy">
+         ${s.eyebrow ? `<span class="eyebrow">${esc(s.eyebrow)}</span>` : ''}
+         <h1>${esc(s.name || 'SHOPS')}</h1>
+       </div>
+     </div>` });
+  out.push({ x:17, y:61, w:24, r:1.5, z:14, html:
+    `<div class="stock ragged panel lede l5">${paras(s.paragraphs)}</div>` });
+  if (s.tagline) out.push({ x:64, y:68, w:18, r:-2.5, z:15, html:
+    `<div class="stock ragged red strip l5">${esc(s.tagline)}</div>` });
+  return out;
 };
 
-RENDER.work = (sec, n) => {
-  const items = sec.items || [];
-  const kinds = [...new Set(items.map(i => (i.kind || '').trim()).filter(Boolean))];
-  return `${headHtml(sec, n)}
-    ${kinds.length > 1 ? `<div class="filters piece" id="filters">
-      <button class="sheet chip on" data-kind="">ALL</button>
-      ${kinds.map(k => `<button class="sheet chip" data-kind="${esc(k)}">${esc(k)}</button>`).join('')}
-    </div>` : ''}
-    <div class="jobs" id="jobs">${items.map(jobHtml).join('')}</div>`;
+/* Nine at a time. The rest stay in the heap until asked for, which
+   is the only honest form of pagination on a site made of scraps. */
+const SCATTER = [
+  { x:14, y:41, w:15, r:-4 },  { x:35, y:32, w:14, r:2.5 },
+  { x:30, y:61, w:14, r:-2 },  { x:53, y:44, w:15, r:1.5 },
+  { x:50, y:65, w:12, r:-3.5 },{ x:72, y:33, w:14, r:3 },
+  { x:77, y:60, w:14, r:-2.5 },{ x:91, y:44, w:11, r:2 },
+  { x:9,  y:63, w:11, r:4.5 },
+];
+COMPOSE.work = (s, st, n) => {
+  const items = s.items || [];
+  const page = st.page || 0;
+  const start = (page * SCATTER.length) % Math.max(items.length, 1);
+  const out = [headline(s, n)];
+  SCATTER.forEach((slot, i) => {
+    const idx = start + i;
+    if (idx >= items.length) return;
+    const job = items[idx];
+    const deep = !!(job.writeup || (job.gallery || []).length);
+    out.push({ ...slot, z: 10 + i, html:
+      `<button class="stock ragged card ${i % 2 ? 'alt' : ''}" data-job="${idx}" data-deep="${deep ? 1 : 0}"${deep ? '' : ' tabindex="-1"'}>
+         ${shotHtml({ src:job.image }, { ratio:'4/3', shape: i % 3 === 1 ? 'arch' : '' })}
+         <div class="meta">
+           <div class="t">${esc(job.title || 'Untitled')}</div>
+           <div class="r">${esc(job.role || '')}${job.year ? ` · <em>${esc(job.year)}</em>` : ''}</div>
+         </div>
+       </button>` });
+  });
+  if (items.length > SCATTER.length)
+    out.push({ x:63, y:74, w:22, r:1, z:44, html:
+      `<div style="text-align:center"><button class="more" data-more="1">More from the pile ↑</button></div>` });
+  return out;
 };
-function jobHtml(job, i){
-  const deep = !!(job.writeup || (job.gallery || []).length);
-  const bits = [job.role, job.year].filter(Boolean).map(esc);
-  return `<div class="piece" data-kind="${esc(job.kind || '')}">
-    <button class="sheet job" data-job="${i}" data-flat="${deep ? 0 : 1}"${deep ? '' : ' tabindex="-1"'}>
-      <div class="shot">${job.image ? mediaHtml(job.image) : '<span class="none">NOTHING HERE YET</span>'}</div>
-      <div class="meta">
-        <div class="jt">${esc(job.title || 'Untitled')}</div>
-        <div class="jr">${bits.length ? bits[0] : ''}${job.year ? ` · <span class="jy">${esc(job.year)}</span>` : ''}</div>
-        ${deep ? '<span class="open">Lift this one off the pile →</span>' : ''}
-      </div>
-    </button>
-  </div>`;
-}
 
-RENDER.services = (sec, n) => `${headHtml(sec, n)}
-  <div class="offers">
-    ${(sec.items || []).map((o, i) => `<div class="piece"><article class="sheet offer">
-      <div class="num">${String(i + 1).padStart(2, '0')}</div>
-      <div>
-        <h3>${esc(o.title || '')}</h3>
-        <div class="blurb">${esc(o.blurb || '')}</div>
-        ${(o.points || []).length ? `<ul class="points">${o.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}
-      </div>
-      <div class="lead-t">${esc(o.lead || '')}</div>
-    </article></div>`).join('')}
-  </div>
-  ${sec.note ? `<div class="piece"><div class="sheet kraft offers-note contra">${esc(sec.note)}</div></div>` : ''}`;
+COMPOSE.services = (s, st, n) => {
+  const items = (s.items || []).slice(0, 5);
+  const out = [headline(s, n)];
+  items.forEach((o, i) => {
+    const x = items.length > 1 ? 17 + (66 / (items.length - 1)) * i : 50;
+    out.push({ x, y: 47 + (i % 2 ? 3 : -3), w:13, r: i % 2 ? 1.4 : -1.4, z: 10 + i, html:
+      `<div class="scroll-top"></div>
+       <div class="stock kraft scroll-body l5">
+         <div class="n">${String(i + 1).padStart(2,'0')}</div>
+         <h3>${esc(o.title || '')}</h3>
+         ${o.lead ? `<div class="lead">${esc(o.lead)}</div>` : ''}
+         <div class="blurb">${esc(o.blurb || '')}</div>
+         ${(o.points || []).length ? `<ul class="pts">${o.points.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+       </div>
+       <div class="fringe">${'<i></i>'.repeat(9)}</div>` });
+  });
+  if (s.note) out.push({ x:23, y:73, w:32, r:1.4, z:44, html:
+    `<div class="stock ragged panel l5">${esc(s.note)}</div>` });
+  return out;
+};
 
-RENDER.process = (sec, n) => `${headHtml(sec, n)}
-  <div class="steps">
-    ${(sec.steps || []).map((s, i) => `<div class="piece step">
-      <div class="step-copy">
-        <div class="n">STAGE ${String(i + 1).padStart(2, '0')}</div>
-        <h3>${esc(s.title || '')}</h3>
-        <p>${esc(s.text || '')}</p>
-      </div>
-      ${frameHtml(s, { cls: i % 2 ? 'cross' : '' })}
-    </div>`).join('')}
-  </div>`;
+COMPOSE.process = (s, st, n) => {
+  const steps = (s.steps || []).slice(0, 5);
+  const ys = [50, 38, 52, 37, 49];
+  const out = [headline(s, n)];
+  steps.forEach((st2, i) => {
+    const x = 14 + (74 / Math.max(steps.length - 1, 1)) * i;
+    out.push({ x, y: ys[i % ys.length], w:16, r: i % 2 ? 2.2 : -2.2, z: 10 + i, html:
+      `<div class="stock ragged ${i % 2 ? 'alt' : ''} mount l5">
+         ${shotHtml(st2, { ratio:'4/3', shape: i % 2 ? 'arch' : '' })}
+         <div class="cap">STAGE ${String(i + 1).padStart(2,'0')} — ${esc(st2.title || '')}</div>
+         <div style="padding:0 2px 12px;font-size:clamp(10px,.82vw,12px);line-height:1.55;color:#332d26">${esc(st2.text || '')}</div>
+       </div>` });
+  });
+  return out;
+};
 
-RENDER.about = (sec, n) => `${headHtml(sec, n)}
-  <div class="about-plate">
-    <div class="piece portrait">
-      ${frameHtml(sec.portrait || {}, { cls: 'l4' })}
-      ${sec.name ? `<div class="lower-third">
-        <div class="nm">${esc(sec.name)}</div>
-        ${sec.role ? `<div class="rl">${esc(sec.role)}</div>` : ''}
-      </div>` : ''}
-    </div>
-    <div>
-      <div class="piece">${slateHtml(sec.facts)}</div>
-      <div class="piece body-copy">${paras(sec.paragraphs)}</div>
-    </div>
-  </div>`;
+COMPOSE.about = (s, st, n) => {
+  const out = [headline(s, n)];
+  out.push({ x:32, y:48, w:25, r:0, z:5, html:ensoHtml('var(--board)') });
+  out.push({ x:32, y:50, w:19, r:-2, z:12, html:
+    photoScrap(s.portrait || {}, { shape:'arch', ratio:'4/5', stock:'l7' }) });
+  if (s.role) out.push({ x:47, y:31, w:17, r:-4, z:14, html:
+    `<div class="stock ragged red strip l5">${esc(s.role)}</div>` });
+  out.push({ x:73, y:47, w:27, r:-1.5, z:13, html:
+    `<div class="stock ragged alt panel l5">${paras(s.paragraphs)}</div>` });
+  const facts = s.facts || [];
+  if (facts.length) out.push({ x:14, y:70, w:20, r:3, z:15, html:
+    `<div class="stock ragged kraft panel">
+       <dl class="slate" style="margin:0">${facts.map(f =>
+         `<dt>${esc(f.k)}</dt><dd>${esc(f.v)}</dd>`).join('')}</dl></div>` });
+  return out;
+};
 
-RENDER.contact = (sec, n) => `<div class="contact-plate">
-    ${headHtml(sec, n)}
-    <div class="piece"><div class="sheet card-rows l4">
-      ${(sec.rows || []).map(r => {
-        const inner = `<span class="k">${esc(r.k)}</span><span class="v">${esc(r.label)}</span>`;
-        return r.href ? `<a class="crow" href="${esc(r.href)}">${inner}</a>` : `<div class="crow">${inner}</div>`;
-      }).join('')}
-    </div></div>
-    ${slateHtml(sec.meta) ? `<div class="piece" style="max-width:420px">${slateHtml(sec.meta)}</div>` : ''}
-    ${sec.note ? `<div class="piece contact-note">${esc(sec.note)}</div>` : ''}
-  </div>`;
+COMPOSE.contact = (s, st, n) => {
+  const rows = (s.rows || []).map(r => {
+    const inner = `<div style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--board)">${esc(r.k)}</div>
+      <div style="font-family:var(--display);font-weight:700;font-size:clamp(13px,1.4vw,22px);margin-top:3px">${esc(r.label)}</div>`;
+    return r.href
+      ? `<a href="${esc(r.href)}" style="text-decoration:none;color:inherit;display:block;padding:7px 0">${inner}</a>`
+      : `<div style="padding:7px 0">${inner}</div>`;
+  }).join('');
+  const out = [headline(s, n)];
+  out.push({ x:48, y:50, w:25, r:0, z:12, html:ensoHtml('var(--vermilion)', rows) });
+  if ((s.meta || []).length) out.push({ x:82, y:58, w:17, r:2, z:13, html:
+    `<div class="stock ragged kraft panel"><dl class="slate" style="margin:0">${
+      s.meta.map(m => `<dt>${esc(m.k)}</dt><dd>${esc(m.v)}</dd>`).join('')}</dl></div>` });
+  if (s.note) out.push({ x:68, y:22, w:26, r:-1.4, z:44, html:
+    `<div class="stock ragged indigo strip l5">${esc(s.note)}</div>` });
+  return out;
+};
 
-RENDER.custom = (sec, n) => `${headHtml(sec, n)}
-  ${(sec.blocks || []).map(b => {
-    if (b.kind === 'text')  return `<div class="piece"><div class="sheet block-text">${paras(String(b.text || '').split(/\n{2,}/))}</div></div>`;
-    if (b.kind === 'image' || b.kind === 'video') return `<div class="piece block-img">${frameHtml(b, { natural: b.kind === 'image' })}</div>`;
-    return '';
-  }).join('')}`;
+COMPOSE.custom = (s, st, n) => {
+  const out = [headline(s, n)];
+  const slots = [{x:28,y:43,w:24,r:-2},{x:60,y:36,w:22,r:2},{x:37,y:65,w:22,r:1.5},{x:73,y:60,w:20,r:-2.5}];
+  (s.blocks || []).slice(0, 4).forEach((b, i) => {
+    const html = b.kind === 'text'
+      ? `<div class="stock ragged panel l5">${paras(String(b.text || '').split(/\n{2,}/))}</div>`
+      : photoScrap(b, { ratio:'4/3', shape: i % 2 ? 'arch' : '' });
+    out.push({ ...slots[i], z: 10 + i, html });
+  });
+  return out;
+};
 
 /* ═════════════════════════════════════════════════════════════
    THE DRIVER
    ═════════════════════════════════════════════════════════ */
-let content = null, sections = [], plates = [], cur = -1, jobsOf = [];
+let content = null, sections = [], stages = [], cur = -1;
+const state = [];                     /* per-section scratch (work paging) */
 
-const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 
-async function boot(){
-  try {
-    const res = await fetch('content.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    content = await res.json();
-  } catch (err) {
-    $('table').innerHTML = `<div class="plate on"><div class="sheet block-text" style="margin-top:40px">
-      <p><strong>Could not load content.json.</strong></p>
-      <p>Serve the folder over HTTP rather than opening the file directly —
-      <code>python3 -m http.server</code> in this directory, then visit
-      <code>localhost:8000</code>.</p>
-      <p style="color:#7a6a5b">${esc(err.message)}</p></div></div>`;
-    return;
+/* Build the scraps for one section and hand each its place in
+   the heap. The pile anchor is deterministic per slot, so a piece
+   always comes out of — and goes back to — the same spot. */
+function paint(stage, sec, i){
+  const rnd = rng(1000 + i * 97);
+  const frags = COMPOSE[sec.type](sec, state[i] || {}, i + 1);
+  stage.innerHTML = frags.map((f, n) => {
+    const pilex = 8 + rnd() * 84;
+    const piler = -46 + rnd() * 92;
+    const d = Math.round(n * 38 + rnd() * 44);
+    const dOut = Math.round((frags.length - n) * 22);
+    return `<div class="scrap" style="
+      --x:${f.x}; --y:${f.y}; --w:${f.w}; --r:${f.r || 0}; --z:${f.z || 10};
+      --pilex:${pilex.toFixed(1)}; --piler:${piler.toFixed(1)};
+      --d:${d}ms; --dOut:${dOut}ms;"><div class="scrap-in">${f.html}</div></div>`;
+  }).join('');
+}
+
+/* ── the heap itself ─────────────────────────────────────── */
+function buildPile(){
+  const rnd = rng(20260821);
+  /* Overwhelmingly warm stock with three accents in the whole heap.
+     An even spread of colours read as confetti; paper with the odd
+     scrap of lacquer in it reads as a shop floor. */
+  const stocks = ['var(--paper)','var(--paper-2)','var(--paper)','var(--kraft)',
+                  'var(--paper-2)','var(--paper)','var(--board)','var(--paper-2)',
+                  'var(--paper)','var(--kraft)','var(--vermilion)','var(--paper)',
+                  'var(--paper-2)','var(--blossom)','var(--paper)','var(--sumi)'];
+  let html = '';
+  for (let n = 0; n < 40; n++){
+    const w = 130 + rnd() * 200, h = 78 + rnd() * 104;
+    const x = -8 + rnd() * 116, rot = -34 + rnd() * 68;
+    const dip = 8 + rnd() * 46;
+    const bg = stocks[Math.floor(rnd() * stocks.length)];
+    html += `<b style="
+      left:${x.toFixed(1)}%; width:${w.toFixed(0)}px; height:${h.toFixed(0)}px;
+      margin-bottom:${-dip.toFixed(0)}px; background:${bg}; border-radius:2px;
+      filter:url(#torn2); opacity:${(.82 + rnd() * .18).toFixed(2)};
+      z-index:${n}; --jr:${rot.toFixed(1)}deg;
+      transform:translateX(-50%) rotate(${rot.toFixed(1)}deg);"></b>`;
   }
-
-  sections = (content.sections || []).filter(s => s && RENDER[s.type]);
-  document.title = content.site?.title || 'SHOPS';
-
-  /* rail */
-  $('rail').innerHTML = `<div class="rail-mark">${esc(content.site?.mark || 'SHOPS')}
-      <small>${esc(content.site?.markSub || '')}</small></div>` +
-    sections.map((s, i) => `<button class="sheet tab" data-go="${i}">
-      <span class="n">${String(i + 1).padStart(2, '0')}</span>
-      <span>${esc(s.label || 'SECTION')}</span></button>`).join('');
-  $('rail').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-go]');
-    if (b) go(+b.dataset.go);
-  });
-
-  /* plates */
-  $('table').innerHTML = sections.map((s, i) =>
-    `<section class="plate" data-i="${i}" aria-label="${esc(s.label || '')}">
-       <div class="plate-inner${s.type === 'title' || s.type === 'contact' ? ' centred' : ''}">${RENDER[s.type](s, i + 1)}</div>
-     </section>`).join('');
-  plates = [...document.querySelectorAll('.plate')];
-  plates.forEach(number);
-
-  /* deep link: #work lands on that section */
-  const want = sections.findIndex(s => slug(s.label) === location.hash.slice(1));
-  go(want >= 0 ? want : 0, { instant: true });
+  $('pile').innerHTML = html;
+}
+let disturbTimer = null;
+function disturbPile(){
+  if (REDUCED) return;
+  const p = $('pile');
+  p.classList.remove('disturbed');
+  void p.offsetWidth;
+  p.classList.add('disturbed');
+  clearTimeout(disturbTimer);
+  disturbTimer = setTimeout(() => p.classList.remove('disturbed'), 900);
 }
 
-/* Give every piece its place in the queue, so a composition
-   assembles in reading order instead of all at once. */
-function number(plate){
-  [...plate.querySelectorAll('.piece')].forEach((el, i) => el.style.setProperty('--i', i));
-}
+/* ── moving between sections ─────────────────────────────── */
+function go(i, { first } = {}){
+  if (i === cur || i < 0 || i >= stages.length) return;
+  const prev = cur >= 0 ? stages[cur] : null;
+  const next = stages[i];
 
-function go(i, { instant } = {}){
-  if (i === cur || i < 0 || i >= plates.length) return;
-  const prev = cur >= 0 ? plates[cur] : null;
-  const next = plates[i];
-
-  setSun(sections[i].sun);          /* the light moves first */
+  setSun(sections[i].sun);
   cur = i;
-  /* a sandboxed or file:// host can refuse this; the deep link is a
-     convenience, not a dependency */
   try { history.replaceState(null, '', '#' + slug(sections[i].label)); } catch {}
-  [...$('rail').querySelectorAll('.tab')].forEach((t, n) => t.classList.toggle('on', n === i));
+
+  [...$('hangings').children].forEach((h, n) => {
+    h.classList.toggle('on', n === i);
+    h.setAttribute('aria-current', n === i ? 'true' : 'false');
+  });
+  $('where').innerHTML =
+    `<span class="tate">${esc(sections[i].label || '')}</span>
+     <span class="rule"></span>
+     <span class="n">${String(i + 1).padStart(2,'0')}</span>`;
 
   const land = () => {
     if (prev) prev.classList.remove('out');
     next.scrollTop = 0;
-    number(next);
+    disturbPile();
     next.classList.add('on');
-    startPile(next);
   };
 
-  if (prev) {
+  if (prev){
     prev.classList.remove('on');
-    prev.classList.add('out');                     /* pieces blow away along the light */
-    setTimeout(land, REDUCED || instant ? 0 : 360);
+    prev.classList.add('out');                 /* thrown back on the heap */
+    setTimeout(land, REDUCED ? 0 : 290);
   } else {
-    land();
+    setTimeout(land, first && !REDUCED ? 260 : 0);
   }
 }
 
-/* ── The pile of prints on the title plate ────────────────────
-   Slots 0–3 are the visible stack; everything else waits
-   underneath. Advancing sends the top print to the back. */
-let pileTimer = null, pileOrder = [];
-function startPile(plate){
-  clearInterval(pileTimer);
-  const pile = plate.querySelector('.pile');
-  if (!pile) return;
-  const prints = [...pile.querySelectorAll('.print')];
-  if (prints.length < 2) return;
-  pileOrder = prints.map((_, i) => i);
-  const paint = () => prints.forEach((p, i) => {
-    const slot = pileOrder.indexOf(i);
-    p.dataset.slot = slot < 4 ? slot : 'x';
-  });
-  const advance = () => { pileOrder.push(pileOrder.shift()); paint(); };
-  pile.onclick = (e) => { if (e.target.closest('.print')) { advance(); reset(); } };
-  const reset = () => {
-    clearInterval(pileTimer);
-    if (!REDUCED) pileTimer = setInterval(advance, 5200);
-  };
-  paint(); reset();
+/* ── more from the pile ──────────────────────────────────── */
+function reshuffle(i){
+  const stage = stages[i];
+  state[i] = state[i] || {};
+  state[i].page = (state[i].page || 0) + 1;
+  stage.classList.remove('on');
+  stage.classList.add('out');
+  setTimeout(() => {
+    paint(stage, sections[i], i);
+    stage.classList.remove('out');
+    void stage.offsetWidth;
+    disturbPile();
+    stage.classList.add('on');
+  }, REDUCED ? 0 : 290);
 }
 
-/* ── Work filters ─────────────────────────────────────────── */
-document.addEventListener('click', (e) => {
-  const chip = e.target.closest('.chip');
-  if (!chip) return;
-  const bar = chip.closest('.filters');
-  const plate = chip.closest('.plate');
-  [...bar.querySelectorAll('.chip')].forEach(c => c.classList.toggle('on', c === chip));
-  const kind = chip.dataset.kind;
-  const cells = [...plate.querySelectorAll('.jobs .piece')];
-  cells.forEach(c => { c.hidden = !!kind && c.dataset.kind !== kind; });
-  /* re-queue the survivors so the grid rebuilds in order */
-  const shown = cells.filter(c => !c.hidden);
-  shown.forEach((c, i) => { c.style.setProperty('--i', i); c.classList.remove('piece'); });
-  void plate.offsetWidth;
-  shown.forEach(c => c.classList.add('piece'));
-});
+/* ── depth: everything drifts at its own rate ────────────── */
+function parallax(){
+  if (REDUCED) return;
+  const planes = [...document.querySelectorAll('.plane')];
+  let tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+  const tick = () => {
+    cx += (tx - cx) * .07; cy += (ty - cy) * .07;
+    planes.forEach(p => {
+      const d = +p.dataset.depth || 0;
+      p.style.transform = `translate(${(cx * d).toFixed(2)}px, ${(cy * d).toFixed(2)}px)`;
+    });
+    raf = (Math.abs(tx - cx) > .05 || Math.abs(ty - cy) > .05) ? requestAnimationFrame(tick) : null;
+  };
+  addEventListener('pointermove', (e) => {
+    tx = (e.clientX / innerWidth - .5) * -2;
+    ty = (e.clientY / innerHeight - .5) * -2;
+    if (!raf) raf = requestAnimationFrame(tick);
+  }, { passive: true });
+}
 
-/* ── Lifting a job off the pile ───────────────────────────── */
+/* ── pulling one piece all the way out ───────────────────── */
 let galIdx = 0, galItems = [];
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.job');
-  if (!btn || btn.dataset.flat === '1') return;
-  const plate = btn.closest('.plate');
-  const sec = sections[+plate.dataset.i];
-  openLift((sec.items || [])[+btn.dataset.job]);
-});
-
 function openLift(job){
   if (!job) return;
   galItems = (job.gallery || []).filter(g => g && g.src);
   galIdx = 0;
   const facts = [
-    ...(job.role ? [{ k: 'ROLE', v: job.role }] : []),
-    ...(job.kind ? [{ k: 'TYPE', v: job.kind }] : []),
-    ...(job.year ? [{ k: 'YEAR', v: job.year }] : []),
-    ...(job.client ? [{ k: 'CLIENT', v: job.client }] : []),
+    ...(job.role ? [{ k:'ROLE', v:job.role }] : []),
+    ...(job.kind ? [{ k:'TYPE', v:job.kind }] : []),
+    ...(job.year ? [{ k:'YEAR', v:job.year }] : []),
+    ...(job.client ? [{ k:'CLIENT', v:job.client }] : []),
     ...(job.meta || [])
   ];
   $('liftSheet').innerHTML = `
     <button class="lift-close" id="liftClose">CLOSE ✕</button>
     <div class="eyebrow">${esc(job.kind || 'WORK')}</div>
     <h3>${esc(job.title || '')}</h3>
-    ${slateHtml(facts)}
+    ${facts.length ? `<dl class="slate">${facts.map(f =>
+      `<dt>${esc(f.k)}</dt><dd>${esc(f.v)}</dd>`).join('')}</dl>` : ''}
     ${galItems.length ? `<div class="gal" id="gal">
-      ${frameHtml(galItems[0], { natural: true, cls: 'l4' })}
+      ${shotHtml(galItems[0], { ratio:'auto', torn:false })}
       ${galItems.length > 1 ? `<div class="gal-nav">
         <button data-step="-1" aria-label="Previous image"><span>◀ PREV</span></button>
         <button data-step="1" aria-label="Next image"><span>NEXT ▶</span></button>
       </div><div class="gal-count">1 / ${galItems.length}</div>` : ''}
     </div>` : ''}
-    ${job.writeup ? `<div class="body-copy">${paras(String(job.writeup).split(/\n{2,}/))}</div>` : ''}`;
+    ${job.writeup ? `<div class="body">${paras(String(job.writeup).split(/\n{2,}/))}</div>` : ''}`;
   const lift = $('lift');
   lift.hidden = false;
   requestAnimationFrame(() => lift.classList.add('open'));
@@ -952,36 +1048,83 @@ function galGo(step){
   if (galItems.length < 2) return;
   galIdx = (galIdx + step + galItems.length) % galItems.length;
   const gal = $('gal');
-  gal.querySelector('.frame').outerHTML = frameHtml(galItems[galIdx], { natural: true, cls: 'l4' });
+  gal.querySelector('.shot').outerHTML = shotHtml(galItems[galIdx], { ratio:'auto', torn:false });
   gal.querySelector('.gal-count').textContent = `${galIdx + 1} / ${galItems.length}`;
 }
 function closeLift(){
   const lift = $('lift');
   lift.classList.remove('open');
-  setTimeout(() => { lift.hidden = true; $('liftSheet').innerHTML = ''; }, REDUCED ? 0 : 300);
+  setTimeout(() => { lift.hidden = true; $('liftSheet').innerHTML = ''; }, REDUCED ? 0 : 320);
 }
+
+/* ── wiring ──────────────────────────────────────────────── */
+$('stages').addEventListener('click', (e) => {
+  const more = e.target.closest('[data-more]');
+  if (more) return reshuffle(cur);
+  const card = e.target.closest('.card');
+  if (!card || card.dataset.deep === '0') return;
+  openLift((sections[cur].items || [])[+card.dataset.job]);
+});
 $('lift').addEventListener('click', (e) => {
-  if (e.target.id === 'lift') return closeLift();
-  if (e.target.closest('#liftClose')) return closeLift();
+  if (e.target.id === 'lift' || e.target.closest('#liftClose')) return closeLift();
   const step = e.target.closest('[data-step]');
   if (step) galGo(+step.dataset.step);
 });
-
-/* ── Keys. Arrows walk the sections; while a job is lifted
-   they walk its gallery instead. ──────────────────────────── */
 addEventListener('keydown', (e) => {
-  const lifted = !$('lift').hidden;
-  if (lifted) {
+  if (!$('lift').hidden){
     if (e.key === 'Escape') closeLift();
     if (e.key === 'ArrowLeft') galGo(-1);
     if (e.key === 'ArrowRight') galGo(1);
     return;
   }
   if (e.target.matches('input, textarea')) return;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { go(cur + 1); e.preventDefault(); }
-  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { go(cur - 1); e.preventDefault(); }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown'){ go(cur + 1); e.preventDefault(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'){ go(cur - 1); e.preventDefault(); }
   if (/^[1-9]$/.test(e.key)) go(+e.key - 1);
 });
+
+/* ── boot ────────────────────────────────────────────────── */
+async function boot(){
+  try {
+    const res = await fetch('content.json', { cache:'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    content = await res.json();
+  } catch (err){
+    $('stages').innerHTML = `<div class="stage on"><div class="scrap" style="--x:50;--y:45;--w:44;--pilex:50;--piler:0">
+      <div class="scrap-in"><div class="stock panel l5">
+      <p><strong>Could not load content.json.</strong></p>
+      <p>Serve this folder over HTTP rather than opening the file directly —
+      <code>python3 -m http.server</code>, then visit <code>localhost:8000</code>.</p>
+      <p style="color:var(--board)">${esc(err.message)}</p></div></div></div></div>`;
+    return;
+  }
+
+  sections = (content.sections || []).filter(s => s && COMPOSE[s.type]);
+  document.title = content.site?.title || 'SHOPS';
+
+  buildPile();
+
+  $('hangings').innerHTML = sections.map((s, i) => `
+    <button class="hang" data-go="${i}" aria-label="${esc(s.label || '')}">
+      <span class="cord"></span>
+      <span class="col"></span>
+      <span class="lbl">${esc(s.label || '')}</span>
+      <span class="num">${String(i + 1).padStart(2,'0')}</span>
+    </button>`).join('');
+  $('hangings').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-go]');
+    if (b) go(+b.dataset.go);
+  });
+
+  $('stages').innerHTML = sections.map((s, i) =>
+    `<section class="stage" data-i="${i}" aria-label="${esc(s.label || '')}"></section>`).join('');
+  stages = [...document.querySelectorAll('.stage')];
+  sections.forEach((s, i) => { state[i] = {}; paint(stages[i], s, i); });
+
+  parallax();
+  const want = sections.findIndex(s => slug(s.label) === location.hash.slice(1));
+  go(want >= 0 ? want : 0, { first:true });
+}
 
 setSun(DEFAULT_SUN);
 boot();
