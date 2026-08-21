@@ -272,71 +272,21 @@ html, body {
 h1, h2 { font-family: var(--display-font); font-weight: 400; }
 h3 { font-family: var(--osd-font); font-weight: 400; }
 
-/* ---------- CH 01 — FULL-FRAME TITLE CARD ----------
-   The hero channel is one fixed composition that never scrolls: the
-   carousel fills the tube as a picture plate and the type is supered over
-   it the way a title card or a broadcast super worked in the era — picture
-   dipped under the words, everything locked to the title-safe rectangle,
-   the whole block symmetrical about the centre line. */
+/* ---------- CH 01 — TITLE CARD OVER BLACK ----------
+   The name is set on unlit tube — most title cards are type on black —
+   and the photography pulls back into a contained picture window beside
+   the credits, like a broadcast over-the-shoulder insert. Still one fixed
+   composition that never scrolls, still locked to the title-safe
+   rectangle and symmetrical about the centre line up top. */
 .channel.ch-hero { position: absolute; inset: 0; padding: 0; }
 .hero-card { position: absolute; inset: 0; overflow: hidden; background: var(--tube); }
-
-/* --- the picture plate --- */
-.hero-plate { position: absolute; inset: 0; }
-.hero-plate .carousel { position: absolute; inset: 0; margin: 0; max-width: none; }
-.hero-plate .tv-frame.wide {
+/* a faint ink wash behind the title zone so the black isn't dead flat */
+.hero-card::before {
+  content: "";
   position: absolute; inset: 0;
-  aspect-ratio: auto;             /* the plate is tube-shaped, not 16:9 */
-  border-radius: 0;
-  box-shadow: none;
-}
-/* the tube supplies its own scanlines and vignette — a second set laid over
-   a full-bleed plate only crushes the picture */
-.hero-plate .tv-frame::before,
-.hero-plate .tv-frame::after { display: none; }
-/* CRTs overscanned: the picture ran off the edge of the mask. Scaling the
-   plate a touch reproduces that, and swallows the tracking-glitch shift. */
-.hero-plate .tv-frame img,
-.hero-plate .tv-frame video,
-.hero-plate .tv-frame iframe { transform: scale(1.04); }
-/* nav sits in edge strips so the middle of the picture isn't a click trap */
-.hero-plate .car-zone.prev,
-.hero-plate .car-zone.next { width: 26%; }
-/* counter and caption take opposite title-safe corners, clear of the
-   channel label, the CH number and the dial */
-.hero-plate .car-osd,
-.hero-plate .tv-caption {
-  z-index: 7;                     /* clear of the dip, which sits at 6 */
-  top: calc(clamp(68px, 12vh, 118px) + 10px);
-  bottom: auto;
-  font-size: clamp(12px, 1.5vw, 17px);
-  max-width: 38%;
-  /* bone, not ink: these sit on open picture where a saturated ink would
-     disappear — the same split the reference cards use between a coloured
-     title and its bone credit lines */
-  color: var(--burn);
-  text-shadow: 0 0 6px rgba(0,0,0,0.95), 0 0 14px rgba(0,0,0,0.8);
-}
-.hero-plate .car-osd {
-  right: auto;
-  left: calc(clamp(20px, 5vw, 56px) + 26px);
-}
-.hero-plate .tv-caption {
-  left: auto;
-  right: calc(clamp(20px, 5vw, 56px) + 26px);
-  text-align: right;
-}
-
-/* --- picture dipped under the supers --- */
-.hero-dip {
-  position: absolute; inset: 0; z-index: 6;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 72% 54% at 50% 52%,
-      rgba(var(--deep-rgb),0.62) 0%, rgba(var(--deep-rgb),0.34) 58%, rgba(var(--deep-rgb),0) 82%),
-    linear-gradient(to bottom,
-      rgba(var(--deep-rgb),0.50) 0%, rgba(var(--deep-rgb),0.20) 18%,
-      rgba(var(--deep-rgb),0.20) 48%, rgba(var(--deep-rgb),0.62) 86%, rgba(var(--deep-rgb),0.80) 100%);
+  background: radial-gradient(ellipse 72% 46% at 50% 24%,
+    rgba(var(--ink-rgb),0.07), transparent 72%);
 }
 
 /* --- title-safe registration marks --- */
@@ -356,7 +306,7 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
 .hero-safe i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; }
 .hero-safe i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; }
 
-/* --- the supered type --- */
+/* --- the card interior --- */
 .hero-copy {
   position: absolute; z-index: 8;
   left: 0; right: 0;
@@ -366,9 +316,16 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* on tall tubes the lower row caps out — centre the whole card rather
+     than leaving the head pinned to the top of a void */
   justify-content: center;
+}
+.hero-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  pointer-events: none;
+  width: 100%;
 }
 .hero-eyebrow {
   font-family: var(--body-font);  /* tracked credit line, not OSD chrome */
@@ -378,7 +335,6 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
   text-indent: 0.4em;             /* tracking pads the right edge; re-centre */
   text-transform: uppercase;
   color: var(--burn);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.9), 0 0 14px rgba(0,0,0,0.7);
   margin-bottom: clamp(14px, 2.6vh, 30px);
 }
 .hero-title {
@@ -401,7 +357,7 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
   position: relative;
   width: min(56%, 460px);
   height: 1px;
-  margin: clamp(16px, 3vh, 34px) 0;
+  margin: clamp(14px, 2.6vh, 30px) 0 0;
   background: linear-gradient(to right,
     transparent, rgba(var(--ink-rgb),0.8) 12%,
     rgba(var(--ink-rgb),0.8) 88%, transparent);
@@ -415,39 +371,73 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
 }
 .hero-rule::before { left: 12%; }
 .hero-rule::after { right: 12%; }
+
+/* --- lower register: credits beside the picture window --- */
+.hero-lower {
+  flex: 0 1 auto;                 /* content-sized; the height budget for the
+                                     16:9 window comes from fitHeroLower() */
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 4.5vw, 64px);
+  margin-top: clamp(14px, 2.6vh, 30px);
+}
 .hero-body {
-  max-width: 58ch;
+  flex: 0 1 44ch;
+  min-width: 0;
   font-size: clamp(12px, 1.45vw, 15px);
   line-height: 1.85;
   color: var(--phosphor);
-  text-shadow:
-    0 1px 3px rgba(0,0,0,0.95),
-    0 0 12px rgba(0,0,0,0.85),
-    0 0 8px rgba(var(--phosphor-rgb),0.28);
 }
 .hero-body p + p { margin-top: 0.85em; }
-.hero-copy .test-bars {
-  margin-top: clamp(18px, 3.4vh, 36px);
-  width: min(46%, 300px);
+.hero-body .test-bars {
+  margin-top: clamp(16px, 3vh, 30px);
+  width: min(62%, 250px);
   max-width: none;
   height: clamp(8px, 1.4vh, 14px);
-  opacity: 0.42;
+  opacity: 0.5;
 }
+/* the picture window: a proper little tube, full CRT treatment, sized to
+   whichever runs out first — the column's width or the row's height
+   (fitHeroFrame publishes --lower-h so 16:9 can respect the height) */
+.hero-side {
+  flex: 0 1 clamp(300px, 44%, 600px);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-side .carousel {
+  margin: 0;
+  width: min(100%, calc(var(--lower-h, 340px) * 16 / 9));
+  max-width: none;
+}
+
 /* short tubes: tighten the stack so the card never needs to scroll */
 @media (max-height: 640px) {
   .hero-copy { top: 54px; }
   .hero-safe { inset-block-start: 54px; }
   .hero-eyebrow { letter-spacing: 0.3em; text-indent: 0.3em; margin-bottom: 10px; }
-  .hero-rule { margin: 12px 0; }
+  .hero-rule { margin-top: 10px; }
+  .hero-lower { margin-top: 12px; }
   .hero-body { line-height: 1.6; }
-  .hero-copy .test-bars { display: none; }
+  .hero-body .test-bars { display: none; }
 }
-@media (max-width: 640px) {
+/* narrow tubes: the row stacks — credits, then the picture window */
+@media (max-width: 760px) {
   .hero-copy { padding: 0 22px; }
   .hero-eyebrow { letter-spacing: 0.22em; text-indent: 0.22em; }
-  .hero-body { line-height: 1.7; }
+  .hero-lower {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: clamp(14px, 2.4vh, 24px);
+  }
+  .hero-body { flex: none; text-align: center; line-height: 1.7; }
+  .hero-body .test-bars { display: none; }   /* the dial owns the bottom here */
+  .hero-side { flex: none; width: 100%; min-height: 0; }
   .hero-rule { width: 70%; }
-  .hero-copy .test-bars { display: none; }   /* the dial owns the bottom here */
 }
 
 .test-bars {
@@ -1367,20 +1357,22 @@ const RENDERERS = {
         <span style="background:#c268a0"></span><span style="background:#cf4a3c"></span>
         <span style="background:#4a5aa8"></span>
       </div>` : '';
-    const plate = carouselHtml(ch.carousel, {
-      auto: true, cls: 'plate', id: 'hero-' + (ch.id || 'signal')
+    const car = carouselHtml(ch.carousel, {
+      auto: true, id: 'hero-' + (ch.id || 'signal')
     });
     return `
       <div class="hero-card">
-        <div class="hero-plate">${plate}</div>
-        <div class="hero-dip" aria-hidden="true"></div>
         <div class="hero-safe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
         <div class="hero-copy">
-          ${ch.sub ? `<p class="hero-eyebrow">${esc(ch.sub)}</p>` : ''}
-          <h1 class="hero-title">${escBr(site.heroName)}</h1>
-          <div class="hero-rule" aria-hidden="true"></div>
-          <div class="hero-body">${(ch.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join('')}</div>
-          ${bars}
+          <header class="hero-head">
+            ${ch.sub ? `<p class="hero-eyebrow">${esc(ch.sub)}</p>` : ''}
+            <h1 class="hero-title">${escBr(site.heroName)}</h1>
+            <div class="hero-rule" aria-hidden="true"></div>
+          </header>
+          <div class="hero-lower">
+            <div class="hero-body">${(ch.paragraphs || []).map(p => `<p>${esc(p)}</p>`).join('')}${bars}</div>
+            <div class="hero-side">${car}</div>
+          </div>
         </div>
       </div>`;
   },
@@ -1496,7 +1488,8 @@ function buildSite(content) {
   paintInk(1);
   fitHeroFrame();
   fitHeroTitle();
-  document.fonts?.ready.then(() => { fitHeroFrame(); fitHeroTitle(); });
+  fitHeroLower();
+  document.fonts?.ready.then(() => { fitHeroFrame(); fitHeroTitle(); fitHeroLower(); });
 
   document.getElementById('osdCh').textContent = 'CH 01';
   document.getElementById('osdLabel').textContent = content.channels[0]?.label || '';
@@ -1537,6 +1530,22 @@ function fitHeroFrame() {
   crt.style.setProperty('--dial-h', Math.ceil(dial.offsetHeight + gap) + 'px');
 }
 
+/* The 16:9 picture window needs a height budget: whatever the card has
+   left below the head, capped so it never dominates. Published as
+   --lower-h; the window's width takes the smaller of its column and this
+   budget × 16/9. Runs after fitHeroTitle, since the fitted title size
+   decides how much height remains. */
+function fitHeroLower() {
+  const crt = document.querySelector('.crt');
+  const copy = document.querySelector('.hero-copy');
+  const head = document.querySelector('.hero-head');
+  const lower = document.querySelector('.hero-lower');
+  if (!crt || !copy || !head || !lower) return;
+  const gap = parseFloat(getComputedStyle(lower).marginTop) || 0;
+  const avail = copy.clientHeight - head.offsetHeight - gap;
+  crt.style.setProperty('--lower-h', Math.max(160, Math.min(520, Math.floor(avail))) + 'px');
+}
+
 /* The title is a flex item sized to fit-content, so it happily overflows its
    container: measure against the container's inner width, never the title's
    own. Narrow screens let it wrap instead of shrinking away (see the
@@ -1557,7 +1566,7 @@ function fitHeroTitle() {
 let heroFitT;
 window.addEventListener('resize', () => {
   clearTimeout(heroFitT);
-  heroFitT = setTimeout(() => { fitHeroFrame(); fitHeroTitle(); }, 120);
+  heroFitT = setTimeout(() => { fitHeroFrame(); fitHeroTitle(); fitHeroLower(); }, 120);
 });
 
 /* ---------- CH 00 clock + test tone ---------- */

@@ -192,45 +192,42 @@ non-clickable. Edit both fields per-project in the admin's guide editor
 
 ## CH 01 — the title card
 
-CH 01 is a single fixed composition that never scrolls: the hero carousel
-fills the whole tube as a picture plate and the type is supered over it, the
-way a title card or a broadcast super worked in the 70s-90s. The reference
-points are Kubrick and Lynch title sequences — everything symmetrical about
-the centre line, type sitting in the picture rather than beside it.
+CH 01 is a single fixed composition that never scrolls. The name is set on
+unlit tube — most film title cards are type on black — and the hero carousel
+sits beside the credits as a contained picture window, like a broadcast
+over-the-shoulder insert. Everything stays locked to the title-safe
+rectangle, with registration marks in the corners and a faint ink wash
+behind the title so the black isn't dead flat.
 
 Structure (`RENDERERS.hero`, the `.hero-*` rules in index.html):
 
-| Layer | What it does |
-|-------|--------------|
-| `.hero-plate` | the carousel, full-bleed; 16:9 dropped, scaled 1.04 for CRT overscan |
-| `.hero-dip` | dips the picture under the words — a radial under the type plus a top/bottom wash |
+| Piece | What it is |
+|-------|------------|
+| `.hero-head` | eyebrow → title → rule, centred, full width |
+| `.hero-lower` | body copy + test bars on the left, picture window right |
+| `.hero-side` | the carousel in a normal `.tv-frame` — full CRT treatment |
 | `.hero-safe` | title-safe registration marks in the four corners |
-| `.hero-copy` | eyebrow → title → rule → body → test bars, centred on one axis |
 
-- The plate drops its own scanlines and vignette; the tube already supplies
-  both, and a second set over a full-bleed picture only crushes it.
-- Carousel nav shrinks to 26% edge strips so the middle of the picture isn't
-  a click trap. The still counter and slide caption move to the top
-  title-safe corners — the bottom ones belong to the dial.
-- `.hero-eyebrow` is `ch.sub`, tracked out to 0.44em and uppercased. The old
-  `.hero-sub` rule is gone; the content field itself is unchanged.
-- `.hero-title` is `white-space: nowrap`, so it keeps the line breaks written
-  into `heroName`, and is printed in the channel ink with the hard offset
-  shadow. `fitHeroTitle()` scales it down if a longer name would run past the
-  title-safe box — it measures the *container's* inner width, since the title
-  is a flex item sized to fit-content and will happily overflow. Below 640px
-  the title wraps instead of shrinking away, and a wrapping title is left
-  alone.
-- The still counter and slide caption are bone, not ink: they sit on open
-  picture where a saturated ink disappears. That is the same split the
-  reference cards use between a coloured title and its bone credit lines.
-- `fitHeroFrame()` measures the dial and publishes `--dial-h`, so the copy
-  block and the safe marks clear it however many rows it wraps to on narrow
-  screens. Both run on load, after fonts settle, and on resize.
+- The window is a stock carousel: scanlines, vignette, caption, counter,
+  38/62 nav zones, auto-advance — nothing hero-specific.
+- `.hero-title` is `white-space: nowrap`, printed in the channel ink with
+  the hard offset shadow; `fitHeroTitle()` scales it to the head's inner
+  width (it measures the *container*, since the title is a fit-content flex
+  item that overflows silently).
+- Three measurements drive the layout, all run on load, after fonts settle,
+  and on resize: `fitHeroFrame()` publishes the dial's height as
+  `--dial-h`; `fitHeroTitle()` fits the name; `fitHeroLower()` publishes
+  the leftover height under the head as `--lower-h` (capped at 520px), and
+  the window's width takes the smaller of its column and
+  `--lower-h × 16/9`, so the 16:9 frame never outgrows the row. Order
+  matters: the fitted title size decides how much height is left.
+- On tall tubes the whole card centres as a group
+  (`justify-content: center`) instead of pinning the head to the top.
+- Below 760px the row stacks — credits, then the window full-width — and
+  the test bars hide (the dial owns the bottom).
 
-Nothing here is content-specific — edit CH 01 in the admin exactly as before.
-`showTestBars` still works; the bars sit under the body copy, and are hidden
-on narrow or short screens where the dial needs the room.
+Nothing here is content-specific — edit CH 01 in the admin exactly as
+before. `showTestBars` still works; the bars sit under the body copy.
 
 ## CRT carousel (hero + pop-up)
 
@@ -249,8 +246,8 @@ than filling a 16:9 frame, and pop-up media drops both scanline layers — the
 per-media one and the pop-up window's own overlay (the carousel sits above it
 at z-index 8) — for a clearer read. The frame's vignette and the CRT colour
 grade stay. Video slides keep 16:9 so their players size correctly. The hero
-carousel is the full-frame picture plate behind CH 01's titles (see above):
-tube-shaped rather than 16:9, cover-cropped, dipped under the type.
+carousel is CH 01's picture window (see above): a stock 16:9 frame beside
+the credits, full CRT treatment.
 
 Slides accept video too: a YouTube/Vimeo watch URL or a direct .mp4/.webm
 file becomes an embedded player (`slideVideoKind`/`slideMediaHtml`). On video
