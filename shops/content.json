@@ -1,0 +1,747 @@
+{
+  "site": {
+    "title": "SHOPS — Benjamin Tran",
+    "mark": "SHOPS",
+    "markSub": "TORONTO · EST. 2013"
+  },
+  "sections": [
+    {
+      "id": "s-title",
+      "type": "title",
+      "label": "THE SHOP",
+      "sun": 38,
+      "eyebrow": "SCENIC FABRICATION · TORONTO",
+      "name": "SHOPS",
+      "tagline": "Currently taking commissions",
+      "paragraphs": [
+        "We build the things a camera is willing to believe. Flats, facades, breakaways, rigs, and the occasional object that has no business existing — cut, joined, painted, and trucked to set on the morning it is needed.",
+        "Timber, steel, foam, resin, and whatever the art director dreamed up at two in the morning. A set is a lie that has to hold weight; that is the whole job."
+      ],
+      "plates": [
+        {
+          "src": "assets/img_0873.jpg",
+          "caption": ""
+        },
+        {
+          "src": "assets/img_6030.jpg",
+          "caption": ""
+        },
+        {
+          "src": "assets/img_8417.jpg",
+          "caption": ""
+        },
+        {
+          "src": "assets/img_3582.jpg",
+          "caption": ""
+        },
+        {
+          "src": "assets/img_0807.jpg",
+          "caption": ""
+        },
+        {
+          "src": "assets/img_8630.jpg",
+          "caption": ""
+        },
+        {
+          "src": "assets/img_4242.jpg",
+          "caption": ""
+        }
+      ]
+    },
+    {
+      "id": "s-work",
+      "type": "work",
+      "label": "WORK",
+      "sun": 118,
+      "title": "Things we have built",
+      "sub": "Features · commercials · unscripted · installation",
+      "items": [
+        {
+          "title": "Deathstalker",
+          "kind": "FILM & TV",
+          "role": "Construction Coordinator",
+          "year": "2025",
+          "client": "",
+          "image": "assets/img_0075.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/fAdo8drjc_M?si=Idx8ezE4gMqTGioA",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0983.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0973.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0976.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0814.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "You Gotta Believe",
+          "kind": "FILM & TV",
+          "role": "Lead Carpenter",
+          "year": "2024",
+          "client": "",
+          "image": "assets/img_0084.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/0r_nbHSOyDE?si=whv-nybZeYcFhoai",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "It Feeds",
+          "kind": "FILM & TV",
+          "role": "Lead Carpenter",
+          "year": "2025",
+          "client": "",
+          "image": "assets/img_0085.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/spLyHdJ_SyE?si=g6MhxScd7WvhNlyy",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Honey Bunch",
+          "kind": "FILM & TV",
+          "role": "Carpenter",
+          "year": "2025",
+          "client": "",
+          "image": "assets/img_0086.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/2SqWRpoUGAk?si=0cL6_GqoISQOP4lL",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5848.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6021.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5849.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6030.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Mother Father Sister Brother Frank",
+          "kind": "FILM & TV",
+          "role": "Carpenter",
+          "year": "2024",
+          "client": "",
+          "image": "assets/img_0087.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/SCem8UD0K8g?si=hfVKv0CIbmE_7Eh-",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "We’re From The Internet",
+          "kind": "FILM & TV",
+          "role": "Construction Coordinator",
+          "year": "",
+          "client": "",
+          "image": "assets/img_9344.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/1vJsNvQ_7BU?si=sTmCAKcbTcH62qx0",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4563.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4585.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4636.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_4639.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Nintendo x Donkey Kong",
+          "kind": "COMMERCIAL",
+          "role": "Construction Coordinator",
+          "year": "",
+          "client": "",
+          "image": "assets/img_0080.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/YkAyvHZq1Ic?si=r0i0WmV5b6Skgbev",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3342.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3337.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3325.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3321.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Cupra — The Chosen One",
+          "kind": "COMMERCIAL",
+          "role": "Construction",
+          "year": "",
+          "client": "",
+          "image": "assets/screenshot-2026-08-20-at-2.30.34-pm.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://www.youtube.com/watch?v=PiSPYPvDHnY",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0131.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7176.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0129.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0130.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Taco Bell — Love Me Tender",
+          "kind": "COMMERCIAL",
+          "role": "Art Coordinator · Construction",
+          "year": "",
+          "client": "",
+          "image": "assets/screenshot-2026-08-20-at-2.20.59-pm.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://www.youtube.com/watch?v=uHDmH2Z8I6M",
+              "caption": ""
+            },
+            {
+              "src": "assets/screenshot-2026-08-20-at-2.20.59-pm.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_8417.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Mcdonald's — It's McValue",
+          "kind": "COMMERCIAL",
+          "role": "Construction Coordinator",
+          "year": "",
+          "client": "",
+          "image": "assets/screenshot-2026-08-20-at-3.37.40-pm.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://www.youtube.com/watch?v=SUqkJ00fWx8",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6560.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6598.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6549.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6544.dng.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "WhiteCastle — Crave Thy Castle",
+          "kind": "COMMERCIAL",
+          "role": "",
+          "year": "",
+          "client": "",
+          "image": "assets/img_9339.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/ixsBPHILjjc?si=3HIjyFUkoWN04zsI",
+              "caption": ""
+            },
+            {
+              "src": "https://youtu.be/WNlAq276Ess?si=VVdVxjvUJ1DTIsq2",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6436.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6465.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_6470.dng.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Princess Margaret Cancer Foundation — Carry The Fire",
+          "kind": "COMMERCIAL",
+          "role": "Construction Coordinator",
+          "year": "",
+          "client": "",
+          "image": "assets/img_9340.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/YJ3owyjYvZo?si=6p1w_WNpTGZDQ5qW",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5640.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5612.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5575.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_5549.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Hinge — it’s funny we met on hinge",
+          "kind": "COMMERCIAL",
+          "role": "Art Coordinator",
+          "year": "",
+          "client": "",
+          "image": "assets/img_9341.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/GMBwQW2v9ys?si=v6LGmYmtwlxEfXA4",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Gain Flings x Wicked",
+          "kind": "COMMERCIAL",
+          "role": "Construction Coordinator",
+          "year": "",
+          "client": "",
+          "image": "assets/img_9342.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/vN_g3BOxAF4?si=ZDtDciD35X4X1_ae",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3586.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3583.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_3515.dng.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Transparent Labs — Protein without the weird stuff",
+          "kind": "COMMERCIAL",
+          "role": "Construction Coordinator",
+          "year": "",
+          "client": "",
+          "image": "assets/img_9343.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/C5vcG_nG2Q4?si=KyqqNd3YeyNQoRAd",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_8119.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_8117.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "IHOP — Go All Out",
+          "kind": "COMMERCIAL",
+          "role": "Construction Coordinator",
+          "year": "",
+          "client": "",
+          "image": "assets/img_9347.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/VJqTkyDoTV4?si=YPGbJYq_d59HMB8Q",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7373.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_0173.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7360.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7357.dng.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Beast Games: season 1",
+          "kind": "UNSCRIPTED",
+          "role": "Lead Carpenter",
+          "year": "",
+          "client": "",
+          "image": "assets/img_0076.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/37ZG9lddxto?si=gkH0kzHxbvewLs8H",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7661.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7662.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7679.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_7773.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Yes, Chef!",
+          "kind": "UNSCRIPTED",
+          "role": "Construction Coordinator",
+          "year": "",
+          "client": "",
+          "image": "assets/img_0077.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "https://youtu.be/Os7NLu9Lgv4?si=YBMKqsL8gzj8hU4H",
+              "caption": ""
+            },
+            {
+              "src": "assets/2a4b084e-32e8-4cab-b3a7-549d8092d49a.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2463.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2316.dng.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2532.dng.jpg",
+              "caption": ""
+            }
+          ]
+        },
+        {
+          "title": "Toronto Raptors x Häagen-Dazs",
+          "kind": "INSTALLATION",
+          "role": "Install · Sports",
+          "year": "",
+          "client": "",
+          "image": "assets/screenshot-2026-08-20-at-2.09.04-pm.jpg",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "assets/img_0336.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/img_2242.dng.jpg",
+              "caption": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "s-comm",
+      "type": "services",
+      "label": "COMMISSIONS",
+      "sun": 205,
+      "title": "What you can ask for",
+      "sub": "Bring a drawing, a photograph, or a description of a dream",
+      "items": [
+        {
+          "title": "Scenic carpentry",
+          "blurb": "Flats, facades, platforms, staircases, decking, and full standing sets. Built to be struck, stored, and stood up again somewhere else next month.",
+          "points": [
+            "FLATS & FACADES",
+            "PLATFORMS",
+            "PRACTICAL BUILDS",
+            "STANDING SETS"
+          ],
+          "lead": "2–6 WEEKS"
+        },
+        {
+          "title": "Metal & rigging",
+          "blurb": "Welded armatures, steel substructure, motion rigs, and the frame inside the thing that everyone assumes is solid wood.",
+          "points": [
+            "WELDING",
+            "ARMATURES",
+            "MOTION RIGS",
+            "LOAD PATHS"
+          ],
+          "lead": "3–8 WEEKS"
+        },
+        {
+          "title": "Sculpt & finish",
+          "blurb": "Foam carving, moulds, casting, and paint treatments — ageing, marbling, faux stone, and finishes that survive a lighting package at two metres.",
+          "points": [
+            "FOAM CARVING",
+            "MOULD & CAST",
+            "SCENIC PAINT",
+            "AGEING"
+          ],
+          "lead": "1–4 WEEKS"
+        },
+        {
+          "title": "Breakaways & effects",
+          "blurb": "Things designed to fail exactly once, on cue, safely, and again tomorrow if the take did not land.",
+          "points": [
+            "BREAKAWAYS",
+            "COLLAPSES",
+            "REPEATABLE GAGS"
+          ],
+          "lead": "BY QUOTE"
+        },
+        {
+          "title": "Installation & experiential",
+          "blurb": "Activations, retail sets, and public-facing builds that have to survive being touched by strangers for a fortnight.",
+          "points": [
+            "ACTIVATIONS",
+            "RETAIL",
+            "PUBLIC BUILDS",
+            "TOURING"
+          ],
+          "lead": "4–10 WEEKS"
+        }
+      ],
+      "note": "Rush work is possible and priced accordingly. If the date is the immovable part of the brief, say so first and we will design the build around it."
+    },
+    {
+      "id": "s-process",
+      "type": "process",
+      "label": "PROCESS",
+      "sun": 300,
+      "title": "How a thing gets made",
+      "sub": "Drawing to load-in, usually in five moves",
+      "steps": [
+        {
+          "title": "The drawing",
+          "text": "You arrive with plans, a sketch, a reference photograph, or a sentence. We work out what it actually has to do — hold a person, come apart, sit two metres from a lens — and what it only has to appear to do.",
+          "src": "assets/img_0983.jpg",
+          "caption": "DRAFTING"
+        },
+        {
+          "title": "The estimate",
+          "text": "Materials, hours, crew, and truck. One number, itemised, with the assumptions written down so we both know which of them the schedule depends on.",
+          "src": "assets/img_5848.jpg",
+          "caption": "ESTIMATE"
+        },
+        {
+          "title": "The build",
+          "text": "Cut, joined, and assembled in the shop, standing up as far as the ceiling allows. Anything that has to move gets tested here rather than on the day.",
+          "src": "assets/img_3342.jpg",
+          "caption": "FABRICATION"
+        },
+        {
+          "title": "The finish",
+          "text": "Sculpt, texture, and paint. This is the stage that decides whether the thing reads as stone or as plywood pretending, and it is never the stage to compress.",
+          "src": "assets/img_7661.jpg",
+          "caption": "FINISHING"
+        },
+        {
+          "title": "The load-in",
+          "text": "Broken down, trucked, and stood up on location or stage, with a crew who know which panel goes where because they built it. Then struck, and stored for the reshoot nobody has mentioned yet.",
+          "src": "assets/img_6021.jpg",
+          "caption": "LOAD-IN"
+        }
+      ]
+    },
+    {
+      "id": "s-about",
+      "type": "about",
+      "label": "ABOUT",
+      "sun": 15,
+      "title": "Who is behind the saw",
+      "sub": "One carpenter, a shop, and a phone book of good crew",
+      "name": "BENJAMIN TRAN",
+      "role": "CONSTRUCTION COORDINATOR",
+      "portrait": {
+        "src": "assets/img_2997.jpg",
+        "caption": ""
+      },
+      "facts": [
+        {
+          "k": "BASED",
+          "v": "TORONTO, ON"
+        },
+        {
+          "k": "TRADE",
+          "v": "CARPENTRY"
+        },
+        {
+          "k": "ACTIVE",
+          "v": "2013 — Present"
+        }
+      ],
+      "paragraphs": [
+        "I'm Ben — carpenter, designer, and general solver of impossible requests for film and television construction. When a script calls for a place that doesn't exist, my job is to make it exist by call time.",
+        "With over a decade of experience as a carpenter, in the real world and on set. Most days you'll find me somewhere between the drafting table and the shop floor.",
+        "Off the clock it's balcony geraniums, a cat who supervises all my sketching, and a glass of something cold while the sun goes down. The tools get put away — the habit of building things doesn't."
+      ]
+    },
+    {
+      "id": "s-contact",
+      "type": "contact",
+      "label": "CONTACT",
+      "sun": 160,
+      "title": "Send us a drawing",
+      "sub": "Or a photograph, or a sentence",
+      "rows": [
+        {
+          "k": "EMAIL",
+          "label": "contact@benjamintran.ca",
+          "href": "mailto:contact@benjamintran.ca"
+        },
+        {
+          "k": "PHONE",
+          "label": "+1 647 533 8726",
+          "href": "tel:+16475338726"
+        }
+      ],
+      "meta": [
+        {
+          "k": "SHOP",
+          "v": "TORONTO, ON"
+        },
+        {
+          "k": "HOURS",
+          "v": "MON–FRI, EARLY"
+        },
+        {
+          "k": "TRAVEL",
+          "v": "YES"
+        }
+      ],
+      "note": "The shadow of this sentence falls the other way."
+    }
+  ]
+}

@@ -1,0 +1,1133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SHOPS</title>
+<meta name="description" content="Scenic fabrication for film, television and installation.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23dfe6e6'/%3E%3Cpath d='M4 26 L14 8 L20 18 L24 13 L30 26 Z' fill='%23aebcc1'/%3E%3Ccircle cx='23' cy='8' r='4' fill='%23c8402c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;700;800&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═════════════════════════════════════════════════════════════
+   SHOPS — THE PILE
+
+   Nothing here is a page. There is one heap of scraps along the
+   bottom of the screen, and a section is what happens when you
+   pull pieces out of it: they arc up, turn over, and settle into
+   an arrangement that makes sense. Leave, and they go back.
+
+   Two systems do the work.
+
+   THE LIGHT. Every shadow derives from --sun-x / --sun-y, a unit
+   vector for where the light is. Both are registered with
+   @property so CSS can tween them; each section declares its own
+   angle, so arriving somewhere new swings every shadow at once.
+
+   THE ARC. A scrap is two nested elements. The outer one carries
+   X and rotation, the inner one Y and scale, on different easing
+   curves. Two straight interpolations at different rates is a
+   curve — that is the whole trick, and it is why the pieces fly
+   rather than slide.
+   ═════════════════════════════════════════════════════════ */
+
+@property --sun-x { syntax:'<number>'; inherits:true; initial-value:0.42; }
+@property --sun-y { syntax:'<number>'; inherits:true; initial-value:0.9; }
+
+:root{
+  /* the theatre: cold, deep, full of air */
+  --mist-hi:  #eef0ec;
+  --mist:     #dde5e6;
+  --mist-lo:  #c4d1d5;
+  --far:      #a9b8be;
+  --further:  #8d9ea6;
+
+  /* the scraps: warm, aged, torn from something else */
+  --paper:    #f5edda;
+  --paper-2:  #ead9bb;
+  --kraft:    #d7bf99;
+  --board:    #bda37c;
+
+  /* lacquer and leaf — the saturated moments, used sparingly */
+  --vermilion:#c8402c;
+  --lacquer:  #8d2415;
+  --gold:     #c39a45;
+  --blossom:  #eec0cd;
+  --azure:    #6ea7c9;
+  --indigo:   #23375f;
+
+  --sumi:     #1e1b1d;          /* ink. the black swan, the hair */
+  --sumi-rgb: 30, 27, 29;
+  --ink-soft: #5f584f;
+
+  --display:'Shippori Mincho B1','Hiragino Mincho ProN',Georgia,serif;
+  --body:'Jost','Futura',system-ui,sans-serif;
+
+  --sun-x: 0.42;
+  --sun-y: 0.9;
+  --swing: 1200ms;
+
+  --pile-h: 22vh;
+  --edge: clamp(16px, 3.2vw, 54px);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0; overflow:hidden;
+  font-family:var(--body); color:var(--sumi);
+  background:var(--mist);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   THE THEATRE
+   Six planes, back to front, each drifting at its own rate under
+   the pointer. Depth is the point: the reference images are all
+   air and haze between things, never a flat backdrop.
+   ───────────────────────────────────────────────────────── */
+.world{ position:fixed; inset:0; overflow:hidden; }
+.plane{ position:absolute; inset:-6%; will-change:transform; }
+/* The stage is the one plane that must map 1:1 to the viewport —
+   the overscan is for backdrops that need slack to slide behind. */
+#stages{ inset:0; }
+
+.sky{
+  background:
+    radial-gradient(120% 80% at
+      calc(50% + var(--sun-x) * 26%) calc(18% + var(--sun-y) * 8%),
+      #fbfaf4 0%, var(--mist-hi) 30%, var(--mist) 58%, var(--mist-lo) 100%);
+  transition:background var(--swing) cubic-bezier(.4,0,.2,1);
+}
+/* The rainbow is weather, not typography. Behind everything, low
+   contrast, doing what it does in the reference: sitting in the sky
+   over the mountains while the poster type stays lacquer red. */
+.bow{
+  position:absolute; left:50%; top:-56%; width:146%; aspect-ratio:1;
+  transform:translateX(-50%); opacity:.46; pointer-events:none;
+  background:radial-gradient(closest-side,
+    transparent 61.5%,
+    #7d72b8 62%, #6b8cc0 64%, #4f97c4 66%, #74ad63 68%,
+    #e6c447 70%, #e0903a 72%, #d8452f 74%, transparent 74.6%);
+  -webkit-mask:linear-gradient(#000 44%, rgba(0,0,0,0) 63%);
+  mask:linear-gradient(#000 44%, rgba(0,0,0,0) 63%);
+  filter:blur(1.5px);
+}
+
+/* Painted ridges, the way a backdrop is painted — flat, receding,
+   and obviously scenery. This is a shop that builds scenery. */
+.ridges{ position:absolute; left:-4%; right:-4%; bottom:6%; opacity:.26; filter:blur(1px); }
+.ridges svg{ display:block; width:100%; height:auto; }
+
+.fog{ pointer-events:none; }
+.fog i{
+  position:absolute; display:block; border-radius:50%;
+  background:radial-gradient(closest-side, rgba(255,255,255,.92), rgba(255,255,255,0));
+}
+/* Haze belongs between the planes and along the floor, not over
+   the whole stage — at full strength it desaturated every scrap
+   and the tableau went to milk. */
+.fog-far i:nth-child(1){ left:-14%; top:44%; width:70%; height:26%; opacity:.5; }
+.fog-far i:nth-child(2){ right:-18%; top:36%; width:64%; height:28%; opacity:.42; }
+.fog-near i:nth-child(1){ left:-10%; bottom:-6%; width:80%; height:26%; opacity:.34; }
+.fog-near i:nth-child(2){ right:-16%; bottom:-2%; width:72%; height:22%; opacity:.26; }
+@keyframes drift{ from{ transform:translateX(-3%);} to{ transform:translateX(3%);} }
+.fog i{ animation:drift 34s ease-in-out infinite alternate; }
+.fog i:nth-child(2){ animation-duration:47s; animation-direction:alternate-reverse; }
+
+/* ═════════════════════════════════════════════════════════════
+   THE SCRAP
+   Every piece of every section is one of these. It knows where it
+   belongs (--x, --y, --w, --r, as percentages of the stage) and
+   where it came from (--pilex, --piler — its place in the heap).
+
+   The pile pose is pure CSS arithmetic against those two sets, in
+   vw/vh, so it survives any resize without JS recomputing a thing.
+   ═════════════════════════════════════════════════════════ */
+.stage{
+  position:absolute; inset:0;
+  pointer-events:none;
+}
+.stage.on{ pointer-events:auto; }
+
+.scrap{
+  --x:50; --y:50; --w:20; --r:0; --z:5;
+  --pilex:50; --piler:0; --d:0ms;
+  position:absolute;
+  left:calc(var(--x) * 1%);
+  top:calc(var(--y) * 1%);
+  width:calc(var(--w) * 1%);
+  z-index:var(--z);
+  /* outer: horizontal travel + the tumble */
+  transform:
+    translate(-50%,-50%)
+    translateX(calc((var(--pilex) - var(--x)) * 1vw))
+    rotate(calc(var(--piler) * 1deg));
+  opacity:0;
+  transition:
+    transform 880ms cubic-bezier(.55,.06,.34,1) var(--d),
+    opacity   360ms ease var(--d);
+  will-change:transform;
+}
+.scrap-in{
+  display:block;
+  /* inner: the lift, on a springier curve than the outer. The
+     mismatch between the two is what bends the path. */
+  transform:translateY(calc((96 - var(--y)) * 1vh)) scale(.13);
+  transform-origin:50% 50%;
+  transition:transform 980ms cubic-bezier(.28,1.22,.4,1) var(--d);
+  will-change:transform;
+}
+.stage.on .scrap{
+  transform:translate(-50%,-50%) translateX(0) rotate(calc(var(--r) * 1deg));
+  opacity:1;
+}
+.stage.on .scrap-in{ transform:translateY(0) scale(1); }
+
+/* Going back is faster and less considered than coming out —
+   things are thrown at a pile, not placed on one. */
+.stage.out .scrap{ transition-duration:430ms, 220ms; transition-delay:var(--dOut); }
+.stage.out .scrap-in{ transition-duration:460ms; transition-delay:var(--dOut);
+  transition-timing-function:cubic-bezier(.6,0,.8,.4); }
+
+/* ── the material of a scrap ─────────────────────────────────
+   Warm stock, a lit edge facing the sun, a hard contact shadow
+   with no blur, and two softer casts for the air underneath. The
+   shadow runs 130ms behind the paper, so anything that moves
+   spends a moment casting nothing. */
+.stock{
+  --lift:3;
+  position:relative;
+  background:var(--paper);
+  box-shadow:
+    inset calc(var(--sun-x) * -1.5px) calc(var(--sun-y) * -1.5px) 0 rgba(255,253,247,.6),
+    calc(var(--sun-x) * var(--lift) * 2px)  calc(var(--sun-y) * var(--lift) * 2px)  0 rgba(var(--sumi-rgb), .09),
+    calc(var(--sun-x) * var(--lift) * 5px)  calc(var(--sun-y) * var(--lift) * 5px)  calc(var(--lift) * 5px)  rgba(var(--sumi-rgb), .17),
+    calc(var(--sun-x) * var(--lift) * 10px) calc(var(--sun-y) * var(--lift) * 10px) calc(var(--lift) * 14px) rgba(var(--sumi-rgb), .11);
+  transition:box-shadow 700ms cubic-bezier(.22,.9,.3,1) 130ms;
+}
+.stock.l1{ --lift:1; } .stock.l5{ --lift:5; } .stock.l7{ --lift:7; }
+.stock.kraft{ background:var(--paper-2); }
+.stock.board{ background:var(--kraft); }
+.stock.ink, .stock.indigo{ background:var(--indigo); color:var(--paper); }
+.stock.red{ background:var(--vermilion); color:#fdf3e6; }
+
+/* Torn, never cut. The displacement map eats the edge of whatever
+   it is applied to, so it goes on the face — never on a wrapper
+   that is also being transformed. */
+.torn{ filter:url(#torn); }
+
+/* ═════════════════════════════════════════════════════════════
+   THE HEAP
+   Always on screen, along the bottom. It is not decoration: it is
+   where every section comes from and goes back to, and it has to
+   be visible for that to read.
+   ═════════════════════════════════════════════════════════ */
+.pile{
+  position:absolute; left:0; right:0; bottom:0; height:var(--pile-h);
+  z-index:40; pointer-events:none;
+}
+.pile b{
+  position:absolute; display:block; bottom:0;
+  transform-origin:50% 100%;
+  transition:transform 700ms cubic-bezier(.3,1.1,.4,1);
+}
+/* the heap settles when something is taken out of it */
+@keyframes jostle{
+  0%  { transform:translateY(0) rotate(var(--jr)); }
+  28% { transform:translateY(-9px) rotate(calc(var(--jr) + 3deg)); }
+  100%{ transform:translateY(0) rotate(var(--jr)); }
+}
+.pile.disturbed b{ animation:jostle 780ms cubic-bezier(.3,.9,.4,1) both; }
+.pile-lip{
+  position:absolute; left:0; right:0; bottom:0; height:calc(var(--pile-h) * .5);
+  background:linear-gradient(to top, rgba(169,184,190,.5), rgba(169,184,190,0));
+  z-index:41; pointer-events:none;
+}
+
+/* ═════════════════════════════════════════════════════════════
+   THE HANGINGS
+   Navigation as lantern columns dropped from the top of the
+   frame, the way the reference hangs everything vertically. They
+   sway on their own hinge and the current one hangs lower.
+   ═════════════════════════════════════════════════════════ */
+.hangings{
+  position:absolute; top:0; left:0; right:0; z-index:60;
+  display:flex; justify-content:center; align-items:flex-start;
+  gap:clamp(6px, 1.1vw, 18px);
+  padding:0 var(--edge);
+}
+.hang{
+  --drop:0px;
+  position:relative; flex:none; border:0; padding:0; cursor:pointer;
+  width:clamp(34px, 3.6vw, 52px);
+  height:clamp(128px, 20vh, 236px);
+  background:none;
+  transform-origin:50% 0%;
+  transform:translateY(var(--drop));
+  transition:transform 620ms cubic-bezier(.3,1.1,.4,1);
+}
+@keyframes sway{
+  from{ rotate:-.75deg; } to{ rotate:.75deg; }
+}
+.hang .col{
+  position:absolute; inset:0;
+  background:linear-gradient(100deg, var(--paper) 0%, var(--paper-2) 62%, var(--kraft) 100%);
+  border-radius:calc(var(--w, 22px)) calc(var(--w, 22px)) 3px 3px / 34px 34px 3px 3px;
+  clip-path:polygon(0 0, 100% 0, 100% calc(100% - 14px), 50% 100%, 0 calc(100% - 14px));
+  box-shadow:
+    calc(var(--sun-x) * 6px) calc(var(--sun-y) * 6px) 12px rgba(var(--sumi-rgb), .18),
+    inset -2px 0 0 rgba(var(--sumi-rgb), .07);
+  animation:sway 7s ease-in-out infinite alternate;
+  transition:box-shadow 700ms ease 130ms;
+}
+.hang:nth-child(2n) .col{ animation-duration:8.6s; animation-delay:-2s; }
+.hang:nth-child(3n) .col{ animation-duration:6.2s; animation-delay:-4s; }
+.hang .cord{
+  position:absolute; left:50%; top:-40vh; width:1px; height:40vh;
+  background:rgba(var(--sumi-rgb), .3);
+}
+.hang .lbl{
+  position:absolute; inset:14px 0 22px;
+  writing-mode:vertical-rl; text-orientation:mixed;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--display); font-weight:600;
+  font-size:clamp(10px, 1.05vw, 14px); letter-spacing:.26em;
+  color:var(--ink-soft); white-space:nowrap; overflow:hidden;
+}
+.hang .num{
+  position:absolute; bottom:26px; left:50%; transform:translateX(-50%);
+  font-family:var(--display); font-size:9px; letter-spacing:.1em; color:var(--board);
+}
+.hang:hover{ --drop:10px; }
+.hang:hover .lbl{ color:var(--sumi); }
+.hang.on{ --drop:clamp(20px, 4vh, 46px); }
+.hang.on .col{
+  background:linear-gradient(100deg, var(--vermilion), var(--lacquer));
+  box-shadow:
+    calc(var(--sun-x) * 10px) calc(var(--sun-y) * 10px) 22px rgba(var(--sumi-rgb), .26);
+}
+.hang.on .lbl{ color:#fdf1e2; }
+.hang.on .num{ color:rgba(253,241,226,.7); }
+.hang:focus-visible{ outline:2px solid var(--vermilion); outline-offset:4px; }
+
+/* ═════════════════════════════════════════════════════════════
+   WHAT A SCRAP CAN BE
+   ═════════════════════════════════════════════════════════ */
+
+/* ── a photograph, torn out of something ── */
+.shot{ position:relative; display:block; overflow:hidden; background:var(--paper-2); }
+.shot img, .shot video{
+  display:block; width:100%; height:100%; object-fit:cover;
+  filter:saturate(.9) contrast(1.04) sepia(.08);
+}
+.shot.arch{ border-radius:50% 50% 4px 4px / 30% 30% 4px 4px; }
+.shot.round{ border-radius:50%; }
+.mount{ padding:9px 9px 0; }
+.mount .cap{
+  padding:8px 2px 9px; font-size:9.5px; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--board);
+}
+.nothing{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-size:9px; letter-spacing:.28em; color:var(--board);
+  background:repeating-linear-gradient(48deg, var(--paper-2) 0 9px, var(--kraft) 9px 18px);
+}
+
+/* ── the title, sitting in a blob rather than on a baseline ──
+   One saturated moment on a pale ground, borrowed straight from
+   the reference. It appears once, on the title tableau, and
+   nowhere else — a rainbow used twice stops being surreal. */
+.blob{
+  position:relative; padding:15% 13% 16%;
+  filter:drop-shadow(calc(var(--sun-x) * 15px) calc(var(--sun-y) * 15px) 24px rgba(var(--sumi-rgb), .34));
+  transition:filter 700ms ease 130ms;
+}
+/* Three stacked clouds: cream halo, ink edge, then the lacquer
+   face — the reference's double outline, done with scale rather
+   than a stroke, because a gooed shape has no stroke to give. */
+.goo{ position:absolute; inset:0; filter:url(#goo); }
+.goo i{ position:absolute; display:block; border-radius:50%; }
+.goo i:nth-child(1){ left:0%;  top:17%; width:43%; height:66%; }
+.goo i:nth-child(2){ left:21%; top:0%;  width:41%; height:79%; }
+.goo i:nth-child(3){ left:47%; top:5%;  width:39%; height:73%; }
+.goo i:nth-child(4){ left:61%; top:21%; width:39%; height:62%; }
+.goo i:nth-child(5){ left:13%; top:33%; width:74%; height:60%; }
+.goo.halo{ transform:scale(1.15); }
+.goo.halo i{ background:#fdf6e8; }
+.goo.edge{ transform:scale(1.075); }
+.goo.edge i{ background:var(--sumi); }
+/* Different colours on different lobes: the gooey blur mixes them,
+   so the blob gets its gradient from its own construction. */
+.goo.face i:nth-child(1){ background:#bf3327; }
+.goo.face i:nth-child(2){ background:#c93c28; }
+.goo.face i:nth-child(3){ background:#d0602b; }
+.goo.face i:nth-child(4){ background:#d89a36; }
+.goo.face i:nth-child(5){ background:#cb5b2b; }
+.blob-copy{ position:relative; z-index:2; }
+.blob h1{
+  margin:0; text-align:center;
+  font-family:var(--display); font-weight:800;
+  font-size:clamp(34px, 6.4vw, 96px); line-height:.9; letter-spacing:.01em;
+  color:var(--indigo);
+  text-shadow:
+    -2px -2px 0 #fdf6e8, 2px -2px 0 #fdf6e8, -2px 2px 0 #fdf6e8, 2px 2px 0 #fdf6e8,
+     0 -3px 0 #fdf6e8, 0 3px 0 #fdf6e8, -3px 0 0 #fdf6e8, 3px 0 0 #fdf6e8,
+     0 6px 0 rgba(var(--sumi-rgb), .55);
+}
+.blob .eyebrow{
+  display:block; text-align:center; margin-bottom:.5em;
+  font-family:var(--body); font-size:clamp(8px,.85vw,11px);
+  font-weight:500; letter-spacing:.4em; text-transform:uppercase;
+  color:#fdf6e8; text-shadow:0 1px 3px rgba(var(--sumi-rgb),.55);
+}
+
+/* ── the ensō — a circle drawn in one breath ── */
+.enso{ position:relative; width:100%; aspect-ratio:1; }
+.enso svg{ width:100%; height:100%; display:block; overflow:visible; }
+.enso .inner{
+  position:absolute; inset:19%; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center; gap:.5em;
+}
+
+/* ── a panel of copy ── */
+.panel{ padding:clamp(14px,1.5vw,26px) clamp(16px,1.7vw,30px); }
+.panel p{ margin:0 0 .85em; line-height:1.66; font-size:clamp(12px,1.02vw,15px); color:#3f382f; }
+.panel p:last-child{ margin:0; }
+.panel .lede p{ font-size:clamp(13px,1.16vw,17px); }
+
+/* ── a vertical label rail ── */
+.tate{
+  writing-mode:vertical-rl; text-orientation:mixed;
+  font-family:var(--display); font-weight:600;
+  letter-spacing:.34em; white-space:nowrap;
+  color:var(--ink-soft);
+}
+.tate.big{ font-size:clamp(13px,1.5vw,22px); color:var(--sumi); }
+.tate.red{ color:var(--vermilion); }
+
+/* ── a strip of lacquer with a line of type ── */
+.strip{
+  padding:.75em 1.2em; text-align:center;
+  font-size:clamp(9px,.86vw,12px); font-weight:500;
+  letter-spacing:.28em; text-transform:uppercase;
+}
+
+/* ── a work item, as a scrap you can pull further out ── */
+.card{ display:block; width:100%; border:0; padding:9px 9px 0; font:inherit; color:inherit;
+  text-align:left; background:var(--paper); cursor:pointer; }
+.card[data-deep="0"]{ cursor:default; }
+.card .meta{ padding:9px 2px 11px; }
+.card .t{ font-family:var(--display); font-weight:700; font-size:clamp(11px,1.02vw,15px); line-height:1.18; }
+.card .r{ margin-top:5px; font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--board); }
+.card .r em{ font-style:normal; color:var(--vermilion); }
+.card:hover{ z-index:30; }
+.scrap:has(.card:hover){ z-index:30; }
+.card:hover .t{ color:var(--lacquer); }
+.card:focus-visible{ outline:2px solid var(--vermilion); outline-offset:4px; }
+
+/* ── a hanging scroll for a commission ── */
+.scroll-top{
+  height:12px; border-radius:6px; background:linear-gradient(var(--board), var(--kraft));
+  box-shadow:calc(var(--sun-x)*4px) calc(var(--sun-y)*4px) 8px rgba(var(--sumi-rgb),.2);
+}
+.scroll-body{ padding:16px 14px 20px; }
+.scroll-body .n{ font-family:var(--display); font-size:11px; letter-spacing:.2em; color:var(--vermilion); }
+.scroll-body h3{ margin:8px 0 0; font-family:var(--display); font-weight:700;
+  font-size:clamp(12px,1.1vw,17px); line-height:1.25; }
+.scroll-body .lead{ margin-top:10px; font-size:9px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--board); }
+.scroll-body .blurb{ margin-top:11px; font-size:clamp(11px,.94vw,13.5px); line-height:1.6; color:#3f382f; }
+.scroll-body .pts{ list-style:none; margin:12px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:5px; }
+.scroll-body .pts li{ font-size:8.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-soft); background:var(--paper-2); padding:5px 8px; }
+.fringe{ display:flex; gap:2px; padding:0 10px; }
+.fringe i{ flex:1; height:clamp(18px,3vh,34px);
+  background:linear-gradient(var(--kraft), rgba(215,191,153,0)); }
+
+/* ── the button that goes back to the heap for more ── */
+.more{
+  border:0; cursor:pointer; font:inherit; padding:11px 18px;
+  font-size:9.5px; letter-spacing:.24em; text-transform:uppercase;
+  background:var(--sumi); color:var(--paper);
+  box-shadow:calc(var(--sun-x)*5px) calc(var(--sun-y)*5px) 12px rgba(var(--sumi-rgb),.28);
+  transition:box-shadow 700ms ease 130ms, background 200ms ease;
+}
+.more:hover{ background:var(--lacquer); }
+.more:focus-visible{ outline:2px solid var(--vermilion); outline-offset:3px; }
+
+/* ── the standing rail: where you are, set vertically ── */
+.where{
+  position:absolute; right:calc(var(--edge) * .5); top:21%; z-index:55;
+  display:flex; align-items:center; gap:14px; pointer-events:none;
+}
+.where .n{ font-family:var(--display); font-size:11px; letter-spacing:.2em; color:var(--vermilion); }
+.where .rule{ width:1px; height:clamp(40px,9vh,90px); background:rgba(var(--sumi-rgb),.28); }
+
+/* ── torn, not cut ───────────────────────────────────────────
+   A clip-path would eat a box-shadow, so ragged stock drops the
+   cast shadows and rebuilds them as chained drop-shadows, which
+   follow the clipped silhouette instead of the box. The lit edge
+   stays an inset shadow — that one is meant to be clipped. */
+.stock.ragged{
+  clip-path:polygon(
+    0.5% 2.2%, 13% 0.4%, 27% 2.8%, 41% 0.3%, 56% 2.6%, 71% 0.5%, 86% 2.9%, 99.5% 1.1%,
+    98.4% 15%, 100% 30%, 98.2% 46%, 99.7% 61%, 98% 77%, 99.5% 97.2%,
+    85% 99.5%, 70% 97.3%, 54% 99.8%, 38% 97.4%, 22% 99.6%, 8% 97.6%, 0.6% 99%,
+    1.8% 80%, 0% 64%, 1.9% 47%, 0.3% 31%, 1.5% 16%);
+  box-shadow:inset calc(var(--sun-x) * -1.5px) calc(var(--sun-y) * -1.5px) 0 rgba(255,253,247,.55);
+  filter:
+    drop-shadow(calc(var(--sun-x) * var(--lift) * 2px) calc(var(--sun-y) * var(--lift) * 2px) 0 rgba(var(--sumi-rgb), .10))
+    drop-shadow(calc(var(--sun-x) * var(--lift) * 5px) calc(var(--sun-y) * var(--lift) * 5px) calc(var(--lift) * 4px) rgba(var(--sumi-rgb), .19));
+  transition:filter 700ms cubic-bezier(.22,.9,.3,1) 130ms;
+}
+.stock.ragged.alt{
+  clip-path:polygon(
+    1.4% 1%, 16% 3%, 30% 0.4%, 46% 2.8%, 60% 0.3%, 76% 2.6%, 90% 0.5%, 99% 2.4%,
+    99.6% 18%, 98% 33%, 99.8% 50%, 98.3% 66%, 100% 82%, 98.6% 98.8%,
+    83% 97%, 67% 99.6%, 51% 97.2%, 35% 99.7%, 19% 97.4%, 5% 99.5%, 1% 97.6%,
+    0.4% 81%, 2% 65%, 0.2% 49%, 1.7% 33%, 0.5% 17%);
+}
+
+/* ── a section's name, set the way a poster sets it ── */
+.headline{
+  padding:.42em .62em .5em;
+  font-family:var(--display); font-weight:800;
+  font-size:clamp(19px, 2.5vw, 42px); line-height:1.0; letter-spacing:-.005em;
+  text-wrap:balance;
+}
+.headline .over{
+  display:block; margin-bottom:.5em;
+  font-family:var(--body); font-size:9px; font-weight:500;
+  letter-spacing:.34em; text-transform:uppercase; color:var(--vermilion);
+}
+.headline .under{
+  display:block; margin-top:.55em;
+  font-family:var(--body); font-size:clamp(9.5px,.82vw,12px); font-weight:400;
+  letter-spacing:.18em; text-transform:uppercase; color:var(--board);
+}
+.panel p{ color:#332d26; }
+
+/* ═════════════════════════════════════════════════════════════
+   PULLED RIGHT OUT
+   A work item opened is not a modal over a page — the tableau
+   scatters and this one piece comes forward on its own.
+   ═════════════════════════════════════════════════════════ */
+.lift{
+  position:absolute; inset:0; z-index:80;
+  display:grid; place-items:center; padding:clamp(12px,3vw,40px);
+  background:radial-gradient(120% 90% at 50% 40%, rgba(160,175,182,.5), rgba(120,136,144,.82));
+  backdrop-filter:blur(4px);
+  opacity:0; pointer-events:none; transition:opacity 320ms ease;
+}
+.lift.open{ opacity:1; pointer-events:auto; }
+.lift-sheet{
+  width:min(880px,100%); max-height:100%; overflow-y:auto;
+  padding:clamp(20px,2.8vw,38px);
+  transform:translateY(34px) rotate(-1.2deg) scale(.97);
+  transition:transform 460ms cubic-bezier(.24,1.15,.36,1);
+  scrollbar-width:thin; scrollbar-color:rgba(var(--sumi-rgb),.3) transparent;
+}
+.lift.open .lift-sheet{ transform:none; }
+.lift-close{
+  position:sticky; top:0; float:right; margin:-6px -6px 0 0; z-index:3;
+  border:0; background:none; cursor:pointer; font:inherit; padding:6px;
+  font-size:9.5px; letter-spacing:.24em; color:var(--board);
+}
+.lift-close:hover{ color:var(--lacquer); }
+.lift-sheet h3{ margin:2px 0 12px; font-family:var(--display); font-weight:700;
+  font-size:clamp(19px,2.5vw,32px); line-height:1.14; }
+.lift-sheet .eyebrow{ font-size:9.5px; letter-spacing:.3em; text-transform:uppercase; color:var(--vermilion); }
+.slate{ display:grid; grid-template-columns:auto 1fr; gap:0 20px; margin:16px 0 20px; }
+.slate dt{ font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:var(--board);
+  padding:8px 0; border-top:1px solid rgba(var(--sumi-rgb),.14); }
+.slate dd{ margin:0; padding:8px 0; font-size:13.5px;
+  border-top:1px solid rgba(var(--sumi-rgb),.14); }
+.gal{ position:relative; margin:18px 0 22px; }
+.gal .shot{ background:var(--paper-2); }
+.gal .shot img{ height:auto; max-height:56vh; object-fit:contain; }
+.gal-nav{ position:absolute; inset:0; display:flex; z-index:3; }
+.gal-nav button{ flex:1; border:0; background:none; cursor:pointer; font:inherit;
+  display:flex; align-items:center; padding:0 12px; opacity:0; transition:opacity 200ms ease; }
+.gal-nav button:last-child{ justify-content:flex-end; }
+.gal-nav span{ background:rgba(var(--sumi-rgb),.74); color:#fdf3e6;
+  font-size:9px; letter-spacing:.2em; padding:8px 11px; }
+.gal:hover .gal-nav button, .gal-nav button:focus-visible{ opacity:1; }
+.gal-count{ position:absolute; right:11px; bottom:11px; z-index:4;
+  font-size:9.5px; letter-spacing:.2em; color:var(--board); }
+.lift-sheet .body p{ margin:0 0 .9em; line-height:1.66; font-size:14px; color:#3f382f; max-width:42em; }
+
+/* ═════════════════════════════════════════════════════════════
+   A SMALLER THEATRE
+   Percentage tableaux collapse on a phone, so below 820px the
+   compositions reflow into one column and the stage scrolls. The
+   scraps still come out of the pile — that never changes.
+   ═════════════════════════════════════════════════════════ */
+@media (max-width:820px){
+  :root{ --pile-h:16vh; }
+  .stage{ overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
+  .stage.on{ padding:calc(clamp(128px,20vh,236px) + 28px) var(--edge) calc(var(--pile-h) + 40px); }
+  .scrap{
+    position:relative; left:auto; top:auto; width:auto;
+    margin:0 auto clamp(16px,3.4vh,30px); max-width:520px;
+    transform:translateX(calc((var(--pilex) - 50) * .8vw)) rotate(calc(var(--piler) * 1deg));
+  }
+  .stage.on .scrap{ transform:translateX(0) rotate(calc(var(--r) * .5deg)); }
+  .scrap-in{ transform:translateY(34vh) scale(.4); }
+  .hangings{ overflow-x:auto; justify-content:flex-start; scrollbar-width:none; }
+  .hangings::-webkit-scrollbar{ display:none; }
+  .where{ display:none; }
+  .ridges{ bottom:12%; }
+}
+
+/* The pieces stop flying, the light stops travelling, the shadows
+   stop arriving late. Everything is still made of torn paper. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    transition-duration:1ms !important; transition-delay:0ms !important;
+    animation-duration:1ms !important; animation-iteration-count:1 !important;
+  }
+  .scrap{ opacity:1; transform:translate(-50%,-50%) rotate(calc(var(--r) * 1deg)); }
+  .scrap-in{ transform:none; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs>
+    <!-- The torn edge. Turbulence displaces the alpha of whatever it
+         is applied to, so a rectangle stops being a rectangle. -->
+    <filter id="torn" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016 0.022" numOctaves="4" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="11" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- Gooey merge: blur a group of lobes, then throw the alpha
+         through a steep curve so the blurred overlaps snap back to
+         a single hard silhouette. Five circles become one cloud. -->
+    <filter id="goo">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b"/>
+      <feColorMatrix in="b" type="matrix" result="g"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -12"/>
+    </filter>
+    <filter id="torn2" x="-8%" y="-8%" width="116%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.021 0.014" numOctaves="3" seed="23" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="world" id="world">
+  <div class="plane sky" data-depth="2">
+    <div class="bow" aria-hidden="true"></div>
+    <div class="ridges">
+      <svg viewBox="0 0 1200 300" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 300 L0 196 L118 128 L214 178 L318 96 L432 172 L536 122 L648 190 L742 140 L864 200 L968 152 L1074 206 L1200 160 L1200 300 Z" fill="#8d9ea6" opacity=".55"/>
+        <path d="M0 300 L0 232 L140 178 L262 226 L376 168 L498 224 L618 182 L738 232 L860 190 L986 238 L1104 200 L1200 236 L1200 300 Z" fill="#a9b8be" opacity=".8"/>
+      </svg>
+    </div>
+  </div>
+  <div class="plane fog fog-far" data-depth="6" aria-hidden="true"><i></i><i></i></div>
+
+  <div class="plane" data-depth="10" id="stages"></div>
+
+  <div class="plane fog fog-near" data-depth="16" aria-hidden="true"><i></i><i></i></div>
+
+  <nav class="hangings" id="hangings" aria-label="Sections"></nav>
+
+  <div class="where" id="where" aria-hidden="true"></div>
+
+  <div class="pile" id="pile" aria-hidden="true"></div>
+  <div class="pile-lip" aria-hidden="true"></div>
+
+  <div class="lift" id="lift" role="dialog" aria-modal="true" aria-label="Detail" hidden>
+    <div class="stock l7 lift-sheet" id="liftSheet"></div>
+  </div>
+</div>
+
+<noscript style="position:fixed;inset:0;display:grid;place-items:center;padding:40px;font-family:Jost,sans-serif">
+  This site assembles itself in the browser. Please enable JavaScript.
+</noscript>
+
+<script>
+/* ═════════════════════════════════════════════════════════════
+   THE ASSEMBLER
+
+   Sections are not laid out; they are composed. Each one is a
+   hand-placed arrangement of scraps in a 100×100 stage space,
+   and every scrap knows both where it belongs and where in the
+   heap it came from. Choosing a section is a choreography, not
+   a render.
+   ═════════════════════════════════════════════════════════ */
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Deterministic scatter — the heap must look tossed, but it has
+   to look identically tossed on every load. */
+function rng(seed){
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+
+/* ── the light ───────────────────────────────────────────── */
+const DEFAULT_SUN = 24;
+function setSun(deg){
+  const t = (Number.isFinite(+deg) ? +deg : DEFAULT_SUN) * Math.PI / 180;
+  document.documentElement.style.setProperty('--sun-x', Math.sin(t).toFixed(4));
+  document.documentElement.style.setProperty('--sun-y', Math.cos(t).toFixed(4));
+}
+
+/* ── media ───────────────────────────────────────────────── */
+function mediaHtml(src){
+  const s = String(src || '');
+  let m = s.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]+)/);
+  if (m) return `<iframe src="https://www.youtube-nocookie.com/embed/${esc(m[1])}" allowfullscreen loading="lazy" title="Video" style="width:100%;height:100%;border:0"></iframe>`;
+  m = s.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (m) return `<iframe src="https://player.vimeo.com/video/${esc(m[1])}" allowfullscreen loading="lazy" title="Video" style="width:100%;height:100%;border:0"></iframe>`;
+  if (/\.(mp4|webm|m4v)(\?|#|$)/i.test(s)) return `<video src="${esc(s)}" muted loop autoplay playsinline></video>`;
+  return `<img src="${esc(s)}" alt="" loading="lazy">`;
+}
+const isStill = (src) => !/(?:youtu|vimeo)|\.(?:mp4|webm|m4v)(?:\?|#|$)/i.test(String(src || ''));
+
+function shotHtml(item, { ratio = '4/3', shape = '', torn = true } = {}){
+  const it = item || {};
+  const cls = ['shot', shape, torn && isStill(it.src) ? 'torn' : ''].filter(Boolean).join(' ');
+  return `<div class="${cls}" style="aspect-ratio:${ratio}">
+    ${it.src ? mediaHtml(it.src) : '<span class="nothing">NOT YET</span>'}
+  </div>`;
+}
+function photoScrap(item, opts){
+  const it = item || {};
+  return `<div class="stock ragged mount ${opts.alt ? 'alt' : ''} ${opts.stock || ''}">${shotHtml(it, opts)}
+    ${it.caption ? `<div class="cap">${esc(it.caption)}</div>` : '<div class="cap"></div>'}</div>`;
+}
+const ensoHtml = (color, inner) => `<div class="enso">
+  <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="41" fill="none"
+    stroke="${color}" stroke-width="5.5" stroke-linecap="round"
+    stroke-dasharray="228 32" transform="rotate(-38 50 50)" opacity=".82"/></svg>
+  ${inner ? `<div class="inner">${inner}</div>` : ''}</div>`;
+const paras = (arr) => (arr || []).filter(Boolean).map(p => `<p>${esc(p)}</p>`).join('');
+const tate = (t, cls) => `<div class="tate ${cls || ''}">${esc(t)}</div>`;
+
+/* ═════════════════════════════════════════════════════════════
+   THE COMPOSITIONS
+   x, y are the centre of a scrap as a percentage of the stage;
+   w is its width; r its resting angle. Hand-placed, because a
+   composition assembled by a loop is a grid wearing a costume.
+   ═════════════════════════════════════════════════════════ */
+const COMPOSE = {};
+
+/* Every section but the title card opens with its name set as a
+   poster would set it — top left, clear of the hangings. The
+   vertical rails are for labels only: rotated Latin is a spine,
+   and a spine is no place for a sentence. */
+const headline = (sec, n) => ({
+  x:16, y:17, w:27, r:-1.2, z:30, html:
+  `<div class="stock ragged headline l5">
+     <span class="over">${String(n).padStart(2,'0')} — ${esc(sec.label || '')}</span>
+     ${esc(sec.title || sec.label || '')}
+     ${sec.sub ? `<span class="under">${esc(sec.sub)}</span>` : ''}
+   </div>` });
+
+COMPOSE.title = (s) => {
+  const p = (s.plates || []).filter(x => x && x.src);
+  const out = [];
+  if (p[2]) out.push({ x:33, y:25, w:10, r:8, z:8, html:photoScrap(p[2], { shape:'round', ratio:'1/1' }) });
+  out.push({ x:66, y:26, w:12, r:0, z:7, html:ensoHtml('var(--vermilion)') });
+  if (p[1]) out.push({ x:12, y:35, w:18, r:-6, z:11, html:photoScrap(p[1], { ratio:'3/4' }) });
+  if (p[0]) out.push({ x:81, y:52, w:18, r:4, z:12, html:photoScrap(p[0], { shape:'arch', ratio:'3/4', alt:1 }) });
+  out.push({ x:51, y:44, w:38, r:-1.5, z:20, html:
+    `<div class="blob">
+       <div class="goo halo">${'<i></i>'.repeat(5)}</div>
+       <div class="goo edge">${'<i></i>'.repeat(5)}</div>
+       <div class="goo face">${'<i></i>'.repeat(5)}</div>
+       <div class="blob-copy">
+         ${s.eyebrow ? `<span class="eyebrow">${esc(s.eyebrow)}</span>` : ''}
+         <h1>${esc(s.name || 'SHOPS')}</h1>
+       </div>
+     </div>` });
+  out.push({ x:17, y:61, w:24, r:1.5, z:14, html:
+    `<div class="stock ragged panel lede l5">${paras(s.paragraphs)}</div>` });
+  if (s.tagline) out.push({ x:64, y:68, w:18, r:-2.5, z:15, html:
+    `<div class="stock ragged red strip l5">${esc(s.tagline)}</div>` });
+  return out;
+};
+
+/* Nine at a time. The rest stay in the heap until asked for, which
+   is the only honest form of pagination on a site made of scraps. */
+const SCATTER = [
+  { x:14, y:41, w:15, r:-4 },  { x:35, y:32, w:14, r:2.5 },
+  { x:30, y:61, w:14, r:-2 },  { x:53, y:44, w:15, r:1.5 },
+  { x:50, y:65, w:12, r:-3.5 },{ x:72, y:33, w:14, r:3 },
+  { x:77, y:60, w:14, r:-2.5 },{ x:91, y:44, w:11, r:2 },
+  { x:9,  y:63, w:11, r:4.5 },
+];
+COMPOSE.work = (s, st, n) => {
+  const items = s.items || [];
+  const page = st.page || 0;
+  const start = (page * SCATTER.length) % Math.max(items.length, 1);
+  const out = [headline(s, n)];
+  SCATTER.forEach((slot, i) => {
+    const idx = start + i;
+    if (idx >= items.length) return;
+    const job = items[idx];
+    const deep = !!(job.writeup || (job.gallery || []).length);
+    out.push({ ...slot, z: 10 + i, html:
+      `<button class="stock ragged card ${i % 2 ? 'alt' : ''}" data-job="${idx}" data-deep="${deep ? 1 : 0}"${deep ? '' : ' tabindex="-1"'}>
+         ${shotHtml({ src:job.image }, { ratio:'4/3', shape: i % 3 === 1 ? 'arch' : '' })}
+         <div class="meta">
+           <div class="t">${esc(job.title || 'Untitled')}</div>
+           <div class="r">${esc(job.role || '')}${job.year ? ` · <em>${esc(job.year)}</em>` : ''}</div>
+         </div>
+       </button>` });
+  });
+  if (items.length > SCATTER.length)
+    out.push({ x:63, y:74, w:22, r:1, z:44, html:
+      `<div style="text-align:center"><button class="more" data-more="1">More from the pile ↑</button></div>` });
+  return out;
+};
+
+COMPOSE.services = (s, st, n) => {
+  const items = (s.items || []).slice(0, 5);
+  const out = [headline(s, n)];
+  items.forEach((o, i) => {
+    const x = items.length > 1 ? 17 + (66 / (items.length - 1)) * i : 50;
+    out.push({ x, y: 47 + (i % 2 ? 3 : -3), w:13, r: i % 2 ? 1.4 : -1.4, z: 10 + i, html:
+      `<div class="scroll-top"></div>
+       <div class="stock kraft scroll-body l5">
+         <div class="n">${String(i + 1).padStart(2,'0')}</div>
+         <h3>${esc(o.title || '')}</h3>
+         ${o.lead ? `<div class="lead">${esc(o.lead)}</div>` : ''}
+         <div class="blurb">${esc(o.blurb || '')}</div>
+         ${(o.points || []).length ? `<ul class="pts">${o.points.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+       </div>
+       <div class="fringe">${'<i></i>'.repeat(9)}</div>` });
+  });
+  if (s.note) out.push({ x:23, y:73, w:32, r:1.4, z:44, html:
+    `<div class="stock ragged panel l5">${esc(s.note)}</div>` });
+  return out;
+};
+
+COMPOSE.process = (s, st, n) => {
+  const steps = (s.steps || []).slice(0, 5);
+  const ys = [50, 38, 52, 37, 49];
+  const out = [headline(s, n)];
+  steps.forEach((st2, i) => {
+    const x = 14 + (74 / Math.max(steps.length - 1, 1)) * i;
+    out.push({ x, y: ys[i % ys.length], w:16, r: i % 2 ? 2.2 : -2.2, z: 10 + i, html:
+      `<div class="stock ragged ${i % 2 ? 'alt' : ''} mount l5">
+         ${shotHtml(st2, { ratio:'4/3', shape: i % 2 ? 'arch' : '' })}
+         <div class="cap">STAGE ${String(i + 1).padStart(2,'0')} — ${esc(st2.title || '')}</div>
+         <div style="padding:0 2px 12px;font-size:clamp(10px,.82vw,12px);line-height:1.55;color:#332d26">${esc(st2.text || '')}</div>
+       </div>` });
+  });
+  return out;
+};
+
+COMPOSE.about = (s, st, n) => {
+  const out = [headline(s, n)];
+  out.push({ x:32, y:48, w:25, r:0, z:5, html:ensoHtml('var(--board)') });
+  out.push({ x:32, y:50, w:19, r:-2, z:12, html:
+    photoScrap(s.portrait || {}, { shape:'arch', ratio:'4/5', stock:'l7' }) });
+  if (s.role) out.push({ x:47, y:31, w:17, r:-4, z:14, html:
+    `<div class="stock ragged red strip l5">${esc(s.role)}</div>` });
+  out.push({ x:73, y:47, w:27, r:-1.5, z:13, html:
+    `<div class="stock ragged alt panel l5">${paras(s.paragraphs)}</div>` });
+  const facts = s.facts || [];
+  if (facts.length) out.push({ x:14, y:70, w:20, r:3, z:15, html:
+    `<div class="stock ragged kraft panel">
+       <dl class="slate" style="margin:0">${facts.map(f =>
+         `<dt>${esc(f.k)}</dt><dd>${esc(f.v)}</dd>`).join('')}</dl></div>` });
+  return out;
+};
+
+COMPOSE.contact = (s, st, n) => {
+  const rows = (s.rows || []).map(r => {
+    const inner = `<div style="font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--board)">${esc(r.k)}</div>
+      <div style="font-family:var(--display);font-weight:700;font-size:clamp(13px,1.4vw,22px);margin-top:3px">${esc(r.label)}</div>`;
+    return r.href
+      ? `<a href="${esc(r.href)}" style="text-decoration:none;color:inherit;display:block;padding:7px 0">${inner}</a>`
+      : `<div style="padding:7px 0">${inner}</div>`;
+  }).join('');
+  const out = [headline(s, n)];
+  out.push({ x:48, y:50, w:25, r:0, z:12, html:ensoHtml('var(--vermilion)', rows) });
+  if ((s.meta || []).length) out.push({ x:82, y:58, w:17, r:2, z:13, html:
+    `<div class="stock ragged kraft panel"><dl class="slate" style="margin:0">${
+      s.meta.map(m => `<dt>${esc(m.k)}</dt><dd>${esc(m.v)}</dd>`).join('')}</dl></div>` });
+  if (s.note) out.push({ x:68, y:22, w:26, r:-1.4, z:44, html:
+    `<div class="stock ragged indigo strip l5">${esc(s.note)}</div>` });
+  return out;
+};
+
+COMPOSE.custom = (s, st, n) => {
+  const out = [headline(s, n)];
+  const slots = [{x:28,y:43,w:24,r:-2},{x:60,y:36,w:22,r:2},{x:37,y:65,w:22,r:1.5},{x:73,y:60,w:20,r:-2.5}];
+  (s.blocks || []).slice(0, 4).forEach((b, i) => {
+    const html = b.kind === 'text'
+      ? `<div class="stock ragged panel l5">${paras(String(b.text || '').split(/\n{2,}/))}</div>`
+      : photoScrap(b, { ratio:'4/3', shape: i % 2 ? 'arch' : '' });
+    out.push({ ...slots[i], z: 10 + i, html });
+  });
+  return out;
+};
+
+/* ═════════════════════════════════════════════════════════════
+   THE DRIVER
+   ═════════════════════════════════════════════════════════ */
+let content = null, sections = [], stages = [], cur = -1;
+const state = [];                     /* per-section scratch (work paging) */
+
+const slug = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+/* Build the scraps for one section and hand each its place in
+   the heap. The pile anchor is deterministic per slot, so a piece
+   always comes out of — and goes back to — the same spot. */
+function paint(stage, sec, i){
+  const rnd = rng(1000 + i * 97);
+  const frags = COMPOSE[sec.type](sec, state[i] || {}, i + 1);
+  stage.innerHTML = frags.map((f, n) => {
+    const pilex = 8 + rnd() * 84;
+    const piler = -46 + rnd() * 92;
+    const d = Math.round(n * 38 + rnd() * 44);
+    const dOut = Math.round((frags.length - n) * 22);
+    return `<div class="scrap" style="
+      --x:${f.x}; --y:${f.y}; --w:${f.w}; --r:${f.r || 0}; --z:${f.z || 10};
+      --pilex:${pilex.toFixed(1)}; --piler:${piler.toFixed(1)};
+      --d:${d}ms; --dOut:${dOut}ms;"><div class="scrap-in">${f.html}</div></div>`;
+  }).join('');
+}
+
+/* ── the heap itself ─────────────────────────────────────── */
+function buildPile(){
+  const rnd = rng(20260821);
+  /* Overwhelmingly warm stock with three accents in the whole heap.
+     An even spread of colours read as confetti; paper with the odd
+     scrap of lacquer in it reads as a shop floor. */
+  const stocks = ['var(--paper)','var(--paper-2)','var(--paper)','var(--kraft)',
+                  'var(--paper-2)','var(--paper)','var(--board)','var(--paper-2)',
+                  'var(--paper)','var(--kraft)','var(--vermilion)','var(--paper)',
+                  'var(--paper-2)','var(--blossom)','var(--paper)','var(--sumi)'];
+  let html = '';
+  for (let n = 0; n < 40; n++){
+    const w = 130 + rnd() * 200, h = 78 + rnd() * 104;
+    const x = -8 + rnd() * 116, rot = -34 + rnd() * 68;
+    const dip = 8 + rnd() * 46;
+    const bg = stocks[Math.floor(rnd() * stocks.length)];
+    html += `<b style="
+      left:${x.toFixed(1)}%; width:${w.toFixed(0)}px; height:${h.toFixed(0)}px;
+      margin-bottom:${-dip.toFixed(0)}px; background:${bg}; border-radius:2px;
+      filter:url(#torn2); opacity:${(.82 + rnd() * .18).toFixed(2)};
+      z-index:${n}; --jr:${rot.toFixed(1)}deg;
+      transform:translateX(-50%) rotate(${rot.toFixed(1)}deg);"></b>`;
+  }
+  $('pile').innerHTML = html;
+}
+let disturbTimer = null;
+function disturbPile(){
+  if (REDUCED) return;
+  const p = $('pile');
+  p.classList.remove('disturbed');
+  void p.offsetWidth;
+  p.classList.add('disturbed');
+  clearTimeout(disturbTimer);
+  disturbTimer = setTimeout(() => p.classList.remove('disturbed'), 900);
+}
+
+/* ── moving between sections ─────────────────────────────── */
+function go(i, { first } = {}){
+  if (i === cur || i < 0 || i >= stages.length) return;
+  const prev = cur >= 0 ? stages[cur] : null;
+  const next = stages[i];
+
+  setSun(sections[i].sun);
+  cur = i;
+  try { history.replaceState(null, '', '#' + slug(sections[i].label)); } catch {}
+
+  [...$('hangings').children].forEach((h, n) => {
+    h.classList.toggle('on', n === i);
+    h.setAttribute('aria-current', n === i ? 'true' : 'false');
+  });
+  $('where').innerHTML =
+    `<span class="tate">${esc(sections[i].label || '')}</span>
+     <span class="rule"></span>
+     <span class="n">${String(i + 1).padStart(2,'0')}</span>`;
+
+  const land = () => {
+    if (prev) prev.classList.remove('out');
+    next.scrollTop = 0;
+    disturbPile();
+    next.classList.add('on');
+  };
+
+  if (prev){
+    prev.classList.remove('on');
+    prev.classList.add('out');                 /* thrown back on the heap */
+    setTimeout(land, REDUCED ? 0 : 290);
+  } else {
+    setTimeout(land, first && !REDUCED ? 260 : 0);
+  }
+}
+
+/* ── more from the pile ──────────────────────────────────── */
+function reshuffle(i){
+  const stage = stages[i];
+  state[i] = state[i] || {};
+  state[i].page = (state[i].page || 0) + 1;
+  stage.classList.remove('on');
+  stage.classList.add('out');
+  setTimeout(() => {
+    paint(stage, sections[i], i);
+    stage.classList.remove('out');
+    void stage.offsetWidth;
+    disturbPile();
+    stage.classList.add('on');
+  }, REDUCED ? 0 : 290);
+}
+
+/* ── depth: everything drifts at its own rate ────────────── */
+function parallax(){
+  if (REDUCED) return;
+  const planes = [...document.querySelectorAll('.plane')];
+  let tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+  const tick = () => {
+    cx += (tx - cx) * .07; cy += (ty - cy) * .07;
+    planes.forEach(p => {
+      const d = +p.dataset.depth || 0;
+      p.style.transform = `translate(${(cx * d).toFixed(2)}px, ${(cy * d).toFixed(2)}px)`;
+    });
+    raf = (Math.abs(tx - cx) > .05 || Math.abs(ty - cy) > .05) ? requestAnimationFrame(tick) : null;
+  };
+  addEventListener('pointermove', (e) => {
+    tx = (e.clientX / innerWidth - .5) * -2;
+    ty = (e.clientY / innerHeight - .5) * -2;
+    if (!raf) raf = requestAnimationFrame(tick);
+  }, { passive: true });
+}
+
+/* ── pulling one piece all the way out ───────────────────── */
+let galIdx = 0, galItems = [];
+function openLift(job){
+  if (!job) return;
+  galItems = (job.gallery || []).filter(g => g && g.src);
+  galIdx = 0;
+  const facts = [
+    ...(job.role ? [{ k:'ROLE', v:job.role }] : []),
+    ...(job.kind ? [{ k:'TYPE', v:job.kind }] : []),
+    ...(job.year ? [{ k:'YEAR', v:job.year }] : []),
+    ...(job.client ? [{ k:'CLIENT', v:job.client }] : []),
+    ...(job.meta || [])
+  ];
+  $('liftSheet').innerHTML = `
+    <button class="lift-close" id="liftClose">CLOSE ✕</button>
+    <div class="eyebrow">${esc(job.kind || 'WORK')}</div>
+    <h3>${esc(job.title || '')}</h3>
+    ${facts.length ? `<dl class="slate">${facts.map(f =>
+      `<dt>${esc(f.k)}</dt><dd>${esc(f.v)}</dd>`).join('')}</dl>` : ''}
+    ${galItems.length ? `<div class="gal" id="gal">
+      ${shotHtml(galItems[0], { ratio:'auto', torn:false })}
+      ${galItems.length > 1 ? `<div class="gal-nav">
+        <button data-step="-1" aria-label="Previous image"><span>◀ PREV</span></button>
+        <button data-step="1" aria-label="Next image"><span>NEXT ▶</span></button>
+      </div><div class="gal-count">1 / ${galItems.length}</div>` : ''}
+    </div>` : ''}
+    ${job.writeup ? `<div class="body">${paras(String(job.writeup).split(/\n{2,}/))}</div>` : ''}`;
+  const lift = $('lift');
+  lift.hidden = false;
+  requestAnimationFrame(() => lift.classList.add('open'));
+  $('liftClose').focus();
+}
+function galGo(step){
+  if (galItems.length < 2) return;
+  galIdx = (galIdx + step + galItems.length) % galItems.length;
+  const gal = $('gal');
+  gal.querySelector('.shot').outerHTML = shotHtml(galItems[galIdx], { ratio:'auto', torn:false });
+  gal.querySelector('.gal-count').textContent = `${galIdx + 1} / ${galItems.length}`;
+}
+function closeLift(){
+  const lift = $('lift');
+  lift.classList.remove('open');
+  setTimeout(() => { lift.hidden = true; $('liftSheet').innerHTML = ''; }, REDUCED ? 0 : 320);
+}
+
+/* ── wiring ──────────────────────────────────────────────── */
+$('stages').addEventListener('click', (e) => {
+  const more = e.target.closest('[data-more]');
+  if (more) return reshuffle(cur);
+  const card = e.target.closest('.card');
+  if (!card || card.dataset.deep === '0') return;
+  openLift((sections[cur].items || [])[+card.dataset.job]);
+});
+$('lift').addEventListener('click', (e) => {
+  if (e.target.id === 'lift' || e.target.closest('#liftClose')) return closeLift();
+  const step = e.target.closest('[data-step]');
+  if (step) galGo(+step.dataset.step);
+});
+addEventListener('keydown', (e) => {
+  if (!$('lift').hidden){
+    if (e.key === 'Escape') closeLift();
+    if (e.key === 'ArrowLeft') galGo(-1);
+    if (e.key === 'ArrowRight') galGo(1);
+    return;
+  }
+  if (e.target.matches('input, textarea')) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown'){ go(cur + 1); e.preventDefault(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp'){ go(cur - 1); e.preventDefault(); }
+  if (/^[1-9]$/.test(e.key)) go(+e.key - 1);
+});
+
+/* ── boot ────────────────────────────────────────────────── */
+async function boot(){
+  try {
+    const res = await fetch('content.json', { cache:'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    content = await res.json();
+  } catch (err){
+    $('stages').innerHTML = `<div class="stage on"><div class="scrap" style="--x:50;--y:45;--w:44;--pilex:50;--piler:0">
+      <div class="scrap-in"><div class="stock panel l5">
+      <p><strong>Could not load content.json.</strong></p>
+      <p>Serve this folder over HTTP rather than opening the file directly —
+      <code>python3 -m http.server</code>, then visit <code>localhost:8000</code>.</p>
+      <p style="color:var(--board)">${esc(err.message)}</p></div></div></div></div>`;
+    return;
+  }
+
+  sections = (content.sections || []).filter(s => s && COMPOSE[s.type]);
+  document.title = content.site?.title || 'SHOPS';
+
+  buildPile();
+
+  $('hangings').innerHTML = sections.map((s, i) => `
+    <button class="hang" data-go="${i}" aria-label="${esc(s.label || '')}">
+      <span class="cord"></span>
+      <span class="col"></span>
+      <span class="lbl">${esc(s.label || '')}</span>
+      <span class="num">${String(i + 1).padStart(2,'0')}</span>
+    </button>`).join('');
+  $('hangings').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-go]');
+    if (b) go(+b.dataset.go);
+  });
+
+  $('stages').innerHTML = sections.map((s, i) =>
+    `<section class="stage" data-i="${i}" aria-label="${esc(s.label || '')}"></section>`).join('');
+  stages = [...document.querySelectorAll('.stage')];
+  sections.forEach((s, i) => { state[i] = {}; paint(stages[i], s, i); });
+
+  parallax();
+  const want = sections.findIndex(s => slug(s.label) === location.hash.slice(1));
+  go(want >= 0 ? want : 0, { first:true });
+}
+
+setSun(DEFAULT_SUN);
+boot();
+</script>
+</body>
+</html>
