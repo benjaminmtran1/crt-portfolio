@@ -259,6 +259,7 @@ html, body {
   border-radius: 3px;
 }
 .bp-pt.on { color: var(--ink); border-color: rgba(var(--ink-rgb),0.65); }
+.bp-pt:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .bp-hint {
   grid-column: 1 / -1;
   font-family: var(--body-font);
@@ -2655,8 +2656,12 @@ function wireBend() {
   bendApply();
 }
 
-/* Surfing channels fast heats the set up. Called from tune(). */
+/* Surfing channels fast heats the set up. Called from tune().
+   Skipped under prefers-reduced-motion: turning the knob is explicit intent,
+   but this bends the picture without being asked, which is the kind of
+   motion that setting exists to opt out of. */
 function bendHeat() {
+  if (REDUCED_MOTION) return;
   BEND.heat = Math.min(0.92, BEND.heat + 0.17);
   bendApply();
 }
