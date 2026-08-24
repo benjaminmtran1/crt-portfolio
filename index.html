@@ -9,46 +9,53 @@
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&family=League+Spartan:wght@800&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   CRT PORTFOLIO — design tokens
+   CRT PORTFOLIO — design tokens (DAYTIME BROADCAST — light palette)
 
-   The palette comes off 60s–80s film title cards: one saturated ink
-   printed over faded Technicolor photography, warm bone-white credits,
-   never a neutral grey. Each channel is "printed" in a different ink,
-   cycled by tune() — flipping channels changes the colour of the whole
-   broadcast, chrome included.
+   The palette comes off 60s–80s film title cards, printed on warm
+   paper rather than glowing out of a dark tube: one deepened ink
+   pressed onto a bone ground, never a neutral grey. Each channel is
+   "printed" in a different ink, cycled by tune() — flipping channels
+   changes the colour of the whole broadcast, chrome included.
+   Photography stays dark inside its frames, so stills still read as
+   little tubes set into the page; --bone is reserved for text that
+   rides on that dark media.
 
    Triplet (`*-rgb`) tokens exist so translucent glows, borders and
    scrims track the palette instead of hardcoding it.
    ============================================================ */
 :root {
-  /* --- the tube --- */
-  --tube: #15100e;              /* warm near-black — unlit glass */
-  --deep: #0c0908;              /* deepest black — bezels, scrims */
-  --deep-rgb: 12,9,8;
+  /* --- the tube (DAYTIME BROADCAST — light palette) --- */
+  --tube: #efe8d8;              /* warm paper — lit glass */
+  --deep: #e3dcc9;              /* deepest paper — bezels, scrims */
+  --deep-rgb: 227,220,201;
 
-  /* --- the inks (one per channel) --- */
-  --ink-red:      #e8503a;      /* tomato */
-  --ink-marigold: #ec9a3c;      /* marigold */
-  --ink-yellow:   #f2cb4a;      /* butter */
-  --ink-teal:     #67b6a6;      /* sea green */
-  --ink-pink:     #f272a8;      /* bubblegum */
-  --ink-cream:    #f6e6cd;      /* bone */
+  /* --- the inks (one per channel), deepened for a light tube --- */
+  --ink-red:      #c23a26;      /* brick tomato */
+  --ink-marigold: #b26e14;      /* burnt marigold */
+  --ink-yellow:   #a8871a;      /* mustard butter */
+  --ink-teal:     #2f7d6d;      /* deep sea green */
+  --ink-pink:     #c04b7e;      /* plum bubblegum */
+  --ink-cream:    #6f6552;      /* dark bone */
 
   /* --- the ink currently on air (tune() overwrites both on .crt) --- */
-  --ink: #ec9a3c;
-  --ink-rgb: 236,154,60;
+  --ink: #b26e14;
+  --ink-rgb: 178,110,20;
 
   /* --- type --- */
-  --burn: #f7e9d2;              /* bone white — headings, highlights */
-  --burn-rgb: 247,233,210;
-  --phosphor: #ded0bb;          /* warm sand — body copy */
-  --phosphor-rgb: 222,208,187;
-  --phosphor-dim: #9c8a79;
-  --ghost: #a58f7b;             /* dimmed UI labels */
+  --burn: #2b241c;              /* darkest sepia — headings, highlights */
+  --burn-rgb: 43,36,28;
+  --phosphor: #4a4234;          /* warm umber — body copy */
+  --phosphor-rgb: 74,66,52;
+  --phosphor-dim: #7d7160;
+  --ghost: #77695a;             /* dimmed UI labels */
+
+  /* --- bone white, reserved for text riding on dark media --- */
+  --bone: #f7e9d2;
+  --bone-rgb: 247,233,210;
 
   /* --- the warm/cool pair behind the chroma split --- */
-  --split-warm: 226,110,86;
-  --split-cool: 96,150,150;
+  --split-warm: 196,88,66;
+  --split-cool: 70,118,118;
 
   /* --- film grade for every image, video and iframe --- */
   --grade: saturate(0.95) contrast(1.05) brightness(0.97) sepia(0.12) hue-rotate(-5deg);
@@ -63,7 +70,7 @@
 
 html, body {
   height: 100%;
-  background: #050605;
+  background: #ccc5b1;
   overflow: hidden;
   font-family: var(--body-font);
 }
@@ -78,7 +85,7 @@ html, body {
   padding: clamp(8px, 2vw, 28px);
   background:
     radial-gradient(ellipse 80% 70% at 50% 45%, rgba(var(--split-warm),0.05), transparent 72%),
-    #050605;
+    #ccc5b1;
 }
 
 
@@ -90,8 +97,8 @@ html, body {
   border-radius: clamp(18px, 4vw, 48px) / clamp(14px, 3vw, 36px);
   overflow: hidden;
   box-shadow:
-    inset 0 0 clamp(60px, 12vw, 180px) rgba(0,0,0,0.6),
-    inset 0 0 12px rgba(0,0,0,0.75),
+    inset 0 0 clamp(60px, 12vw, 180px) rgba(90,80,62,0.30),
+    inset 0 0 12px rgba(90,80,62,0.35),
     0 0 46px rgba(var(--ink-rgb),0.08);
 
   /* Halation — light scattering in the emulsion and bouncing off the film
@@ -102,10 +109,10 @@ html, body {
      paintInk() writes onto this element — on :root it would freeze at the
      default ink, the way the old --amber alias did. */
   --halation:
-    0 0 0.16em rgba(var(--ink-rgb), 0.45),
-    0 0 0.5em  rgba(var(--ink-rgb), 0.3),
-    0 0 1.2em  rgba(var(--ink-rgb), 0.16),
-    0 0 2.4em  rgba(var(--split-warm), 0.12);
+    0 0 0.16em rgba(var(--ink-rgb), 0.32),
+    0 0 0.5em  rgba(var(--ink-rgb), 0.18),
+    0 0 1.2em  rgba(var(--ink-rgb), 0.10),
+    0 0 2.4em  rgba(var(--split-warm), 0.08);
 }
 /* A set was 4:3. On a landscape screen the tube takes that ratio and the
    cabinet fills the pillars either side. Portrait and small screens keep
@@ -141,8 +148,8 @@ html, body {
     to bottom,
     transparent 0px,
     transparent 2px,
-    rgba(0,0,0,0.22) 3px,
-    rgba(0,0,0,0.22) 4px
+    rgba(84,76,58,0.10) 3px,
+    rgba(84,76,58,0.10) 4px
   );
   mix-blend-mode: multiply;
 }
@@ -174,8 +181,8 @@ html, body {
   background:
     radial-gradient(ellipse at center,
       transparent 58%,
-      rgba(0,0,0,0.16) 84%,
-      rgba(0,0,0,0.5) 100%);
+      rgba(84,76,58,0.10) 84%,
+      rgba(84,76,58,0.28) 100%);
 }
 
 /* aperture-grille RGB stripes, extremely faint */
@@ -225,8 +232,8 @@ html, body {
     2px 0 0 rgba(var(--ink-rgb),0.35),
    -1px 0 0 rgba(var(--split-cool),0.35),
     0 0 8px rgba(var(--ink-rgb),0.5),
-    0 1px 4px rgba(0,0,0,0.95),
-    0 0 18px rgba(0,0,0,0.85);
+    0 1px 4px rgba(247,241,228,0.9),
+    0 0 18px rgba(247,241,228,0.7);
   pointer-events: none;
   letter-spacing: 0.05em;
 }
@@ -393,7 +400,7 @@ html, body {
   width: min(100%, 620px);
   border: 1px solid rgba(var(--ink-rgb),0.5);
   border-radius: 4px;
-  background: rgba(0,0,0,0.3);
+  background: rgba(84,76,58,0.07);
   text-align: left;
 }
 .slate-row {
@@ -483,7 +490,7 @@ html, body {
   background: repeating-linear-gradient(
     to bottom,
     transparent 0px, transparent 2px,
-    rgba(0,0,0,0.26) 3px, rgba(0,0,0,0.26) 4px);
+    rgba(84,76,58,0.10) 3px, rgba(84,76,58,0.10) 4px);
 }
 .ident-mark {
   font-family: var(--display-font);
@@ -529,7 +536,7 @@ html, body {
   font-size: clamp(13px, 1.6vw, 18px);
   letter-spacing: 0.14em;
   color: var(--burn);
-  text-shadow: 0 0 8px rgba(0,0,0,0.95);
+  text-shadow: 0 0 8px rgba(247,241,228,0.9);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -686,7 +693,7 @@ h3 { font-family: var(--osd-font); font-weight: 400; }
      card was printed — plus a soft bloom so it still glows on a tube */
   text-shadow:
     0.062em 0.062em 0 color-mix(in srgb, var(--ink) 30%, #000),
-    0 0 0.09em rgba(0,0,0,0.8),
+    0 0 0.09em rgba(84,76,58,0.35),
     var(--halation);
 }
 .hero-rule {
@@ -792,7 +799,7 @@ h2.ch-title {
   color: var(--ink);
   text-shadow:
     0.05em 0.05em 0 color-mix(in srgb, var(--ink) 28%, #000),
-    0 0 0.08em rgba(0,0,0,0.7),
+    0 0 0.08em rgba(84,76,58,0.30),
     var(--halation);
   margin: clamp(20px, 6vh, 56px) 0 10px;
 }
@@ -1026,7 +1033,7 @@ h2.ch-title {
   display: flex; align-items: center; justify-content: center;
   font-family: var(--osd-font);
   font-size: 15px;
-  color: var(--burn);
+  color: var(--bone);
   text-shadow: 0 0 6px rgba(0,0,0,0.9);
 }
 .car-thumb:hover { opacity: 0.85; }
@@ -1044,9 +1051,9 @@ h2.ch-title {
   left: 10px; bottom: 8px;
   font-family: var(--osd-font);
   font-size: clamp(13px, 1.6vw, 16px);
-  color: var(--burn);
+  color: var(--bone);
   letter-spacing: 0.08em;
-  text-shadow: 1.5px 0 0 rgba(var(--split-warm),0.45), -1.5px 0 0 rgba(var(--split-cool),0.45), 0 0 8px rgba(var(--burn-rgb),0.5);
+  text-shadow: 1.5px 0 0 rgba(var(--split-warm),0.45), -1.5px 0 0 rgba(var(--split-cool),0.45), 0 0 8px rgba(var(--bone-rgb),0.5);
   pointer-events: none;
 }
 .tv-caption.rec::before {
@@ -1063,19 +1070,20 @@ h2.ch-title {
   align-items: center;
   justify-content: center;
   min-height: 180px;
+  /* media slots stay dark tubes, so the empty slot stays dark too */
   background:
     repeating-linear-gradient(45deg,
-      rgba(var(--phosphor-rgb),0.06) 0 8px,
+      rgba(var(--bone-rgb),0.06) 0 8px,
       rgba(0,0,0,0) 8px 16px),
-    var(--deep);
+    #141110;
 }
 .tv-frame.no-signal .ns-text {
   font-family: var(--osd-font);
   font-size: clamp(20px, 3vw, 30px);
-  color: var(--phosphor-dim);
+  color: rgba(var(--bone-rgb),0.65);
   letter-spacing: 0.2em;
   animation: ns-drift 4s ease-in-out infinite alternate;
-  text-shadow: 0 0 10px rgba(var(--phosphor-rgb),0.3);
+  text-shadow: 0 0 10px rgba(var(--bone-rgb),0.3);
 }
 @keyframes ns-drift {
   from { transform: translate(-8px, -4px); }
@@ -1154,7 +1162,7 @@ h2.ch-title {
   background: var(--deep);
   border: 1px solid rgba(var(--phosphor-rgb),0.35);
   border-radius: 12px / 10px;
-  box-shadow: inset 0 0 60px rgba(0,0,0,0.85), 0 0 60px rgba(0,0,0,0.8);
+  box-shadow: inset 0 0 60px rgba(84,76,58,0.22), 0 0 60px rgba(60,55,44,0.35);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1163,11 +1171,11 @@ h2.ch-title {
 /* the pop-up is its own little tube: scanlines + vignette */
 .pip::before {
   content: ""; position: absolute; inset: 0; z-index: 6; pointer-events: none;
-  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.2) 3px, rgba(0,0,0,0.2) 4px);
+  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(84,76,58,0.08) 3px, rgba(84,76,58,0.08) 4px);
 }
 .pip::after {
   content: ""; position: absolute; inset: 0; z-index: 7; pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%);
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(84,76,58,0.16) 100%);
 }
 
 .pip-head {
@@ -1333,7 +1341,7 @@ h2.ch-title {
 .oa-panel {
   flex: 1 1 45%;
   background: var(--deep);
-  border-top: 2px solid rgba(0,0,0,0.6);
+  border-top: 2px solid rgba(84,76,58,0.35);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1402,8 +1410,8 @@ h2.ch-title {
 .boot-dot {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: var(--burn);
-  box-shadow: 0 0 30px 8px rgba(var(--burn-rgb),0.9);
+  background: var(--bone);
+  box-shadow: 0 0 30px 8px rgba(var(--bone-rgb),0.9);
   animation: boot-expand 0.9s ease-out forwards;
 }
 @keyframes boot-expand {
@@ -2056,9 +2064,9 @@ function buildSite(content) {
         <span style="background:#4a5aa8"></span>
       </div>
       <div class="oa-mid" aria-hidden="true">
-        <span style="background:#4a5aa8"></span><span style="background:#15100e"></span>
-        <span style="background:#c268a0"></span><span style="background:#15100e"></span>
-        <span style="background:#5fb5ad"></span><span style="background:#15100e"></span>
+        <span style="background:#4a5aa8"></span><span style="background:#efe8d8"></span>
+        <span style="background:#c268a0"></span><span style="background:#efe8d8"></span>
+        <span style="background:#5fb5ad"></span><span style="background:#efe8d8"></span>
         <span style="background:#cdc6b0"></span>
       </div>
       <div class="oa-panel">
@@ -2092,14 +2100,14 @@ function buildSite(content) {
    static burst, so the OSD, dial, headings and hero title all change
    together with the picture. */
 const INKS = [
-  { hex: '#e8503a', rgb: '232,80,58'   },   /* tomato    */
-  { hex: '#f2cb4a', rgb: '242,203,74'  },   /* butter    */
-  { hex: '#f272a8', rgb: '242,114,168' },   /* bubblegum */
-  { hex: '#67b6a6', rgb: '103,182,166' },   /* sea green */
-  { hex: '#ec9a3c', rgb: '236,154,60'  },   /* marigold  */
-  { hex: '#f6e6cd', rgb: '246,230,205' }    /* bone      */
+  { hex: '#c23a26', rgb: '194,58,38'   },   /* brick tomato    */
+  { hex: '#a8871a', rgb: '168,135,26'  },   /* mustard butter  */
+  { hex: '#c04b7e', rgb: '192,75,126'  },   /* plum bubblegum  */
+  { hex: '#2f7d6d', rgb: '47,125,109'  },   /* deep sea green  */
+  { hex: '#b26e14', rgb: '178,110,20'  },   /* burnt marigold  */
+  { hex: '#6f6552', rgb: '111,101,82'  }    /* dark bone       */
 ];
-const OFF_AIR_INK = { hex: '#f6e6cd', rgb: '246,230,205' };
+const OFF_AIR_INK = { hex: '#6f6552', rgb: '111,101,82' };
 
 function paintInk(ch) {
   const crt = document.querySelector('.crt');
