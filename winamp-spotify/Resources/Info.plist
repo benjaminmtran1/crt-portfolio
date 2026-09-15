@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>WinampSpotify</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.winampspotify.player</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Winamp Spotify</string>
+	<key>CFBundleDisplayName</key>
+	<string>Winamp Spotify</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.music</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSSupportsAutomaticTermination</key>
+	<false/>
+	<key>NSSupportsSuddenTermination</key>
+	<false/>
+
+	<!-- Controlling the Spotify desktop app. macOS shows this string in the
+	     Automation permission prompt, so it has to say why. -->
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Winamp Spotify controls the Spotify app on this Mac to play, pause, skip and seek.</string>
+
+	<!-- The Core Audio process tap that drives the spectrum analyzer. Samples
+	     go straight into an FFT and are never recorded or written to disk. -->
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>Winamp Spotify reads Spotify's audio output to draw the spectrum analyzer. Nothing is recorded.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Winamp Spotify reads Spotify's audio output to draw the spectrum analyzer. Nothing is recorded.</string>
+
+	<!-- OAuth redirect target. This scheme must match the Redirect URI
+	     registered on your Spotify app. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.winampspotify.auth</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>winamp-spotify</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- So skins can be opened straight from Finder. -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Winamp Skin</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>wsz</string>
+				<string>wsp</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Winamp Spotify Skin</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>wskin</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

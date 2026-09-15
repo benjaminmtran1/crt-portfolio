@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Deliberately NOT sandboxed.
+	     The app sends Apple events to Spotify, creates a Core Audio process tap
+	     and an aggregate device, and loads skin archives from anywhere the user
+	     points it. The sandbox permits none of that combination, which is why
+	     distribution is a notarized DMG rather than the Mac App Store. -->
+
+	<!-- Required to send Apple events to Spotify. -->
+	<key>com.apple.security.automation.apple-events</key>
+	<true/>
+
+	<!-- Required for the Core Audio process tap behind the spectrum analyzer. -->
+	<key>com.apple.security.device.audio-input</key>
+	<true/>
+
+	<!-- Hardened Runtime is on (see build-app.sh); these two carve out what
+	     the app genuinely needs. -->
+	<key>com.apple.security.cs.disable-library-validation</key>
+	<false/>
+</dict>
+</plist>
