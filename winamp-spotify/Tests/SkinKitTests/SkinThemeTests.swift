@@ -154,8 +154,8 @@ final class SkinThemeTests: XCTestCase {
         samples += [SkinColor](repeating: .black, count: 8)
 
         let chrome = SkinThemeDerivation.chromeColors(from: samples)
-        XCTAssertEqual(chrome.base.r, 60, accuracy: 2)
-        XCTAssertEqual(chrome.base.g, 62, accuracy: 2)
+        assertClose(chrome.base.r, 60, tolerance: 2)
+        assertClose(chrome.base.g, 62, tolerance: 2)
         XCTAssertGreaterThan(chrome.bevelLight.relativeLuminance, chrome.base.relativeLuminance)
         XCTAssertLessThan(chrome.bevelDark.relativeLuminance, chrome.base.relativeLuminance)
     }
@@ -297,16 +297,25 @@ final class SkinThemeTests: XCTestCase {
 }
 
 private extension XCTestCase {
-    /// `XCTAssertEqual` with accuracy needs a FloatingPoint; these are bytes.
-    func XCTAssertEqual(
+    /// Byte comparison with a tolerance.
+    ///
+    /// `XCTAssertEqual(_:_:accuracy:)` needs a `FloatingPoint`, and these are
+    /// bytes. Deliberately *not* named `XCTAssertEqual`: overloading an XCTest
+    /// global with a member is a reliable way to produce overload-resolution
+    /// errors in every other assertion in the file.
+    func assertClose(
         _ actual: UInt8,
         _ expected: UInt8,
-        accuracy: UInt8,
+        tolerance: UInt8,
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
         let difference = actual > expected ? actual - expected : expected - actual
-        XCTAssertLessThanOrEqual(difference, accuracy, "\(actual) vs \(expected)", file: file, line: line)
+        XCTAssertLessThanOrEqual(
+            difference, tolerance,
+            "\(actual) differs from \(expected) by more than \(tolerance)",
+            file: file, line: line
+        )
     }
 }
 

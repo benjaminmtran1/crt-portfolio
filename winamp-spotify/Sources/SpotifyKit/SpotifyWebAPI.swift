@@ -107,14 +107,15 @@ public actor SpotifyWebAPI {
         try await get("artists/\(id)")
     }
 
-    /// An artist's most-played tracks. Spotify requires a market; `from_token`
-    /// resolves it from the signed-in user, which is what we want.
+    /// An artist's most-played tracks.
+    ///
+    /// `market` is deliberately omitted: it used to be required as the magic
+    /// value `from_token`, which is now deprecated, and leaving it out makes
+    /// Spotify use the country on the signed-in account — which is what we
+    /// wanted `from_token` for in the first place.
     public func artistTopTracks(id: String) async throws -> [SpotifyTrack] {
         struct Response: Decodable { let tracks: [SpotifyTrack] }
-        let response: Response = try await get(
-            "artists/\(id)/top-tracks",
-            query: ["market": "from_token"]
-        )
+        let response: Response = try await get("artists/\(id)/top-tracks")
         return response.tracks
     }
 
@@ -133,12 +134,6 @@ public actor SpotifyWebAPI {
             "limit": "\(limit)",
             "offset": "\(offset)",
         ])
-    }
-
-    public func relatedArtists(id: String) async throws -> [SpotifyArtist] {
-        struct Response: Decodable { let artists: [SpotifyArtist] }
-        let response: Response = try await get("artists/\(id)/related-artists")
-        return response.artists
     }
 
     // MARK: Albums

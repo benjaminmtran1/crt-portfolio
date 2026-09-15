@@ -1,4 +1,5 @@
 import AppKit
+import ImageIO
 import CryptoKit
 
 /// Fetches and caches album and artist artwork.

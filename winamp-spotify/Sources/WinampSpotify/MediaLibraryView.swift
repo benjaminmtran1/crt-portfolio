@@ -66,7 +66,7 @@ final class MediaLibraryView: NSView {
         wantsLayer = true
         layer?.magnificationFilter = .nearest
         configureSearchField()
-        addTrackingArea()
+        installTrackingArea()
     }
 
     required init?(coder: NSCoder) {
@@ -206,8 +206,23 @@ final class MediaLibraryView: NSView {
         )
     }
 
+    /// The area rows are actually drawn in: the list well, inset by its bevel.
+    ///
+    /// Defined once because row capacity, row drawing and row hit-testing all
+    /// have to agree. When they did not, `visibleRowCount` was a row larger
+    /// than what fits, so the last row could never be scrolled to.
+    private var listInterior: PixelRect {
+        let list = listRect
+        return PixelRect(
+            x: list.x + 2,
+            y: list.y + 2,
+            width: max(0, list.width - 4),
+            height: max(0, list.height - 4)
+        )
+    }
+
     private var visibleRowCount: Int {
-        max(1, listRect.height / rowHeight)
+        max(1, listInterior.height / rowHeight)
     }
 
     private var maximumScrollRow: Int {
@@ -446,10 +461,7 @@ final class MediaLibraryView: NSView {
         }
 
         // Column layout: thumbnail, title, subtitle, trailing, chevron.
-        let interior = PixelRect(
-            x: list.x + 2, y: list.y + 2,
-            width: list.width - 4, height: list.height - 4
-        )
+        let interior = listInterior
         let trailingWidth = 46
         let chevronWidth = 8
         let available = max(20, interior.width - thumbnailSize - 6 - trailingWidth - chevronWidth - 6)
@@ -625,10 +637,7 @@ final class MediaLibraryView: NSView {
 
     private func row(at point: NSPoint) -> MediaBrowser.Row? {
         let (_, y) = renderer.layoutPoint(from: point)
-        let interior = PixelRect(
-            x: listRect.x + 2, y: listRect.y + 2,
-            width: listRect.width - 4, height: listRect.height - 4
-        )
+        let interior = listInterior
         guard y >= interior.y, y < interior.maxY else { return nil }
         let index = scrollRow + (y - interior.y) / rowHeight
         return browser.rows.indices.contains(index) ? browser.rows[index] : nil
@@ -724,7 +733,7 @@ final class MediaLibraryView: NSView {
             let point = convert(event.locationInWindow, from: nil)
             let (x, y) = renderer.layoutPoint(from: point)
             // Only fire if the mouse is still on the button.
-            if bottomButtonRect(button).contains(x: x, y: y) { perform(button) }
+            if bottomButtonRect(button).contains(x: x, y: y) { activateBottomButton(button) }
             pressedButton = nil
             needsDisplay = true
         }
@@ -795,7 +804,7 @@ final class MediaLibraryView: NSView {
         needsDisplay = true
     }
 
-    private func perform(_ button: BottomButton) {
+    private func activateBottomButton(_ button: BottomButton) {
         let entries = browser.allEntries
         guard !entries.isEmpty else { return }
         switch button {
@@ -843,7 +852,7 @@ final class MediaLibraryView: NSView {
 
     // MARK: - Tracking
 
-    private func addTrackingArea() {
+    private func installTrackingArea() {
         let area = NSTrackingArea(
             rect: .zero,
             options: [.mouseMoved, .mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],

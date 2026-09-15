@@ -209,19 +209,15 @@ struct PreferencesView: View {
 
                 LabeledContent("Derived palette") {
                     HStack(spacing: 3) {
-                        ForEach(Array(swatches(of: current).enumerated()), id: \.offset) { _, swatch in
+                        ForEach(swatches(of: current)) { swatch in
                             RoundedRectangle(cornerRadius: 2)
-                                .fill(Color(
-                                    red: Double(swatch.1.r) / 255,
-                                    green: Double(swatch.1.g) / 255,
-                                    blue: Double(swatch.1.b) / 255
-                                ))
+                                .fill(swatch.swiftUIColor)
                                 .frame(width: 18, height: 18)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 2)
-                                        .strokeBorder(.separator, lineWidth: 0.5)
+                                        .strokeBorder(.secondary.opacity(0.4), lineWidth: 0.5)
                                 )
-                                .help(swatch.0)
+                                .help(swatch.name)
                         }
                     }
                 }
@@ -250,17 +246,36 @@ struct PreferencesView: View {
         .formStyle(.grouped)
     }
 
-    private func swatches(of theme: SkinTheme) -> [(String, SkinColor)] {
+    /// One entry in the palette strip. A named type rather than a tuple:
+    /// `ForEach` needs `Identifiable`, and destructuring a tuple in a closure's
+    /// parameter list has not been valid Swift since SE-0110.
+    private struct Swatch: Identifiable {
+        let name: String
+        let color: SkinColor
+
+        var id: String { name }
+
+        var swiftUIColor: Color {
+            Color(
+                red: Double(color.r) / 255,
+                green: Double(color.g) / 255,
+                blue: Double(color.b) / 255
+            )
+        }
+    }
+
+    private func swatches(of theme: SkinTheme) -> [Swatch] {
         [
-            ("Faceplate", theme.faceBase),
-            ("Bevel light", theme.bevelLight),
-            ("Bevel dark", theme.bevelDark),
-            ("Display", theme.displayBackground),
-            ("Display text", theme.displayText),
-            ("List background", theme.listBackground),
-            ("List text", theme.listText),
-            ("Selection", theme.selectionBackground),
-            ("Accent", theme.accent),
+            Swatch(name: "Faceplate", color: theme.faceBase),
+            Swatch(name: "Bevel light", color: theme.bevelLight),
+            Swatch(name: "Bevel dark", color: theme.bevelDark),
+            Swatch(name: "Faceplate text", color: theme.faceText),
+            Swatch(name: "Display", color: theme.displayBackground),
+            Swatch(name: "Display text", color: theme.displayText),
+            Swatch(name: "List background", color: theme.listBackground),
+            Swatch(name: "List text", color: theme.listText),
+            Swatch(name: "Selection", color: theme.selectionBackground),
+            Swatch(name: "Accent", color: theme.accent),
         ]
     }
 

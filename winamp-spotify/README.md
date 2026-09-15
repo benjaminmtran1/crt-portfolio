@@ -358,6 +358,16 @@ What *has* been verified, and how:
   formats, font mapping, marquee scrolling, skin merging, the layout table, and
   theme derivation against hostile palettes. Written but not run.
 
+A compiler-free static pass has also been run over all 49 Swift files —
+delimiter balance, duplicate declarations, call-site argument labels, enum case
+resolution, and per-file framework imports. It found and fixed: two genuinely
+missing imports (`Combine` in `Settings.swift`, `ImageIO` in
+`ArtworkLoader.swift` — module imports are not transitive), tuple destructuring
+in a SwiftUI `ForEach` closure (invalid since SE-0110), a test helper
+overloading XCTest's global `XCTAssertEqual`, two methods shadowing `NSObject`
+selectors, a list-capacity calculation that disagreed with the row-drawing
+inset, and two Spotify endpoints that have since been deprecated.
+
 Areas most likely to need work on a real Mac, in rough order of risk:
 
 1. **`ProcessTap`** — the aggregate-device dictionary keys and the tap property
