@@ -8,6 +8,13 @@ import SkinKit
 /// interpolation, no fractional coordinates. A skinned player that smooths its
 /// own artwork looks wrong in a way that is hard to name but impossible to
 /// unsee.
+///
+/// **One instance per window.** `canvasHeight` is mutable state used to flip
+/// top-left layout coordinates into CoreGraphics' bottom-left space, and it is
+/// read by hit-testing as well as drawing. Sharing a renderer between windows
+/// of different heights means a click in one gets converted with another's
+/// height. The CGImage caches are per-instance as a result, which is fine: skin
+/// sprites are a few hundred kilobytes.
 final class SkinRenderer {
 
     private(set) var skin: Skin
@@ -28,6 +35,9 @@ final class SkinRenderer {
     /// `RasterImage` is not free, so they are built once per skin.
     private var imageCache: [SpriteID: CGImage] = [:]
     private var stripCache: [SpriteStripID: [CGImage]] = [:]
+    /// Glyph sheets re-coloured for the media library, cached per colour.
+    /// There are only a handful of label colours in a theme.
+    private var tintedFontCache: [SkinColor: [CGImage]] = [:]
 
     init(skin: Skin, scale: Int = 1) {
         self.skin = skin
@@ -38,6 +48,7 @@ final class SkinRenderer {
         self.skin = skin
         imageCache.removeAll(keepingCapacity: true)
         stripCache.removeAll(keepingCapacity: true)
+        tintedFontCache.removeAll(keepingCapacity: true)
     }
 
     // MARK: - Sizing
@@ -74,6 +85,23 @@ final class SkinRenderer {
         let images = skin.strip(id).compactMap { $0.makeCGImage() }
         stripCache[id] = images
         return images
+    }
+
+    /// The glyph sheet re-coloured to `color`.
+    ///
+    /// The main window uses the untinted glyphs, because a classic skin's baked
+    /// font colour is part of its look. The media library needs the same glyphs
+    /// in theme colours, since it draws them on generated widgets.
+    func tintedGlyphs(_ color: SkinColor) -> [CGImage] {
+        if let cached = tintedFontCache[color] { return cached }
+        let tinted = skin.strip(.font).compactMap {
+            $0.tinted(
+                to: (color.r, color.g, color.b),
+                backgroundLuminance: skin.fontBackgroundLuminance
+            ).makeCGImage()
+        }
+        tintedFontCache[color] = tinted
+        return tinted
     }
 
     // MARK: - Drawing
@@ -139,6 +167,9 @@ final class SkinRenderer {
     // MARK: - Text
 
     /// Draws a string with the skin's bitmap font. Returns the width drawn.
+    ///
+    /// Pass `tint` to re-colour the glyphs; omit it to use the skin's own baked
+    /// font colour, which is what the main window wants.
     @discardableResult
     func drawText(
         _ text: String,
@@ -146,9 +177,10 @@ final class SkinRenderer {
         y: Int,
         in context: CGContext,
         maxCharacters: Int? = nil,
-        pitch: Int = BitmapFontLayout.glyphWidth
+        pitch: Int = BitmapFontLayout.glyphWidth,
+        tint: SkinColor? = nil
     ) -> Int {
-        let glyphs = strip(.font)
+        let glyphs = tint.map { tintedGlyphs($0) } ?? strip(.font)
         guard !glyphs.isEmpty else { return 0 }
 
         var drawn = 0

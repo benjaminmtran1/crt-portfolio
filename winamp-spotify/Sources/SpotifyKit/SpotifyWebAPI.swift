@@ -101,6 +101,81 @@ public actor SpotifyWebAPI {
         ])
     }
 
+    // MARK: Artists
+
+    public func artist(id: String) async throws -> SpotifyArtist {
+        try await get("artists/\(id)")
+    }
+
+    /// An artist's most-played tracks. Spotify requires a market; `from_token`
+    /// resolves it from the signed-in user, which is what we want.
+    public func artistTopTracks(id: String) async throws -> [SpotifyTrack] {
+        struct Response: Decodable { let tracks: [SpotifyTrack] }
+        let response: Response = try await get(
+            "artists/\(id)/top-tracks",
+            query: ["market": "from_token"]
+        )
+        return response.tracks
+    }
+
+    /// An artist's discography.
+    ///
+    /// `includeGroups` defaults to albums and singles but not `appears_on`,
+    /// which is mostly compilations and would bury the real releases.
+    public func artistAlbums(
+        id: String,
+        includeGroups: [String] = ["album", "single"],
+        limit: Int = 50,
+        offset: Int = 0
+    ) async throws -> SpotifyPage<SpotifyAlbum> {
+        try await get("artists/\(id)/albums", query: [
+            "include_groups": includeGroups.joined(separator: ","),
+            "limit": "\(limit)",
+            "offset": "\(offset)",
+        ])
+    }
+
+    public func relatedArtists(id: String) async throws -> [SpotifyArtist] {
+        struct Response: Decodable { let artists: [SpotifyArtist] }
+        let response: Response = try await get("artists/\(id)/related-artists")
+        return response.artists
+    }
+
+    // MARK: Albums
+
+    public func album(id: String) async throws -> SpotifyAlbum {
+        try await get("albums/\(id)")
+    }
+
+    /// An album's track list.
+    ///
+    /// The simplified track objects this returns carry no album reference, so
+    /// the caller has to graft one on if it wants artwork — `MediaBrowser` does.
+    public func albumTracks(
+        id: String,
+        limit: Int = 50,
+        offset: Int = 0
+    ) async throws -> SpotifyPage<SpotifyTrack> {
+        try await get("albums/\(id)/tracks", query: [
+            "limit": "\(limit)",
+            "offset": "\(offset)",
+        ])
+    }
+
+    // MARK: Library
+
+    public func savedAlbums(limit: Int = 50, offset: Int = 0) async throws -> SpotifyPage<SpotifySavedAlbum> {
+        try await get("me/albums", query: ["limit": "\(limit)", "offset": "\(offset)"])
+    }
+
+    /// Followed artists. Cursor-paged rather than offset-paged, unlike
+    /// everything else in the API.
+    public func followedArtists(limit: Int = 50, after: String? = nil) async throws -> SpotifyFollowedArtists {
+        var query = ["type": "artist", "limit": "\(limit)"]
+        if let after { query["after"] = after }
+        return try await get("me/following", query: query)
+    }
+
     public func track(id: String) async throws -> SpotifyTrack {
         try await get("tracks/\(id)")
     }

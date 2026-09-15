@@ -35,10 +35,22 @@ final class AppController: NSObject, NSApplicationDelegate {
     private var mainWindowController: MainWindowController!
     private var playlistWindowController: NSWindowController?
     private var playlistView: PlaylistView?
+    private var playlistRenderer: SkinRenderer?
     private var preferencesWindow: NSWindow?
-    private var libraryWindow: NSWindow?
+    private var libraryWindowController: NSWindowController?
+    private var libraryView: MediaLibraryView?
+    private var libraryRenderer: SkinRenderer?
+    private var browser: MediaBrowser!
+
+    /// Every renderer currently backing a window. A skin or scale change has to
+    /// reach all of them, and each window needs its own because the renderer
+    /// carries the canvas height used for coordinate flipping.
+    private var activeRenderers: [SkinRenderer] {
+        [renderer, playlistRenderer, libraryRenderer].compactMap { $0 }
+    }
 
     private var cancellables: Set<AnyCancellable> = []
+    private var browserCancellable: AnyCancellable?
 
     // MARK: - Accessors used by the interaction and menu extensions
 
@@ -98,6 +110,7 @@ final class AppController: NSObject, NSApplicationDelegate {
             preference: settings.backend
         )
         visualizer.mode = settings.visualizerMode
+        browser = MediaBrowser(api: api)
 
         skinLibrary.refresh(bundledSkinURLs: Self.bundledSkinURLs)
     }
@@ -111,6 +124,7 @@ final class AppController: NSObject, NSApplicationDelegate {
 
         mainWindowController = MainWindowController(playerView: playerView)
         mainWindowController.showWindow(nil)
+        previousScale = settings.scale
         applyAlwaysOnTop()
     }
 
@@ -176,14 +190,49 @@ final class AppController: NSObject, NSApplicationDelegate {
         settings.selectedSkinID = entryID
         let skin = currentSkin()
         mainWindowController.applySkin(skin)
+        for secondary in [playlistRenderer, libraryRenderer].compactMap({ $0 }) {
+            secondary.apply(skin: skin)
+        }
         playlistView?.needsDisplay = true
+        // The library regenerates its widget art from the new skin's palette.
+        libraryView?.skinDidChange()
     }
 
     func setScale(_ scale: Int) {
         settings.scale = scale
+        for active in activeRenderers { active.scale = max(1, scale) }
         mainWindowController.setScale(scale)
+        resizeSecondaryWindows()
         playlistView?.needsDisplay = true
+        libraryView?.needsDisplay = true
     }
+
+    /// Keeps the playlist and library windows at whole multiples of their
+    /// layout size when the scale changes, so they stay pixel-exact.
+    private func resizeSecondaryWindows() {
+        let scale = CGFloat(settings.scale)
+        for window in [playlistWindowController?.window, libraryWindowController?.window].compactMap({ $0 }) {
+            let layoutWidth = (window.frame.width / CGFloat(max(1, previousScale))).rounded()
+            let layoutHeight = (window.frame.height / CGFloat(max(1, previousScale))).rounded()
+            let size = NSSize(width: layoutWidth * scale, height: layoutHeight * scale)
+            window.setFrame(
+                NSRect(
+                    x: window.frame.minX,
+                    y: window.frame.maxY - size.height,
+                    width: size.width,
+                    height: size.height
+                ),
+                display: true
+            )
+            window.contentMinSize = NSSize(width: 275 * scale, height: 160 * scale)
+            window.resizeIncrements = NSSize(width: 25 * scale, height: 1 * scale)
+        }
+        previousScale = settings.scale
+    }
+
+    /// Scale the secondary windows were last laid out at, so a change can be
+    /// applied as a ratio rather than guessing their layout size.
+    private var previousScale = 1
 
     /// Opens the file picker for `.wsz` / `.wskin` skins and installs the pick.
     func importSkin() {
@@ -205,8 +254,10 @@ final class AppController: NSObject, NSApplicationDelegate {
     }
 
     func applyAlwaysOnTop() {
-        mainWindowController.window?.level = settings.alwaysOnTop ? .floating : .normal
-        playlistWindowController?.window?.level = settings.alwaysOnTop ? .floating : .normal
+        let level: NSWindow.Level = settings.alwaysOnTop ? .floating : .normal
+        mainWindowController.window?.level = level
+        playlistWindowController?.window?.level = level
+        libraryWindowController?.window?.level = level
     }
 
     // MARK: - Playlist window
@@ -216,26 +267,35 @@ final class AppController: NSObject, NSApplicationDelegate {
             controller.close()
             playlistWindowController = nil
             playlistView = nil
+            playlistRenderer = nil
             playerView.isPlaylistVisible = false
             return
         }
 
-        let view = PlaylistView(renderer: renderer)
+        // A renderer of its own: the canvas height it carries is this window's,
+        // not the main window's.
+        let ownRenderer = SkinRenderer(skin: currentSkin(), scale: settings.scale)
+        playlistRenderer = ownRenderer
+
+        let view = PlaylistView(renderer: ownRenderer)
         view.delegate = self
         view.playlist = coordinator.playlist
         view.nowPlayingURI = coordinator.snapshot.trackURI
 
-        let window = SkinnedWindow(contentRect: NSRect(x: 0, y: 0, width: 275 * settings.scale, height: 232 * settings.scale))
-        // The playlist is the one window that resizes, and only in the 25px
-        // steps its frame tiles are built from.
+        let scale = CGFloat(settings.scale)
+        let window = SkinnedWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 275 * scale, height: 232 * scale)
+        )
+        // The playlist is resizable, and only in the steps its frame tiles are
+        // built from.
         window.styleMask.insert(.resizable)
-        window.contentMinSize = NSSize(width: 275 * settings.scale, height: 116 * settings.scale)
-        window.resizeIncrements = NSSize(width: 25 * settings.scale, height: 29 * settings.scale)
+        window.contentMinSize = NSSize(width: 275 * scale, height: 116 * scale)
+        window.resizeIncrements = NSSize(width: 25 * scale, height: 29 * scale)
         window.contentView = view
         window.setFrameAutosaveName("PlaylistWindow")
 
         let controller = NSWindowController(window: window)
-        // Sit just below the main window so the two move as a pair.
+        // Sit directly below the main window, so the two move as a pair.
         if let main = mainWindowController.window {
             window.setFrameOrigin(NSPoint(x: main.frame.minX, y: main.frame.minY - window.frame.height))
         }
@@ -250,51 +310,75 @@ final class AppController: NSObject, NSApplicationDelegate {
     // MARK: - Library
 
     /// The eject button's job: pick something from Spotify to load.
+    ///
+    /// Drawn in the current skin rather than in system chrome, because a native
+    /// panel next to a skinned player looks like two different applications.
     func showLibraryBrowser() {
+        if let controller = libraryWindowController, controller.window?.isVisible == true {
+            controller.window?.makeKeyAndOrderFront(nil)
+            return
+        }
+
         guard settings.isSpotifyConfigured else {
             showPreferences()
             present(
                 message: "Add your Spotify client ID first",
-                informative: "The playlist browser uses the Spotify Web API, which needs a client ID from developer.spotify.com. Preferences is open."
+                informative: """
+                Searching and browsing use the Spotify Web API, which needs a \
+                client ID from developer.spotify.com. Preferences is open — \
+                transport control keeps working without it.
+                """
             )
             return
         }
 
-        if let window = libraryWindow {
-            window.makeKeyAndOrderFront(nil)
-            return
+        let ownRenderer = SkinRenderer(skin: currentSkin(), scale: settings.scale)
+        libraryRenderer = ownRenderer
+
+        let view = MediaLibraryView(renderer: ownRenderer, browser: browser)
+        view.delegate = self
+
+        let scale = CGFloat(settings.scale)
+        let window = SkinnedWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 420 * scale, height: 320 * scale)
+        )
+        window.styleMask.insert(.resizable)
+        window.contentMinSize = NSSize(width: 320 * scale, height: 200 * scale)
+        // Width steps match the frame tiles; height is free because rows are a
+        // fixed height and a partial row at the bottom is simply not drawn.
+        window.resizeIncrements = NSSize(width: 25 * scale, height: 1 * scale)
+        window.contentView = view
+        window.setFrameAutosaveName("MediaLibraryWindow")
+
+        let controller = NSWindowController(window: window)
+        if let main = mainWindowController.window {
+            window.setFrameOrigin(NSPoint(
+                x: main.frame.maxX + 8,
+                y: main.frame.maxY - window.frame.height
+            ))
         }
+        controller.showWindow(nil)
+        window.makeFirstResponder(view)
 
-        let browser = LibraryBrowserView(
-            api: api,
-            onLoad: { [weak self] name, entries in
-                guard let self else { return }
-                var playlist = coordinator.playlist
-                playlist.replaceAll(with: entries, name: name)
-                coordinator.playlist = playlist
-                if playlistWindowController == nil { togglePlaylistWindow() }
-            },
-            onEnqueue: { [weak self] entries in
-                guard let self else { return }
-                var playlist = coordinator.playlist
-                playlist.append(entries)
-                coordinator.playlist = playlist
-                if playlistWindowController == nil { togglePlaylistWindow() }
-            }
-        )
+        libraryWindowController = controller
+        libraryView = view
+        applyAlwaysOnTop()
 
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 620, height: 460),
-            styleMask: [.titled, .closable, .resizable, .miniaturizable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = "Spotify Library"
-        window.contentView = NSHostingView(rootView: browser)
-        window.isReleasedWhenClosed = false
-        window.center()
-        window.makeKeyAndOrderFront(nil)
-        libraryWindow = window
+        // Observe the model here rather than in the view: the view is a
+        // renderer, and this keeps its redraws driven by one place.
+        browserCancellable = browser.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.libraryView?.modelDidChange() }
+
+        browser.reload()
+    }
+
+    func closeLibraryWindow() {
+        libraryWindowController?.close()
+        libraryWindowController = nil
+        libraryView = nil
+        libraryRenderer = nil
+        browserCancellable = nil
     }
 
     func showPreferences() {
@@ -306,6 +390,8 @@ final class AppController: NSObject, NSApplicationDelegate {
             settings: settings,
             skinLibrary: skinLibrary,
             visualizer: visualizer,
+            theme: { [weak self] in self?.renderer.skin.effectiveTheme ?? .fallback },
+            onClearArtworkCache: { ArtworkLoader.shared.clearCache() },
             onSignIn: { [weak self] in await self?.signIn() },
             onSignOut: { [weak self] in await self?.signOut() },
             onSelectSkin: { [weak self] id in self?.applySkin(entryID: id) },
@@ -378,6 +464,7 @@ final class AppController: NSObject, NSApplicationDelegate {
             remoteEngine: RemotePlaybackEngine(api: api),
             preference: settings.backend
         )
+        browser = MediaBrowser(api: api)
         cancellables.removeAll()
         observeModel()
         coordinator.start()

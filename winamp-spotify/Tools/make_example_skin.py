@@ -321,6 +321,15 @@ def main():
             "background": hexcolor(preview.LCD_BG),
             "selectedBackground": hexcolor((84, 52, 12)),
         },
+        # Optional: correct individual colours of the palette that would
+        # otherwise be derived from the artwork. Omit the block entirely and
+        # everything here is inferred -- this is here to exercise the override
+        # path and to document it.
+        "theme": {
+            "accent": hexcolor(preview.ACCENT),
+            "faceText": hexcolor(preview.LCD_BRIGHT),
+            "listFontName": "Menlo",
+        },
         "visualizerColors": vis_colors,
         "regions": {
             "normal": [rounded(275, 116)],

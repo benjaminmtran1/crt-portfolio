@@ -29,6 +29,7 @@ final class PlaylistView: NSView {
     weak var delegate: PlaylistViewDelegate?
 
     private let renderer: SkinRenderer
+    private let windowFrame: SkinnedFrame
 
     var playlist = Playlist() {
         didSet { needsDisplay = true }
@@ -44,21 +45,20 @@ final class PlaylistView: NSView {
     private var selectionAnchor: Int?
     private var isDraggingScrollbar = false
 
-    // MARK: Geometry constants
-    //
-    // The classic frame is assembled from fixed-size tiles, so these are not
-    // arbitrary: they are the sprite dimensions in `ClassicSpriteTable`.
+    // Frame geometry lives in `SkinnedFrame`, which the media library shares,
+    // so the tile dimensions are stated once.
+    private var topHeight: Int { SkinnedFrame.topHeight }
+    private var bottomHeight: Int { SkinnedFrame.bottomHeight }
+    private var leftWidth: Int { SkinnedFrame.leftWidth }
+    private var rightWidth: Int { SkinnedFrame.rightWidth }
 
-    private let topHeight = 20
-    private let bottomHeight = 38
-    private let leftWidth = 12
-    private let rightWidth = 20
     /// Tuned for the 6px bitmap font: enough leading to be readable without
     /// wasting rows.
     private let rowHeight = 10
 
     init(renderer: SkinRenderer) {
         self.renderer = renderer
+        self.windowFrame = SkinnedFrame(renderer: renderer)
         super.init(frame: NSRect(x: 0, y: 0, width: 275, height: 232))
         wantsLayer = true
         layer?.magnificationFilter = .nearest
@@ -79,12 +79,7 @@ final class PlaylistView: NSView {
 
     private var contentRect: PixelRect {
         let size = layoutSize
-        return PixelRect(
-            x: leftWidth,
-            y: topHeight,
-            width: max(0, size.width - leftWidth - rightWidth),
-            height: max(0, size.height - topHeight - bottomHeight)
-        )
+        return windowFrame.contentRect(width: size.width, height: size.height)
     }
 
     private var visibleRowCount: Int {
@@ -114,53 +109,18 @@ final class PlaylistView: NSView {
     private func drawFrame(in context: CGContext, size: (width: Int, height: Int), isActive: Bool) {
         let style = renderer.skin.playlistStyle
 
-        // Interior first, so the tiles overlap it rather than the reverse.
+        // Interior first, so the frame tiles overlap it rather than the reverse.
         context.setFillColor(renderer.cgColor(style.background))
         context.fill(renderer.deviceRect(contentRect))
 
-        // Top edge: left corner, title block, filler tiles, right corner.
-        let topLeft: SpriteID = isActive ? .playlistTopLeftActive : .playlistTopLeftInactive
-        let topRight: SpriteID = isActive ? .playlistTopRightActive : .playlistTopRightInactive
-        let topTile: SpriteID = isActive ? .playlistTopTileActive : .playlistTopTileInactive
-        let titleBar: SpriteID = isActive ? .playlistTitleBarActive : .playlistTitleBarInactive
-
-        renderer.draw(topLeft, at: 0, y: 0, in: context)
-        let titleWidth = renderer.image(titleBar)?.width ?? 100
-        let titleX = max(25, (size.width - titleWidth) / 2)
-        renderer.tileHorizontally(
-            topTile,
-            across: PixelRect(x: 25, y: 0, width: max(0, size.width - 50), height: topHeight),
-            in: context
+        // The skin's own "PLAYLIST" lettering, which is baked into pledit.bmp.
+        windowFrame.draw(
+            in: context,
+            width: size.width,
+            height: size.height,
+            isActive: isActive,
+            title: .playlistSprite
         )
-        renderer.draw(titleBar, at: titleX, y: 0, in: context)
-        renderer.draw(topRight, at: max(25, size.width - 25), y: 0, in: context)
-
-        // Side edges.
-        renderer.tileVertically(
-            .playlistLeftTile,
-            across: PixelRect(x: 0, y: topHeight, width: leftWidth, height: contentRect.height),
-            in: context
-        )
-        renderer.tileVertically(
-            .playlistRightTile,
-            across: PixelRect(x: max(0, size.width - rightWidth), y: topHeight, width: rightWidth, height: contentRect.height),
-            in: context
-        )
-
-        // Bottom edge.
-        let bottomY = size.height - bottomHeight
-        renderer.tileHorizontally(
-            .playlistBottomTile,
-            across: PixelRect(x: 0, y: bottomY, width: size.width, height: bottomHeight),
-            in: context
-        )
-        renderer.draw(.playlistBottomLeft, at: 0, y: bottomY, in: context)
-        let bottomRightWidth = renderer.image(.playlistBottomRight)?.width ?? 150
-        renderer.draw(.playlistBottomRight, at: max(0, size.width - bottomRightWidth), y: bottomY, in: context)
-
-        // Title-bar buttons.
-        renderer.draw(.playlistShadeButton, at: size.width - 22, y: 3, in: context)
-        renderer.draw(.playlistCloseButton, at: size.width - 12, y: 3, in: context)
     }
 
     private func drawEntries(in context: CGContext) {
@@ -217,17 +177,16 @@ final class PlaylistView: NSView {
 
     private func drawScrollbar(in context: CGContext, size: (width: Int, height: Int)) {
         guard playlist.count > visibleRowCount else { return }
-        guard let thumb = renderer.image(
-            isDraggingScrollbar ? .playlistScrollThumbPressed : .playlistScrollThumb
-        ) else { return }
-
-        let trackX = size.width - 15
-        let trackTop = topHeight
-        let trackHeight = contentRect.height
-        let travel = max(0, trackHeight - thumb.height)
-        let fraction = Double(scrollRow) / Double(max(1, maximumScrollRow))
-        let y = trackTop + Int((fraction * Double(travel)).rounded())
-        renderer.draw(thumb, at: trackX, y: y, in: context)
+        let fraction = maximumScrollRow == 0
+            ? 0
+            : Double(scrollRow) / Double(maximumScrollRow)
+        windowFrame.drawScrollbar(
+            in: context,
+            width: size.width,
+            content: contentRect,
+            fraction: fraction,
+            pressed: isDraggingScrollbar
+        )
     }
 
     private func drawBottomBar(in context: CGContext, size: (width: Int, height: Int)) {

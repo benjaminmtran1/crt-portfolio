@@ -12,6 +12,9 @@ struct PreferencesView: View {
     let skinLibrary: SkinLibrary
     @ObservedObject var visualizer: VisualizerFeed
 
+    /// Read lazily: the theme changes when the skin does.
+    let theme: () -> SkinTheme
+    let onClearArtworkCache: () -> Void
     let onSignIn: () async -> Void
     let onSignOut: () async -> Void
     let onSelectSkin: (String?) -> Void
@@ -31,6 +34,8 @@ struct PreferencesView: View {
                 .tabItem { Label("Skins", systemImage: "paintbrush") }
             visualizerTab
                 .tabItem { Label("Visualizer", systemImage: "waveform") }
+            libraryTab
+                .tabItem { Label("Library", systemImage: "books.vertical") }
         }
         .padding(16)
         .frame(minWidth: 480, minHeight: 500)
@@ -183,6 +188,80 @@ struct PreferencesView: View {
 
             Spacer()
         }
+    }
+
+    // MARK: - Library
+
+    private var libraryTab: some View {
+        let current = theme()
+        return Form {
+            Section {
+                Text("""
+                The media library window has no artwork in any skin — no Winamp \
+                skin ever contained a search field or a tab strip. So it is \
+                framed in the skin's own playlist tiles, and every control \
+                inside is generated from a palette read out of the skin: its \
+                pledit.txt list colours, its viscolor.txt ramp, and the \
+                faceplate colours sampled from main.bmp.
+                """)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+                LabeledContent("Derived palette") {
+                    HStack(spacing: 3) {
+                        ForEach(Array(swatches(of: current).enumerated()), id: \.offset) { _, swatch in
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(Color(
+                                    red: Double(swatch.1.r) / 255,
+                                    green: Double(swatch.1.g) / 255,
+                                    blue: Double(swatch.1.b) / 255
+                                ))
+                                .frame(width: 18, height: 18)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .strokeBorder(.separator, lineWidth: 0.5)
+                                )
+                                .help(swatch.0)
+                        }
+                    }
+                }
+
+                LabeledContent("List font") {
+                    Text(current.listFontName ?? "System (skin did not name one)")
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Theming")
+            }
+
+            Section {
+                Button("Clear Artwork Cache", action: onClearArtworkCache)
+                Text("""
+                Album and artist artwork is the one thing that cannot be themed \
+                — it is someone's cover, not skin art — so it is framed in the \
+                skin's bevel instead. Thumbnails are cached on disk.
+                """)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            } header: {
+                Text("Artwork")
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    private func swatches(of theme: SkinTheme) -> [(String, SkinColor)] {
+        [
+            ("Faceplate", theme.faceBase),
+            ("Bevel light", theme.bevelLight),
+            ("Bevel dark", theme.bevelDark),
+            ("Display", theme.displayBackground),
+            ("Display text", theme.displayText),
+            ("List background", theme.listBackground),
+            ("List text", theme.listText),
+            ("Selection", theme.selectionBackground),
+            ("Accent", theme.accent),
+        ]
     }
 
     private func isSelected(_ entry: SkinLibrary.Entry) -> Bool {

@@ -75,6 +75,59 @@ public struct RasterImage: Sendable {
         return RasterImage(width: cw, height: ch, pixels: out)
     }
 
+    /// Re-colours a glyph, treating distance from `backgroundLuminance` as
+    /// coverage.
+    ///
+    /// Needed because a classic skin's `text.bmp` has its colour baked in — the
+    /// font is bright green because the skin is — but the media library draws
+    /// labels on generated widgets whose colours come from the derived theme.
+    /// An untinted glyph there can be invisible.
+    ///
+    /// The font sheet's background is whatever the author used (usually black,
+    /// occasionally light), so coverage is the *absolute* distance from it,
+    /// normalised by how much room that leaves. Anti-aliased glyph edges come
+    /// out as partial alpha, which is what keeps tinted text from looking
+    /// chunkier than the original.
+    public func tinted(to color: (r: UInt8, g: UInt8, b: UInt8), backgroundLuminance: Double) -> RasterImage {
+        guard !isEmpty else { return self }
+        let headroom = max(0.08, max(backgroundLuminance, 1 - backgroundLuminance))
+        var out = [UInt8](repeating: 0, count: pixels.count)
+
+        var i = 0
+        while i < pixels.count {
+            // Rec. 709 luma on the raw bytes: this is a coverage estimate, not
+            // a colour conversion, so gamma-correctness would be wasted work.
+            let luma = (0.2126 * Double(pixels[i])
+                + 0.7152 * Double(pixels[i + 1])
+                + 0.0722 * Double(pixels[i + 2])) / 255
+            let sourceAlpha = Double(pixels[i + 3]) / 255
+            let coverage = min(1, abs(luma - backgroundLuminance) / headroom) * sourceAlpha
+
+            let alpha = UInt8((coverage * 255).rounded())
+            // Premultiplied, matching this type's contract.
+            out[i] = UInt8((Double(color.r) * coverage).rounded())
+            out[i + 1] = UInt8((Double(color.g) * coverage).rounded())
+            out[i + 2] = UInt8((Double(color.b) * coverage).rounded())
+            out[i + 3] = alpha
+            i += 4
+        }
+        return RasterImage(width: width, height: height, pixels: out)
+    }
+
+    /// Mean luminance, used to find a font sheet's background tone.
+    public var meanLuminance: Double {
+        guard !isEmpty else { return 0 }
+        var total = 0.0
+        var i = 0
+        while i < pixels.count {
+            total += (0.2126 * Double(pixels[i])
+                + 0.7152 * Double(pixels[i + 1])
+                + 0.0722 * Double(pixels[i + 2])) / 255
+            i += 4
+        }
+        return total / Double(pixels.count / 4)
+    }
+
     // MARK: - CoreGraphics bridging
 
     public func makeCGImage() -> CGImage? {

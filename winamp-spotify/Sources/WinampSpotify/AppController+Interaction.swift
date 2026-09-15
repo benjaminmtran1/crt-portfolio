@@ -419,3 +419,48 @@ extension AppController {
         }
     }
 }
+
+// MARK: - Media library interactions
+
+extension AppController: MediaLibraryViewDelegate {
+
+    func mediaLibraryView(
+        _ view: MediaLibraryView,
+        didActivate entry: PlaylistEntry,
+        contextURI: String?
+    ) {
+        // Add the track to the playlist if it is not already there, so the
+        // playlist window reflects what is playing and next/previous work.
+        var playlist = coordinatorRef.playlist
+        if !playlist.entries.contains(where: { $0.uri == entry.uri }) {
+            playlist.append([entry])
+        }
+        coordinatorRef.playlist = playlist
+        coordinatorRef.playEntry(entry)
+    }
+
+    func mediaLibraryView(_ view: MediaLibraryView, didEnqueue entries: [PlaylistEntry]) {
+        var playlist = coordinatorRef.playlist
+        // Skip anything already queued: loading an album twice should not
+        // double every track.
+        let existing = Set(playlist.entries.map(\.uri))
+        playlist.append(entries.filter { !existing.contains($0.uri) })
+        coordinatorRef.playlist = playlist
+        if !playlistIsVisible { togglePlaylistWindow() }
+    }
+
+    func mediaLibraryView(
+        _ view: MediaLibraryView,
+        didReplacePlaylistWith entries: [PlaylistEntry],
+        name: String
+    ) {
+        var playlist = coordinatorRef.playlist
+        playlist.replaceAll(with: entries, name: name)
+        coordinatorRef.playlist = playlist
+        if !playlistIsVisible { togglePlaylistWindow() }
+    }
+
+    func mediaLibraryViewDidRequestClose(_ view: MediaLibraryView) {
+        closeLibraryWindow()
+    }
+}

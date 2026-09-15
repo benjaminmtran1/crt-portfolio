@@ -40,6 +40,30 @@ public struct ModernSkinManifest: Codable, Sendable {
         public var columns: Int?
     }
 
+    /// Overrides for the generated-widget palette. Every field is optional and
+    /// overlays the theme derived from the skin's own art, so a manifest can
+    /// correct one colour without restating all fifteen.
+    public struct ThemeColors: Codable, Sendable {
+        public var faceBase: String?
+        public var faceHighlight: String?
+        public var faceShadow: String?
+        public var bevelLight: String?
+        public var bevelDark: String?
+        public var faceText: String?
+        public var faceTextDim: String?
+        public var displayBackground: String?
+        public var displayText: String?
+        public var displayDim: String?
+        public var listBackground: String?
+        public var listText: String?
+        public var listAlternate: String?
+        public var selectionBackground: String?
+        public var selectionText: String?
+        public var accent: String?
+        public var accentText: String?
+        public var listFontName: String?
+    }
+
     public struct PlaylistColors: Codable, Sendable {
         public var normalText: String?
         public var currentText: String?
@@ -73,6 +97,10 @@ public struct ModernSkinManifest: Codable, Sendable {
     /// converting classic art that relied on magenta.
     public var transparentColor: String?
 
+    /// Palette for the media library and anything else drawn rather than
+    /// blitted. Omit it and one is derived from the skin's own artwork.
+    public var theme: ThemeColors?
+
     public init(
         format: String = ModernSkinManifest.formatIdentifier,
         version: Int = ModernSkinManifest.currentVersion,
@@ -86,7 +114,8 @@ public struct ModernSkinManifest: Codable, Sendable {
         playlist: PlaylistColors? = nil,
         visualizerColors: [String]? = nil,
         regions: [String: [[Int]]]? = nil,
-        transparentColor: String? = nil
+        transparentColor: String? = nil,
+        theme: ThemeColors? = nil
     ) {
         self.format = format
         self.version = version
@@ -101,5 +130,6 @@ public struct ModernSkinManifest: Codable, Sendable {
         self.visualizerColors = visualizerColors
         self.regions = regions
         self.transparentColor = transparentColor
+        self.theme = theme
     }
 }

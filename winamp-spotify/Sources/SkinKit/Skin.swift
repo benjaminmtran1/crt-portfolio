@@ -49,6 +49,19 @@ public struct Skin: Sendable {
     /// Number of glyph columns in the font sheet; classic sheets are 31 wide.
     public var fontColumns: Int = 31
 
+    /// Luminance of the font sheet's background, so glyphs can be re-coloured.
+    ///
+    /// A classic `text.bmp` bakes its colour in. The media library needs the
+    /// same glyphs in the derived theme's colours, and tinting needs to know
+    /// which tone is "off". Computed at load; see `measureFontBackground()`.
+    public var fontBackgroundLuminance: Double = 0
+
+    /// Palette for the parts of the app the skin has no sprites for — the media
+    /// library, chiefly. A modern skin may declare one; for everything else the
+    /// loader derives it from the faceplate and the text configs. Read it
+    /// through `effectiveTheme`, which falls back to deriving on demand.
+    public var theme: SkinTheme?
+
     public init(
         metadata: Metadata,
         layout: SkinLayout = .classic,
@@ -57,7 +70,8 @@ public struct Skin: Sendable {
         strips: [SpriteStripID: [RasterImage]] = [:],
         playlistStyle: PlaylistStyle = .default,
         visualizerPalette: VisualizerPalette = .default,
-        regions: [String: SkinRegion] = [:]
+        regions: [String: SkinRegion] = [:],
+        theme: SkinTheme? = nil
     ) {
         self.metadata = metadata
         self.layout = layout
@@ -67,6 +81,7 @@ public struct Skin: Sendable {
         self.playlistStyle = playlistStyle
         self.visualizerPalette = visualizerPalette
         self.regions = regions
+        self.theme = theme
     }
 
     // MARK: - Sprite access
@@ -130,6 +145,7 @@ public struct Skin: Sendable {
         result.layout = layout
         result.assetScale = assetScale
         result.fontColumns = fontColumns
+        result.fontBackgroundLuminance = fontBackgroundLuminance
         result.sprites.merge(sprites) { _, new in new }
         for (id, frames) in strips where !frames.isEmpty {
             result.strips[id] = frames
@@ -137,11 +153,33 @@ public struct Skin: Sendable {
         if playlistStyle != .default { result.playlistStyle = playlistStyle }
         if visualizerPalette != .default { result.visualizerPalette = visualizerPalette }
         if !regions.isEmpty { result.regions = regions }
+        // Derive from the merged skin, not from `self`: a partial skin that
+        // ships no main.bmp should still be sampled against the faceplate it
+        // will actually be drawn with.
+        result.theme = theme ?? SkinThemeDerivation.derive(from: result)
         return result
     }
 
     /// True when the skin has enough to draw a main window on its own.
     public var isRenderable: Bool {
         sprites[.mainBackground] != nil
+    }
+
+    /// Estimates the font sheet's background tone.
+    ///
+    /// Glyphs are sparse — a 5x6 cell is mostly empty — so the mean luminance
+    /// across the whole sheet sits close to the background rather than to the
+    /// ink. That is good enough to tint against, and far more robust than
+    /// sampling a corner pixel, which some sheets leave as stray ink.
+    public mutating func measureFontBackground() {
+        let glyphs = strip(.font)
+        guard !glyphs.isEmpty else {
+            fontBackgroundLuminance = 0
+            return
+        }
+        // A sample of the sheet is plenty and keeps skin loading quick.
+        let sampled = glyphs.prefix(40)
+        let total = sampled.reduce(0.0) { $0 + $1.meanLuminance }
+        fontBackgroundLuminance = total / Double(sampled.count)
     }
 }

@@ -142,6 +142,44 @@ public enum ModernSkinLoader {
             regions: regions
         )
         skin.fontColumns = fontColumns
+        skin.measureFontBackground()
+        // Derive from the skin's own art first, then let the manifest correct
+        // individual colours. That way a skin can declare one accent without
+        // having to restate the whole palette.
+        var theme = SkinThemeDerivation.derive(from: skin)
+        if let overrides = manifest.theme {
+            theme = apply(overrides, to: theme).contrastChecked()
+        }
+        skin.theme = theme
         return skin
+    }
+
+    private static func apply(
+        _ overrides: ModernSkinManifest.ThemeColors,
+        to theme: SkinTheme
+    ) -> SkinTheme {
+        var result = theme
+        func color(_ raw: String?, _ current: SkinColor) -> SkinColor {
+            raw.flatMap(SkinColor.init(parsing:)) ?? current
+        }
+        result.faceBase = color(overrides.faceBase, result.faceBase)
+        result.faceHighlight = color(overrides.faceHighlight, result.faceHighlight)
+        result.faceShadow = color(overrides.faceShadow, result.faceShadow)
+        result.bevelLight = color(overrides.bevelLight, result.bevelLight)
+        result.bevelDark = color(overrides.bevelDark, result.bevelDark)
+        result.faceText = color(overrides.faceText, result.faceText)
+        result.faceTextDim = color(overrides.faceTextDim, result.faceTextDim)
+        result.displayBackground = color(overrides.displayBackground, result.displayBackground)
+        result.displayText = color(overrides.displayText, result.displayText)
+        result.displayDim = color(overrides.displayDim, result.displayDim)
+        result.listBackground = color(overrides.listBackground, result.listBackground)
+        result.listText = color(overrides.listText, result.listText)
+        result.listAlternate = color(overrides.listAlternate, result.listAlternate)
+        result.selectionBackground = color(overrides.selectionBackground, result.selectionBackground)
+        result.selectionText = color(overrides.selectionText, result.selectionText)
+        result.accent = color(overrides.accent, result.accent)
+        result.accentText = color(overrides.accentText, result.accentText)
+        result.listFontName = overrides.listFontName ?? result.listFontName
+        return result
     }
 }

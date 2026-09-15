@@ -12,6 +12,12 @@ spectrum analyzer reading Spotify's actual audio output.
 
 *"Amber CRT", the worked example of the modern `.wskin` format.*
 
+![The media library under three skins](docs/media-library-preview.png)
+
+*The media library, themed from three different skins. The third is a
+deliberately hostile one — see [Theming a window no skin has art
+for](#theming-a-window-no-skin-has-art-for).*
+
 ---
 
 ## What this is, and what it deliberately isn't
@@ -49,6 +55,65 @@ sprite) and repurposed to cycle the visualizer.
 
 If you ever want the real thing, the seam is `AudioVis`: an output stage between
 `ProcessTap` and the device would slot in there without touching the UI.
+
+### Search, artists and albums
+
+The **media library** window (eject button, or ⌘L) covers search, followed
+artists, saved albums, playlists and liked songs, with drill-down: artist → top
+tracks → full discography → album → tracks. Everything reduces to one row type,
+so there is a single list renderer rather than five, and `PLAY` / `ENQUEUE` /
+`REPLACE` act on whatever is currently listed.
+
+It needs a Spotify client ID, because browsing is Web API work. Transport
+control does not.
+
+### Theming a window no skin has art for
+
+This is the interesting problem. A classic `.wsz` contains sprites for exactly
+three windows — main, equalizer, playlist. There is no `search-field.bmp`, no
+tab strip, no artist row, and there never will be, because the format froze in
+1997. So the library window cannot be blitted from a downloaded skin. A native
+macOS panel next to a skinned player looks like two applications, which is the
+thing worth avoiding.
+
+The way out is that a classic skin still tells you enough to **derive** a
+palette, and then the widgets get generated in those colours:
+
+| Source in the skin | What it gives |
+|---|---|
+| `pledit.txt` | List text, now-playing text, background, selection background, and a `Font=` request. This is literally a list-view theme — and its `mbFG`/`mbBG` keys themed Winamp's old *minibrowser*, so using them for an in-app browser is what they were for. |
+| `viscolor.txt` | A display well and an accent ramp, 24 colours. |
+| `main.bmp` | The faceplate. Sampling the chrome bands — the strips between the controls, which are always faceplate and never a sunken display — recovers the base colour and the bevel pair the author drew with. |
+| `pledit.bmp` | Corner and tile sprites that are a **general-purpose resizable window frame**, not playlist-specific. The library window is framed in the skin's own artwork. |
+| `text.bmp` | The bitmap font, re-tinted for labels (see below). |
+
+`SkinThemeDerivation` turns that into a `SkinTheme`; `ThemedChrome` draws
+buttons, tabs, wells, scrollbars and artwork frames from it, in the same
+bevel-and-recess idiom the original skins were built from. A modern `.wskin` can
+declare a `theme` block to correct any of it, but never has to.
+
+Three details that turned out to matter:
+
+- **Contrast is enforced, not hoped for.** These colours were chosen to sit
+  under sprites, not behind text, and plenty of skins set `Normal` barely
+  distinguishable from `NormalBG`, or `SelectedBG` identical to it. Every
+  text/surface pair is checked and pushed apart, keeping the hue where it can.
+  The direction is found by trying both and taking the better worst case — a
+  luminance threshold sends saturated colours the wrong way, since hot pink has
+  a low relative luminance but takes *dark* text.
+- **Panels are gradients**, so faceplate text is optimised against the whole
+  tonal range it sits on rather than one end of it. Faceplate text is also a
+  separate pair from display text, because a colour legible on a dark well can
+  vanish on a bright faceplate.
+- **The bitmap font is tinted.** `text.bmp` bakes the skin's colour in — right
+  for the main window, invisible on a generated widget. Coverage is taken as
+  distance from the sheet's background tone, which handles both dark-ink and
+  light-ink sheets and keeps anti-aliased edges.
+
+Two things are deliberately *not* themed. Album artwork is someone's cover, not
+skin art, so it is framed in the skin's bevel instead. And the search field is a
+real `NSTextField`, styled to match — hand-rolling text input means losing IME,
+selection, paste and undo.
 
 ### The visualizer is real
 
@@ -134,7 +199,7 @@ The window behaves the way you remember.
 | Scroll anywhere | Volume |
 | Right-click | The options menu |
 | Right-click **RPT** | Cycle off → repeat all → repeat one |
-| **Eject** | Open the Spotify library browser |
+| **Eject** | Open the media library |
 | **PL** | Playlist editor |
 | ⌘D | Double size (also 3× and 4×) |
 
@@ -228,12 +293,21 @@ Sources/
     ModernSkinLoader    .wskin → Skin
     DefaultSkin         The built-in skin, drawn procedurally
     SkinLibrary         Discovery, caching, base-skin merging
+    SkinTheme           Palette for windows with no sprites, + colour maths
+    SkinThemeDerivation Reading that palette out of any skin
+    ThemedChrome        Generating widget art from it
 
-  SpotifyKit/    Web API. OAuth PKCE, keychain tokens, typed endpoints.
+  SpotifyKit/    Web API. OAuth PKCE, keychain tokens, typed endpoints —
+                 including artist, album, discography and multi-type search.
   PlayerCore/    PlayerSnapshot, the PlaybackEngine protocol, the remote
-                 engine, Playlist, and PlaybackCoordinator.
+                 engine, Playlist, PlaybackCoordinator, and MediaBrowser
+                 (the library's navigation stack).
   AudioVis/      Core Audio process tap + vDSP FFT.
   WinampSpotify/ The app: AppKit windows, sprite renderer, ScriptingBridge.
+    SkinnedFrame        One resizable window frame, shared by the playlist
+                        and library windows
+    ThemedText          Bitmap font or the skin's requested system font
+    MediaLibraryView    The drawn browser
 ```
 
 The split that matters: **views know pixels, the coordinator knows playback, and
@@ -271,9 +345,18 @@ What *has* been verified, and how:
   unzipped, its PNG decoded, its declared rectangles cropped, and the window
   recomposed from nothing but the archive. That is the second image. It confirms
   all 74 sprites and 4 strips are declared, in bounds, and non-overlapping.
+- **The media library's theming** was verified against three skins including a
+  deliberately hostile one (hot pink faceplate, near-black text on a near-black
+  list, a selection identical to the background). That is the third image above,
+  and `Tools/preview_media_library.py` prints the contrast ratio of every
+  text/surface pair and exits non-zero if any falls below its floor. It caught
+  four real bugs: faceplate text checked against the wrong surface, a
+  `drawBitmap` that ignored its colour argument entirely, a contrast direction
+  chosen by a luminance threshold that fails on saturated colours, and an
+  artwork frame that painted over the artwork it framed.
 - `swift test` covers the ZIP reader, the BMP decoder, the three text config
-  formats, font mapping, marquee scrolling, skin merging, and the layout table.
-  Written but not run.
+  formats, font mapping, marquee scrolling, skin merging, the layout table, and
+  theme derivation against hostile palettes. Written but not run.
 
 Areas most likely to need work on a real Mac, in rough order of risk:
 
@@ -300,6 +383,7 @@ Swift, so if you change the palette, the layout or the font, change both.
 | `Tools/generate_font_art.py` | Regenerates `Sources/SkinKit/DefaultFontArt.swift`. |
 | `Tools/preview_default_skin.py` | Renders the built-in skin and the classic layout. |
 | `Tools/make_example_skin.py` | Rebuilds `Skins/Amber CRT.wskin`. |
+| `Tools/preview_media_library.py` | Renders the library under three skins and checks every contrast pair. Exits non-zero on a failure, so it works as a check. |
 
 ## Licensing note
 

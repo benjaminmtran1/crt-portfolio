@@ -145,6 +145,10 @@ public enum ClassicSkinLoader {
             regions: regions
         )
         skin.fontColumns = fontColumns
+        skin.measureFontBackground()
+        // Derived here rather than lazily: sampling the faceplate is a
+        // one-time cost and callers treat `Skin` as a plain value.
+        skin.theme = SkinThemeDerivation.derive(from: skin)
         return skin
     }
 

@@ -118,9 +118,12 @@ public enum DefaultSkin {
                 fontName: nil
             ),
             visualizerPalette: .default,
-            regions: [:]
+            regions: [:],
+            // No sampling needed: `SkinTheme.fallback` is this skin's palette.
+            theme: SkinTheme.fallback
         )
         skin.fontColumns = 31
+        skin.measureFontBackground()
         return skin
     }
 

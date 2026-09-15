@@ -1,7 +1,7 @@
 import Foundation
 
 /// An 8-bit-per-channel colour, kept independent of AppKit/UIKit.
-public struct SkinColor: Equatable, Codable, Sendable {
+public struct SkinColor: Hashable, Codable, Sendable {
     public var r: UInt8
     public var g: UInt8
     public var b: UInt8
@@ -54,6 +54,12 @@ public struct PlaylistStyle: Equatable, Codable, Sendable {
     public var miniBrowserBackground: SkinColor
     public var fontName: String?
 
+    /// Whether the skin actually wrote `mbFG`/`mbBG`, as opposed to these
+    /// carrying the default. Winamp's minibrowser was its in-app browser, so
+    /// when a skin themed it, that is the most authoritative source for the
+    /// media library's colours — but only if it really said so.
+    public var declaresMiniBrowserColors: Bool = false
+
     public static let `default` = PlaylistStyle(
         normalText: SkinColor(r: 0, g: 255, b: 0),
         currentText: .white,
@@ -61,7 +67,8 @@ public struct PlaylistStyle: Equatable, Codable, Sendable {
         selectedBackground: SkinColor(r: 0, g: 0, b: 198),
         miniBrowserText: SkinColor(r: 0, g: 255, b: 0),
         miniBrowserBackground: .black,
-        fontName: nil
+        fontName: nil,
+        declaresMiniBrowserColors: false
     )
 
     /// `pledit.txt` is an INI file with a single `[Text]` section.
@@ -81,8 +88,16 @@ public struct PlaylistStyle: Equatable, Codable, Sendable {
             case "current": style.currentText = SkinColor(parsing: value) ?? style.currentText
             case "normalbg": style.background = SkinColor(parsing: value) ?? style.background
             case "selectedbg": style.selectedBackground = SkinColor(parsing: value) ?? style.selectedBackground
-            case "mbfg": style.miniBrowserText = SkinColor(parsing: value) ?? style.miniBrowserText
-            case "mbbg": style.miniBrowserBackground = SkinColor(parsing: value) ?? style.miniBrowserBackground
+            case "mbfg":
+                if let color = SkinColor(parsing: value) {
+                    style.miniBrowserText = color
+                    style.declaresMiniBrowserColors = true
+                }
+            case "mbbg":
+                if let color = SkinColor(parsing: value) {
+                    style.miniBrowserBackground = color
+                    style.declaresMiniBrowserColors = true
+                }
             case "font": style.fontName = value.isEmpty ? nil : value
             default: break
             }

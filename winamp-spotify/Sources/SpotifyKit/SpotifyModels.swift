@@ -14,6 +14,29 @@ public struct SpotifyArtist: Codable, Hashable, Sendable, Identifiable {
     public let id: String?
     public let name: String
     public let uri: String?
+    /// Only present on the full artist object, not on the simplified one
+    /// embedded in a track.
+    public let images: [SpotifyImage]?
+    public let genres: [String]?
+    public let popularity: Int?
+    public let followers: Followers?
+
+    public struct Followers: Codable, Hashable, Sendable {
+        public let total: Int?
+    }
+
+    public func artworkURL(minimumEdge: Int) -> URL? {
+        guard let images, !images.isEmpty else { return nil }
+        let sorted = images.sorted { ($0.width ?? 0) < ($1.width ?? 0) }
+        let match = sorted.first { ($0.width ?? 0) >= minimumEdge } ?? sorted.last
+        return match.flatMap { URL(string: $0.url) }
+    }
+
+    /// "Rock · Shoegaze", for the subtitle line in an artist list.
+    public var genreSummary: String? {
+        guard let genres, !genres.isEmpty else { return nil }
+        return genres.prefix(2).joined(separator: " \u{00B7} ")
+    }
 }
 
 public struct SpotifyAlbum: Codable, Hashable, Sendable, Identifiable {
@@ -22,10 +45,28 @@ public struct SpotifyAlbum: Codable, Hashable, Sendable, Identifiable {
     public let uri: String?
     public let images: [SpotifyImage]?
     public let releaseDate: String?
+    /// `album`, `single` or `compilation`. Used to label and to filter out the
+    /// singles that flood an artist's discography.
+    public let albumType: String?
+    public let totalTracks: Int?
+    public let artists: [SpotifyArtist]?
 
     enum CodingKeys: String, CodingKey {
-        case id, name, uri, images
+        case id, name, uri, images, artists
         case releaseDate = "release_date"
+        case albumType = "album_type"
+        case totalTracks = "total_tracks"
+    }
+
+    public var artistNames: String {
+        (artists ?? []).map(\.name).joined(separator: ", ")
+    }
+
+    /// Just the year: release dates arrive as `2001`, `2001-05` or `2001-05-21`
+    /// depending on how precisely the label reported them.
+    public var releaseYear: String? {
+        guard let releaseDate, releaseDate.count >= 4 else { return nil }
+        return String(releaseDate.prefix(4))
     }
 
     /// The smallest image at least `minimumEdge` across, falling back to the
@@ -192,5 +233,28 @@ public struct SpotifySavedTrack: Codable, Sendable {
 public struct SpotifySearchResponse: Codable, Sendable {
     public let tracks: SpotifyPage<SpotifyTrack>?
     public let albums: SpotifyPage<SpotifyAlbum>?
+    public let artists: SpotifyPage<SpotifyArtist>?
     public let playlists: SpotifyPage<SpotifyPlaylist>?
+}
+
+/// `me/albums` wraps each album the way `me/tracks` wraps each track.
+public struct SpotifySavedAlbum: Codable, Sendable {
+    public let album: SpotifyAlbum
+    public let addedAt: String?
+
+    enum CodingKeys: String, CodingKey {
+        case album
+        case addedAt = "added_at"
+    }
+}
+
+/// `me/following` nests its page one level deeper than every other endpoint.
+public struct SpotifyFollowedArtists: Codable, Sendable {
+    public let artists: CursorPage
+
+    public struct CursorPage: Codable, Sendable {
+        public let items: [SpotifyArtist]
+        public let next: String?
+        public let total: Int?
+    }
 }
