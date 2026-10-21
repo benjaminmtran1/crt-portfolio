@@ -34,7 +34,7 @@ The audit uses `backlot/content.mjs` (`normalizeContent`, `galleryFor`, `watchLi
 | projects[].image/caption | First gallery item and caption; first available photo is thumbnail | Cover media/caption |
 | projects[].writeup | Paragraphs in project detail | Optional Write-up & extra details disclosure |
 | projects[].meta[].k/v | Key/value project facts | Optional extra details |
-| projects[].gallery[].src/caption | Photos, local MP4/WebM, external photos, YouTube/Vimeo watch links and labels | Gallery & film links, upload/link/batch/reorder controls retained |
+| projects[].gallery[].src/caption | Photos, local MP4/WebM, external photos, YouTube/Vimeo embedded players and labels | Gallery & film links, upload/link/batch/reorder controls retained |
 | projects[].time | No Backlot use | Closed Legacy fields disclosure if already present; not created for new projects |
 | About label | Mapped destination label | Optional Map label disclosure |
 | About sub | About headline | Relabeled About headline |

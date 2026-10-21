@@ -29,7 +29,7 @@ Supported in the Backlot:
 
 - Project titles, descriptions, role/tags, images, captions, paragraphs, extra info fields, project order and gallery order.
 - New projects, deletions, new image uploads and replacement images. Missing images show a clapper placeholder.
-- YouTube and Vimeo links, local MP4/WebM gallery videos, externally hosted images and category reel links.
+- YouTube and Vimeo films play inside project galleries with tap-to-play, native controls, inline playback and fullscreen. Existing gallery URLs/captions remain unchanged. Watch buttons select the embedded film; a small external-watch fallback stays available for provider restrictions. Closing or switching items/projects unloads hosted players and stops local videos. Local MP4/WebM, externally hosted images and category reel links remain supported.
 - Category labels and subheadings, browser title, hero/title-screen name and the in-game header role line. The old SIGNAL welcome paragraph is superseded by the title screen.
 - About portrait, name, role, biography and slate; Contact rows.
 
@@ -51,6 +51,7 @@ node backlot/checks/truck.test.mjs
 node backlot/checks/departments.test.mjs
 node backlot/checks/construction.test.mjs
 node backlot/checks/title.test.mjs
+node backlot/checks/video.test.mjs
 node --check backlot/app.mjs
 ```
 
