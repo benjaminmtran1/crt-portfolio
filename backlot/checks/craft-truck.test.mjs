@@ -16,13 +16,15 @@ assert.ok(craftCup.x>=craftTruck.counter.x&&craftCup.x<=craftTruck.counter.x+cra
 const life=new LotLife(),craft=life.hotspot('craft');
 assert.deepEqual(craft.point,craftStop);assert.equal(life.nearby(craftStop)?.id,'craft');
 const bodyPoint={x:craftTruck.body.x+craftTruck.body.w/2,y:craftTruck.body.y+20};
-const roofPoint={x:craftTruck.body.x+craftTruck.body.w/2,y:craftHit.y+10};
+const roofPoint={x:craftTruck.body.x+craftTruck.body.w/2,y:craftHit.sign.y+10};
 for(const point of [bodyPoint,roofPoint,{x:craftTruck.cab.x+20,y:craftTruck.cab.y+20},craftCup]){
  assert.equal(life.hit(point)?.id,'craft','The body, cab, sign and serving counter identify the same craft interaction');
  assert.deepEqual(life.hit(point).point,craftStop,'A vehicle hit targets the clear apron, not solid scenery');
 }
 assert.ok(roofPoint.y<craftTruck.body.y,'The roof-sign hit is above the collision body');
-for(const point of [{x:craftHit.x-1,y:roofPoint.y},{x:craftHit.x+craftHit.w+1,y:roofPoint.y},{x:roofPoint.x,y:craftHit.y-1}])assert.notEqual(life.hit(point)?.id,'craft','The vehicle does not claim unrelated ground outside its hit area');
+for(const point of [{x:craftHit.sign.x-1,y:roofPoint.y},{x:craftHit.sign.x+craftHit.sign.w+1,y:roofPoint.y},{x:roofPoint.x,y:craftHit.sign.y-1}])assert.notEqual(life.hit(point)?.id,'craft','The vehicle does not claim unrelated ground outside its hit area');
+
+for(const s of stages)assert.notEqual(life.hit(s.door)?.id,'craft',`${s.id} doorway must never be claimed by the truck`);
 
 let manualFaces=0,routes=0;
 for(const hz of [30,60,120]){

@@ -14,7 +14,8 @@ export const crewTruck={body:{x:752,y:596,w:100,h:74},cab:{x:852,y:620,w:38,h:50
 // counter projects toward its clear serving apron; neither lane is sealed off.
 export const craftTruck={body:{x:202,y:308,w:108,h:49},cab:{x:310,y:318,w:39,h:47},counter:{x:214,y:343,w:86,h:23}};
 export const craftStop={x:280,y:380};
-export const craftHit={x:202,y:277,w:147,h:91};
+// Use separate pointer silhouettes so the raised sign cannot steal Stage 01 clicks.
+export const craftHit={body:{x:200,y:304,w:150,h:65},sign:{x:212,y:275,w:104,h:29}};
 export const craftCrew={x:245,y:378};
 export const craftCup={x:279,y:345};
 export const obstacles=[...stages.map(s=>({x:s.x-4,y:s.y-4,w:s.w+8,h:s.h+8})),...Object.values(crewTruck),...Object.values(craftTruck),

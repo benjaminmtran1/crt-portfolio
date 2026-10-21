@@ -32,7 +32,13 @@ async function boot(reduced=false,saved={}){
 }
 const craftOpen=t=>{assert.equal(t.get('#panel').open,true);assert.equal(t.get('#panel').dataset.kind,'craft');assert.equal(t.app.world.paused,true);assert.equal(t.get('#panel-title').textContent,'Coffee’s on.');assert.equal(t.get('#crew-reply').getAttribute('role'),'status');assert.equal(t.get('#crew-portrait').getAttribute('aria-hidden'),'true');assert.deepEqual([...t.get('.crew-choices').querySelectorAll('button')].map(b=>b.dataset.chat),['day','rumour','coffee']);};
 const arrive=(t,hz)=>{for(let i=0;i<hz*40&&!t.get('#panel').open;i++){t.frame(hz);assert.ok(!blocked(t.app.world.player.x,t.app.world.player.y),'Craft approach never clips scenery');}craftOpen(t);assert.ok(distance(t.app.world.player,craftStop)<10);assert.equal(t.app.world.path.length,0);assert.equal(t.app.world.destination,null);};
-const body={x:craftTruck.body.x+50,y:craftTruck.body.y+20},sign={x:craftTruck.body.x+50,y:craftHit.y+10};
+const body={x:craftTruck.body.x+50,y:craftTruck.body.y+20},sign={x:craftTruck.body.x+50,y:craftHit.sign.y+10};
+
+// The roof sign must not steal clicks on the adjacent Narrative doorway.
+for(const pointerType of ['mouse','touch']){
+ const t=await boot(),door=stages.find(s=>s.id==='narrative').door;t.pointer(door,pointerType);
+ assert.equal(t.app.world.destination,'narrative','Stage 01 keeps its own door target beside the truck sign');
+}
 
 // Use actual canvas pointer listeners: both mouse and touch on the raised sign
 // and body must walk to the serving apron and open the existing conversation.
