@@ -2,27 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#142430">
-<title>Benjamin Tran — The Backlot</title>
+<title>Benjamin Tran</title>
 <meta name="description" content="Walk through a pixel-art film set and explore Benjamin Tran's scenic construction work for film, television, commercials and installations.">
-<link rel="icon" href="backlot/assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="backlot/style.css">
+<link rel="icon" href="backlot/assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="backlot/style.css?v=crew1">
 </head>
 <body>
-<a class="skip" href="#index-button">Browse the work</a>
-<div class="app">
+<a class="skip" href="#title-work">Browse the work</a>
+<section id="title-screen" class="title-screen" aria-labelledby="title-name">
+ <canvas id="title-scene" aria-hidden="true"></canvas>
+ <div class="title-shade" aria-hidden="true"></div>
+ <div class="cartridge-frame" aria-hidden="true"><span>1 PLAYER</span><span>TORONTO / ON</span></div>
+ <div class="title-content">
+  <div class="title-spark" aria-hidden="true">✦</div>
+  <h1 id="title-name"><span>BENJAMIN</span><span>TRAN</span></h1>
+  <p class="title-role">CONSTRUCTION COORDINATOR</p>
+  <div class="title-rule" aria-hidden="true"><i></i><i></i><i></i></div>
+  <button id="start-button" class="start-button" disabled><span aria-hidden="true">▶</span> PRESS START</button>
+  <button id="title-work" class="title-work" disabled>WORK INDEX</button>
+  <p class="title-instruction">ENTER / TAP TO BEGIN</p>
+  <div id="loading" class="title-loading" role="status">LOADING THE LOT…</div>
+  <span id="crew-seal" class="crew-seal" hidden>CREW APPROVED <span aria-hidden="true">♥</span></span>
+ </div>
+ <footer class="title-footer"><span>© 2026 <span id="title-credit">BENJAMIN TRAN</span></span><button id="title-sound" aria-pressed="false">SOUND OFF</button></footer>
+</section>
+<div class="app" inert>
  <header class="topbar">
   <a class="identity" href="#" id="home-button" aria-label="Benjamin Tran, return to the lot entrance"><span class="clapper" aria-hidden="true">BT</span><span><strong id="identity-name">BENJAMIN TRAN</strong><small id="identity-role">CONSTRUCTION COORDINATOR · DESIGNER</small></span></a>
   <nav aria-label="Portfolio"><button id="index-button" class="index-button">Work index <span>19</span></button><button id="map-button">Lot map <span class="key">M</span></button><button id="contact-button" class="desktop-contact">Contact ↗</button><button id="settings-button" class="settings-button" aria-label="Display and sound settings">☷</button></nav>
  </header>
  <main id="lot" aria-label="Interactive film set portfolio">
-  <canvas id="world" tabindex="0" aria-label="Explore the backlot using arrow keys or WASD. Press E near a numbered stage to view the work. You can also use Work index to access every project.">Explore Benjamin Tran's work using the Work index button.</canvas>
+  <canvas id="world" tabindex="0" aria-label="Explore the backlot using arrow keys or WASD. Press E near a stage, prop, or cat to interact. You can also use Work index to access every project.">Explore Benjamin Tran's work using the Work index button.</canvas>
   <div class="scene-grain" aria-hidden="true"></div>
-  <section id="welcome" class="welcome">
-   <div class="eyebrow"><span class="live-dot"></span> A PORTFOLIO YOU CAN WALK THROUGH</div>
-   <h1>Welcome to<br><em>THE BACKLOT.</em></h1>
-   <p id="welcome-copy">I build the worlds<br>the camera believes in.</p>
-   <button id="explore-button" class="explore-button">LET’S TAKE A LOOK <span>↘</span></button>
-   <small>Walk up to a numbered set to see the work.</small>
-  </section>
+  <aside id="take-hud" class="take-hud" hidden><div><span id="take-number">TAKE 01</span><strong id="take-call" role="status" aria-live="polite">QUIET ON SET</strong></div><button id="cut-button" aria-label="End the scene and return to exploring">CUT <span>ESC</span></button></aside>
   <button id="minimap-button" class="minimap" aria-label="Open the lot map"><span>STUDIO LOT <span class="map-plus">+</span></span><canvas id="minimap" width="160" height="120" aria-hidden="true"></canvas><small>YOU ARE HERE <i></i></small></button>
   <div id="place" class="place"><span id="place-number">EXT.</span><span id="place-name">THE BACKLOT</span></div>
   <aside id="monitor" class="monitor" aria-label="Featured project">
@@ -31,8 +42,7 @@
    <div class="monitor-caption"><span id="feature-category"></span><strong id="feature-title"></strong></div>
   </aside>
   <div class="interaction" id="interaction" hidden><span id="interaction-caption"></span><button id="interact-button"><span class="key">E</span><strong id="interact-label">Enter set</strong><span>↗</span></button></div>
-  <div class="touch-controls" id="touch-controls"><div id="joystick" class="joystick" role="group" aria-label="Touch movement joystick"><div class="stick-cross"></div><div class="stick-knob" id="stick-knob"></div></div><button class="touch-action" id="touch-action" aria-label="Interact with nearest stage">A<span>LOOK</span></button></div>
-  <div id="loading" class="loading"><span class="live-dot"></span> OPENING THE STUDIO…</div>
+  <div class="touch-controls" id="touch-controls"><div id="joystick" class="joystick" role="group" aria-label="Touch movement joystick"><div class="stick-cross"></div><div class="stick-knob" id="stick-knob"></div></div><button class="touch-action" id="touch-action" aria-label="Interact with nearby stage, prop, or cat">A<span>LOOK</span></button></div>
   <div class="scene-hint" id="scene-hint">Click the ground to walk · Click a stage to visit</div>
  </main>
  <footer class="statusbar"><div><span class="live-dot"></span><span id="status">THE BACKLOT</span><span class="divider">/</span><span id="visited-count">0 OF 4 SETS VISITED</span></div><div class="desktop-keys"><span><b>WASD</b> MOVE</span><span><b>E</b> LOOK</span><span><b>M</b> MAP</span></div><button id="weather-button" aria-pressed="true">☂ LIGHT RAIN</button></footer>
@@ -40,6 +50,6 @@
 <dialog id="panel" class="panel" aria-labelledby="panel-title"><div id="panel-inner"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <noscript><div class="no-js">This interactive portfolio needs JavaScript. Enable JavaScript to browse the projects, or <a href="mailto:contact@benjamintran.ca">contact Ben</a>.</div></noscript>
-<script type="module" src="backlot/app.mjs"></script>
+<script type="module" src="backlot/app.mjs?v=crew1"></script>
 </body>
 </html>
