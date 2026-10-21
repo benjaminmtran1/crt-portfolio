@@ -175,7 +175,7 @@ input[type=file] { display: none; }
 
 <header>
   <h1>CONTROL ROOM</h1>
-  <span class="sub"><span class="rec-dot">●</span> EDITING — CRT PORTFOLIO</span>
+  <span class="sub"><span class="rec-dot">●</span> EDITING — THE BACKLOT</span>
   <span class="spacer"></span>
   <button class="act small" id="btnLoadFile">LOAD JSON FILE</button>
   <button class="act small" id="btnDownload">DOWNLOAD JSON</button>
@@ -203,14 +203,16 @@ input[type=file] { display: none; }
   <!-- RIGHT: publish -->
   <div class="panel">
     <h2>TRANSMIT</h2>
+    <p class="hint"><b>BACKLOT EDITING</b><br>Projects, roles, captions, galleries, videos, write-ups, info fields, category labels, About, Contact and site identity feed the new game portfolio. The four existing project categories have map locations. New guide categories appear in Work index; new buildings require a code update. TV timeslots, test bars and the old SIGNAL carousel do not control the map.</p>
+    <p class="hint"><a href="./" target="_blank" rel="noopener">OPEN LIVE PORTFOLIO ↗</a></p>
     <label class="f">GitHub owner</label>
-    <input type="text" id="ghOwner" placeholder="your-username">
+    <input type="text" id="ghOwner" value="benjaminmtran1" placeholder="your-username">
     <label class="f">Repo</label>
-    <input type="text" id="ghRepo" placeholder="crt-portfolio">
+    <input type="text" id="ghRepo" value="crt-portfolio" placeholder="crt-portfolio">
     <label class="f">Branch</label>
     <input type="text" id="ghBranch" value="main">
     <label class="f">Fine-grained token (Contents: read/write)</label>
-    <input type="text" id="ghToken" placeholder="github_pat_…">
+    <input type="password" id="ghToken" placeholder="github_pat_…">
     <label style="display:flex; gap:6px; align-items:center; margin-top:8px; font-size:11px; color: var(--ghost); cursor:pointer;">
       <input type="checkbox" id="ghRemember" style="accent-color:#c2a35c;"> remember settings in this browser
     </label>
@@ -978,6 +980,8 @@ $('btnPublish').onclick = async () => {
       await ghPut(owner, repo, branch, token, path, base64, 'Add media: ' + path.split('/').pop());
     }
     setStatus('Committing content.json…');
+    content.site = content.site || {};
+    content.site.updatedAt = new Date().toISOString();
     const jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
     await ghPut(owner, repo, branch, token, 'content.json', jsonB64, 'Update site content');
     pendingAssets = {};

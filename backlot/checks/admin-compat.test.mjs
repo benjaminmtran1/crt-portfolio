@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {normalizeContent,galleryFor,mediaURL,mediaKind,safeURL,featuredProjects,thumbnailFor} from '../content.mjs';
+const root=path.resolve(import.meta.dirname,'../..'),raw=JSON.parse(fs.readFileSync(path.join(root,'content.json'),'utf8'));
+const data=normalizeContent(raw);assert.equal(data.projects.length,19);assert.equal(data.categories.length,4);
+for(const p of data.projects){for(const item of galleryFor(p)){const clean=item.src.split(/[?#]/)[0];if(clean.startsWith('assets/'))assert.ok(fs.existsSync(path.join(root,clean)),item.src);}}
+const edited=structuredClone(raw),category=edited.channels.find(c=>c.id==='commercial');category.label='Brand films';
+category.projects.push({title:'New project',tags:'Designer',image:'assets/new-upload.jpg',desc:'New description',writeup:'A first paragraph.\n\nA second paragraph.',meta:[{k:'CLIENT',v:'Example client'}],gallery:[{src:'assets/new-gallery.jpg',caption:'New caption'},{src:'assets/new-video.mp4',caption:'On set'},{src:'https://vimeo.com/12345',caption:'Watch'},{src:'https://example.com/external-image.jpg',caption:'External image'}]});
+const edit=normalizeContent(edited),newProject=edit.projects.find(p=>p.title==='New project');assert.equal(edit.projects.length,20);assert.equal(edit.categories.find(c=>c.id==='commercial').label,'Brand films');
+assert.ok(mediaURL(newProject.image).startsWith('assets/new-upload.jpg'),'New uploads do not depend on a generated manifest');assert.equal(galleryFor(newProject).length,4);assert.equal(galleryFor(newProject)[2].kind,'video');assert.equal(newProject.meta[0].v,'Example client');assert.equal(thumbnailFor(newProject),'assets/new-upload.jpg');
+assert.notEqual(mediaURL('assets/same-name.jpg','first'),mediaURL('assets/same-name.jpg','second'),'Publishing replacement media changes its cache key');
+assert.equal(mediaURL('https://example.com/image.jpg?signature=abc','new'),'https://example.com/image.jpg?signature=abc');
+assert.equal(mediaKind('https://youtu.be/example'),'watch');assert.equal(mediaKind('https://vimeo.com/123'),'watch');assert.equal(mediaKind('assets/video.webm'),'video');
+assert.equal(safeURL('javascript:alert(1)'), '');assert.equal(safeURL('assets/../../secret'), '');assert.equal(safeURL('mailto:contact@benjamintran.ca',true),'mailto:contact@benjamintran.ca');
+const empty=normalizeContent({channels:[{id:'commercial',type:'guide',projects:[{}]}]});assert.equal(empty.projects[0].title,'Untitled project');assert.equal(galleryFor(empty.projects[0]).length,0);assert.equal(featuredProjects([],[]).length,0);
+edited.channels.push({id:'new-category',type:'guide',label:'New category',projects:[{title:'New category project'}]});const extra=normalizeContent(edited);assert.equal(extra.categories.length,5);assert.equal(extra.projects.length,21);assert.ok(featuredProjects(extra.projects,extra.categories).every(Boolean));
+edited.channels=edited.channels.filter(c=>c.id!=='narrative');const deleted=normalizeContent(edited);assert.ok(featuredProjects(deleted.projects,deleted.categories).every(Boolean),'Removing a featured category does not leave an undefined project');
+const admin=fs.readFileSync(path.join(root,'admin.html'),'utf8'),app=fs.readFileSync(path.join(root,'backlot/app.mjs'),'utf8'),html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+assert.ok(admin.includes('id="ghBranch" value="main"'));assert.ok(admin.includes('content.site.updatedAt = new Date().toISOString()'));assert.ok(admin.includes("'content.json', jsonB64"));assert.ok(app.includes("fetch('content.json',{cache:'no-store'})"));assert.ok(!app.includes("fetch('media.json')"));
+assert.equal(fs.readFileSync(path.join(root,'CNAME'),'utf8').trim(),'benjamintran.ca');assert.ok(fs.existsSync(path.join(root,'.nojekyll')));
+const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);assert.equal(new Set(ids).size,ids.length);
+const dynamic=new Set(['panel-title','project-search','project-list','results-count','gallery-main','gallery-image','gallery-video','gallery-count','photo-caption','big-map','retry-load']);for(const m of app.matchAll(/\$\('#([a-z][a-z0-9-]*)'\)/g))assert.ok(ids.includes(m[1])||dynamic.has(m[1]),'Missing hook '+m[1]);
+for(const f of ['app.mjs','content.mjs','world.mjs','renderer.mjs','pixels.mjs','style.css','assets/pixel.ttf','assets/mark.svg','assets/placeholder.svg'])assert.ok(fs.existsSync(path.join(root,'backlot',f)),f);
+console.log('Admin compatibility passed: current projects, additions, renamed/deleted categories, media replacement, external images, uploaded videos, Vimeo/YouTube, empty projects, metadata, direct JSON loading and custom-domain files.');

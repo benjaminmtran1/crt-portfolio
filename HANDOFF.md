@@ -1,5 +1,7 @@
 # CRT Portfolio — Handoff Doc
 
+> This document describes the archived CRT interface. The live homepage is now The Backlot; see [BACKLOT.md](BACKLOT.md) for current implementation, supported admin edits, deployment and rollback. `content.json`, `assets/` and the editor remain in use.
+
 Portfolio site for Ben's film construction work, styled as an old CRT television,
 with a self-contained admin GUI for updating content.
 
