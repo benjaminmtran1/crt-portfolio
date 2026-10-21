@@ -5,7 +5,7 @@
 <title>Benjamin Tran</title>
 <meta name="description" content="Walk through a pixel-art film set and explore Benjamin Tran's scenic construction work for film, television, commercials and installations.">
 <link rel="preload" href="backlot/assets/pixel.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="icon" href="backlot/assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="backlot/style.css?v=pocket2"><link rel="stylesheet" href="backlot/title.css?v=titlemenu2">
+<link rel="icon" href="backlot/assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="backlot/style.css?v=cleanup1"><link rel="stylesheet" href="backlot/title.css?v=titlemenu2">
 </head>
 <body>
 <a class="skip" href="#title-work">Browse the work</a>
@@ -44,10 +44,9 @@
   <aside id="take-hud" class="take-hud" hidden><div><span id="take-number">TAKE 01</span><strong id="take-call" role="status" aria-live="polite">QUIET ON SET</strong></div><button id="cut-button" aria-label="End the scene and return to exploring">CUT <span>ESC</span></button></aside>
   <button id="minimap-button" class="minimap" aria-label="Open the lot map"><span>STUDIO LOT <span class="map-plus">+</span></span><canvas id="minimap" width="160" height="120" aria-hidden="true"></canvas><small>YOU ARE HERE <i></i></small></button>
   <div id="place" class="place"><span id="place-number">EXT.</span><span id="place-name">THE BACKLOT</span></div>
-  <aside id="monitor" class="monitor" aria-label="Featured project">
-   <div class="monitor-top"><span><i></i> ON THE MONITOR</span><div><button id="feature-prev" aria-label="Previous featured project">←</button><button id="feature-next" aria-label="Next featured project">→</button></div></div>
-   <button id="feature-open" class="monitor-image"><img id="feature-image" alt=""><span class="monitor-play">VIEW PROJECT ↗</span></button>
-   <div class="monitor-caption"><span id="feature-category"></span><strong id="feature-title"></strong></div>
+  <aside id="monitor" class="monitor monitor-compact" aria-label="Featured project">
+   <div class="monitor-top"><span><i></i> ON THE MONITOR</span><div><button id="feature-prev" aria-label="Previous featured project">←</button><button id="feature-next" aria-label="Next featured project">→</button><button id="feature-toggle" aria-label="Expand featured project preview" aria-expanded="false" aria-controls="feature-open">+</button></div></div>
+   <button id="feature-open" class="monitor-project"><span class="monitor-image"><img id="feature-image" alt=""><span class="monitor-play">VIEW PROJECT ↗</span></span><span class="monitor-caption"><span id="feature-category"></span><strong id="feature-title"></strong></span></button>
   </aside>
   <div class="interaction" id="interaction" hidden><span id="interaction-caption"></span><button id="interact-button"><span class="key">E</span><strong id="interact-label">Enter set</strong><span>↗</span></button></div>
   <div class="touch-controls" id="touch-controls"><div id="joystick" class="joystick" role="group" aria-label="Touch movement joystick"><div class="stick-cross"></div><div class="stick-knob" id="stick-knob"></div></div><button class="touch-action" id="touch-action" aria-label="Interact with nearby stage, prop, or cat">A<span>LOOK</span></button></div>
@@ -58,7 +57,7 @@
 <dialog id="panel" class="panel" aria-labelledby="panel-title"><div id="panel-inner"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <noscript><div class="no-js">This interactive portfolio needs JavaScript. Enable JavaScript to browse the projects, or <a href="mailto:contact@benjamintran.ca">contact Ben</a>.</div></noscript>
-<script type="module" src="backlot/app.mjs?v=pocket2"></script>
+<script type="module" src="backlot/app.mjs?v=cleanup1"></script>
 </body>
 </html>
 

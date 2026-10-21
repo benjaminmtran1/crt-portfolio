@@ -1,5 +1,5 @@
-import {findPath,GRID,HEIGHT,distance,clamp} from './world.mjs?v=pocket2';
-import {crew} from './encounters.mjs?v=pocket1';
+import {findPath,GRID,HEIGHT,distance,clamp} from './world.mjs?v=cleanup1';
+import {crew} from './encounters.mjs?v=cleanup1';
 
 // Build routes once, then sample by distance. Absolute time makes pause, manual
 // chapter selection and replay deterministic without moving the live lot actors.

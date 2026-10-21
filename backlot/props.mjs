@@ -1,5 +1,5 @@
 import {pixelText} from './pixels.mjs?v=crew3';
-import {lotCamera} from './world.mjs?v=pocket2';
+import {lotCamera,scenicStation,workshopLumber} from './world.mjs?v=cleanup1';
 const R=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),w,h);};
 const P=(c,pts,col)=>{c.fillStyle=col;c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();};
 const L=(c,x,y,xx,yy,col,w=1)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(Math.round(x)+.5,Math.round(y)+.5);c.lineTo(Math.round(xx)+.5,Math.round(yy)+.5);c.stroke();};
@@ -34,10 +34,14 @@ export function drawWrapBell(c){
 }
 export function drawWorkProps(c){
  // Scenic practice flat: braced timber back, mottled paint and a mixing pot.
+ c.save();c.translate(scenicStation.flat.x-744,scenicStation.flat.y-359);
  R(c,745,336,30,28,'#857c69');R(c,747,338,26,24,'#91a89a');R(c,748,340,11,17,'#b7c6ac');R(c,760,342,11,8,'#698f87');R(c,753,351,15,9,'#91aaa0');
  R(c,744,335,3,31,'#c6a677');R(c,773,335,3,31,'#ad8a5d');L(c,776,340,786,367,'#b79b71',2);L(c,744,365,785,368,'#485957',2);
- R(c,705,340,9,8,'#768d87');R(c,704,339,11,2,'#d8cbae');R(c,707,337,6,2,'#aac2ad');
+ c.restore();c.save();c.translate(scenicStation.mix.x-704,scenicStation.mix.y-356);
+ R(c,705,340,9,8,'#768d87');R(c,704,339,11,2,'#d8cbae');R(c,707,337,6,2,'#aac2ad');c.restore();
  // Lumber stacked beside the workshop apron, with spaced bearers.
+ c.save();c.translate(workshopLumber.x-446,workshopLumber.y-263);
  R(c,449,266,4,11,'#4c5146');R(c,479,266,4,11,'#4c5146');
  for(let y=263;y<273;y+=4){R(c,446,y,40,3,'#bd9563');R(c,446,y,40,1,'#e2c18d');R(c,483,y,3,3,'#8c6c4e');}
+ c.restore();
 }

@@ -1,7 +1,8 @@
 import {titleBuilds,paintTitleBuild} from './title-builds.mjs?v=beastcash1';
+import {scenicStation,carpenterStation} from './world.mjs?v=cleanup1';
 export const crew=[
- {id:'scenic',name:'Jules',role:'Scenic painter',point:{x:704,y:356},coat:'#a68078',lines:['If it looks like stone, please don’t lean on it until the paint dries.','My finest moss is three shades of green and a very tired sponge.','Look through the camera. That’s where all the separate bits become a place.']},
- {id:'grip',name:'Frankie',role:'Carpenter',point:{x:376,y:296},coat:'#d5ae69',lines:['It’s level. The rest of the planet is slightly off.','The best camera angle is usually exactly where someone put the lumber.','A whole world in the frame. Three sandbags and a coffee just outside it.']},
+ {id:'scenic',name:'Jules',role:'Scenic painter',point:scenicStation.mix,coat:'#a68078',lines:['If it looks like stone, please don’t lean on it until the paint dries.','My finest moss is three shades of green and a very tired sponge.','Look through the camera. That’s where all the separate bits become a place.']},
+ {id:'grip',name:'Frankie',role:'Carpenter',point:carpenterStation.measure,coat:'#d5ae69',lines:['It’s level. The rest of the planet is slightly off.','The best camera angle is usually exactly where someone put the lumber.','A whole world in the frame. Three sandbags and a coffee just outside it.']},
  {id:'pa',name:'Kit',role:'Production assistant',point:{x:560,y:608},coat:'#859eaa',lines:['I have four walkies and somehow none of them are on the right channel.','They said one last setup. I’ve written that down for historical purposes.','See that bell by production? Ring it when you’re ready to call wrap.']}
 ];
 export const cameraBuilds=titleBuilds;

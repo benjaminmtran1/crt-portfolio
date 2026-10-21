@@ -1,4 +1,4 @@
-import {clamp} from './world.mjs?v=truck1';
+import {clamp} from './world.mjs?v=cleanup1';
 import {pixelText} from './pixels.mjs?v=crew3';
 import {buildSteps} from './departments.mjs?v=drafting1';
 
