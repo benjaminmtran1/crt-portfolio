@@ -14,6 +14,10 @@ The homepage is now an explorable pixel-art film set. The original admin and con
 - The clapperboard beside the central avenue starts a 10.5-second scene: quiet on set, a lantern-carrying performer, a moving camera and a wrap. CUT or Escape skips it. Dialogs and background tabs pause it.
 - Walk behind stages 01 and 02 through the northern service lane to reveal the timber backs, braces and sandbags. Inspect the small rear placards to open an illustrated cutaway and links to the current project galleries.
 - Pet the workshop cat, then follow it. It waits if you fall behind and leads to a small crew corner beyond the prop garden. Pet it there to earn a Crew Approved stamp. The stamp and the cat's new resting place are saved in this browser.
+- The lighting desk beside the central avenue offers **Work lights**, **Golden hour** and **Night shoot**, with a preview of the whole lot. The selected look is saved in this browser. A filmed take uses its own lighting, then returns to your chosen look.
+- Stop at **Craft services** on the western cross street for coffee, rotating crew chatter and hints that change with discoveries already found. This is fictional in-game dialogue, separate from project credits and About content.
+- The drafting table outside the workshop opens a 12-second miniature build: **Mark out → Frame → Skin → Dress**. Pause, resume, replay or inspect any step. Calmer motion disables autoplay and keeps every step available. Closing the window or switching away stops progression.
+- Six optional crew discoveries now persist in the existing browser save; previous cat rewards remain valid. Settings shows a small discovery count. Projects remain available through Work index at all times.
 
 ## Updating the site
 
@@ -41,16 +45,17 @@ The old homepage is preserved in branch `archive/crt-before-backlot-2026-10-20`,
 node backlot/checks/routes.test.mjs
 node backlot/checks/admin-compat.test.mjs
 node backlot/checks/life.test.mjs
+node backlot/checks/departments.test.mjs
 node --check backlot/app.mjs
 ```
 
-The route checks cover every destination from the start and all destination pairs, collision, pause, manual override and movement at different frame rates. The crew checks cover every new prop route, timed takes, skipping and pausing, cat path collision, waiting for the player, and saved rewards. The admin checks exercise adding/relabeling/removing projects and categories, new photos, videos, metadata, missing content and filename replacement. Native Canvas renders check the pixel artwork and drawing performance.
+The route checks cover every destination from the start and all destination pairs, collision, pause, manual override and movement at different frame rates. The crew checks cover every new prop route, timed takes, skipping and pausing, cat path collision, waiting for the player, and saved rewards. Department checks cover all lighting cues, changing dialogue hints, construction timing at 30/60/120 Hz, manual stepping, pause/replay and calmer motion. The admin checks exercise adding/relabeling/removing projects and categories, new photos, videos, metadata, missing content and filename replacement. Native Canvas renders check the pixel artwork and drawing performance; all three lighting looks and four construction steps have been visually reviewed.
 
-No real publish was performed through the user's personal token during testing. Browser automation and physical iPhone touch QA remain unverified. GitHub Pages deployment is checked separately after the source push.
+No real publish was performed through the user's personal token during testing. The managed preview server started, but the cloud browser timed out before opening it; browser and physical iPhone touch QA remain unverified. GitHub Pages deployment is checked separately after the source push.
 
 ## Locked Decisions
 
-Use the existing content and exact project credits. Keep photography readable inside the pixel-art world. Keep the work index accessible without walking. Preserve the custom domain and admin publishing workflow. Use the name alone as the title, with Construction Coordinator underneath. Keep the three crew discoveries optional, with sound muted by default and reduced-motion support.
+Use the existing content and exact project credits. Keep photography readable inside the pixel-art world. Keep the work index accessible without walking. Preserve the custom domain and admin publishing workflow. Use the name alone as the title, with Construction Coordinator underneath. Keep all crew discoveries optional, with sound muted by default and reduced-motion support.
 
 ## Open Questions
 
@@ -58,6 +63,6 @@ Physical iPhone touch feel and final visual polish; whether individual projects 
 
 ## Future Ideas
 
-Additional map areas and project-specific props. These are separate design changes, rather than content-only admin edits.
+Remaining brainstorm ideas are parked: a suspiciously large door, a production-office directory, recurring incidents and a wrap photo. Additional map areas and project-specific props are separate design changes, rather than content-only admin edits.
 
 The prior [HANDOFF.md](HANDOFF.md) describes the archived CRT interface. This document describes the current homepage. The separate private Sites prototype remains an earlier design snapshot; GitHub is now the source for this live release.

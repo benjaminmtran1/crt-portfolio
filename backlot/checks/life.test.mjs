@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {World,stages,findPath,blocked,distance} from '../world.mjs?v=crew1';
-import {LotLife,curiosities,catNook,TAKE_LENGTH} from '../life.mjs?v=crew1';
+import {World,stages,findPath,blocked,distance} from '../world.mjs?v=crew3';
+import {LotLife,curiosities,catNook,TAKE_LENGTH} from '../life.mjs?v=crew3';
 
 // Every new interaction must be reachable from every existing destination.
 for(const source of stages){
