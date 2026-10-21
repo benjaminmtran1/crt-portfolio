@@ -1,4 +1,4 @@
-import {distance,findPath,clamp} from './world.mjs?v=truck1';
+import {distance,findPath,clamp,craftStop,craftHit} from './world.mjs?v=craft1';
 import {lightingLooks,crewReply} from './departments.mjs?v=crew3';
 
 // These props share the same walkable space as the portfolio destinations.
@@ -7,7 +7,7 @@ export const curiosities=[
  {id:'rear-narrative',point:{x:224,y:64},label:'Look behind the set',caption:'REAR OF STAGE 01',category:'narrative',radius:40},
  {id:'rear-commercial',point:{x:736,y:64},label:'Look behind the set',caption:'REAR OF STAGE 02',category:'commercial',radius:40},
  {id:'lighting',point:{x:568,y:440},label:'Try the lights',caption:'THE LIGHTING DESK',radius:36},
- {id:'craft',point:{x:280,y:368},label:'Take a break',caption:'CRAFT SERVICES',radius:36},
+ {id:'craft',point:craftStop,label:'Take a break',caption:'CRAFT SERVICES',radius:36},
  {id:'build',point:{x:560,y:248},label:'Build a little set',caption:'THE DRAFTING TABLE',radius:34}
 ];
 export const catHome={x:416,y:240},catNook={x:736,y:640};
@@ -27,7 +27,7 @@ export class LotLife{
  chat(topic){const reply=crewReply(topic,this.found,this.chatCount);if(topic==='day')this.chatCount++;this.discover('craft');return reply;}
  hotspot(id){return id==='cat'?{id,point:this.cat,label:'Pet the cat',caption:this.cat.mode==='trusted'?'CREW APPROVED':this.cat.mode==='nook'?'THE CAT’S SECRET SPOT':'THE SHOP CAT',radius:38}:curiosities.find(item=>item.id===id);}
  nearby(player){if(this.take)return null;return [...curiosities,this.hotspot('cat')].filter(item=>distance(item.point,player)<item.radius).sort((a,b)=>distance(a.point,player)-distance(b.point,player))[0]||null;}
- hit(point){if(this.take)return null;return [...curiosities,this.hotspot('cat')].find(item=>Math.abs(point.x-item.point.x)<(item.id==='cat'?18:24)&&point.y>item.point.y-28&&point.y<item.point.y+12)||null;}
+ hit(point){if(this.take)return null;if(point.x>=craftHit.x&&point.x<=craftHit.x+craftHit.w&&point.y>=craftHit.y&&point.y<=craftHit.y+craftHit.h)return this.hotspot('craft');return [...curiosities,this.hotspot('cat')].find(item=>Math.abs(point.x-item.point.x)<(item.id==='cat'?18:24)&&point.y>item.point.y-28&&point.y<item.point.y+12)||null;}
  backstage(player){return player.y<94?curiosities.find(item=>item.category&&Math.abs(player.x-item.point.x)<125)?.category:null;}
  interact(id,world){
   if(this.take)return;

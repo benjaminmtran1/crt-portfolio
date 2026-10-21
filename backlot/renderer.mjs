@@ -1,7 +1,7 @@
-import {WIDTH,HEIGHT,stages,clamp} from './world.mjs?v=truck1';
+import {WIDTH,HEIGHT,stages,clamp,craftCrew,craftCup} from './world.mjs?v=craft1';
 import {pixelText} from './pixels.mjs?v=crew3';
 import {drawPlayer} from './player.mjs?v=likeness1';
-import {curiosities,catNook} from './life.mjs?v=truck1';
+import {curiosities,catNook} from './life.mjs?v=craft1';
 import {lightingLooks} from './departments.mjs?v=drafting1';
 import {drawConstructionScene} from './construction.mjs?v=drafting1';
 const factory=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
@@ -51,21 +51,20 @@ export class Renderer{
   for(const [x,y]of [[355,305],[591,305],[354,553],[591,553],[381,463],[560,463]])this.lamp(c,x,y);
   for(const [x,y]of [[348,373],[605,373],[365,651],[585,651]]){oval(c,x,y+4,9,3,'#1a2731');rect(c,x-7,y+1,14,3,'#e5b081');poly(c,[[x-5,y],[x+5,y],[x+2,y-12],[x-2,y-12]],'#cb845f');rect(c,x-3,y-6,6,3,'#e5d6ad');}
   c.strokeStyle='#182733';c.lineWidth=2;c.beginPath();c.moveTo(174,267);c.bezierCurveTo(170,310,245,304,286,315);c.bezierCurveTo(327,327,347,300,344,277);c.stroke();c.beginPath();c.moveTo(780,569);c.bezierCurveTo(818,605,691,640,649,597);c.stroke();
-  for(const [x,y]of [[290,370],[654,370]]){this.chair(c,x,y);rect(c,x+19,y-12,21,8,'#9b7e57');line(c,x+21,y-4,x+21,y+6,'#526464');line(c,x+37,y-4,x+37,y+6,'#526464');rect(c,x+26,y-17,4,5,'#d1c7a0');}
+  for(const [x,y]of [[654,370]]){this.chair(c,x,y);rect(c,x+19,y-12,21,8,'#9b7e57');line(c,x+21,y-4,x+21,y+6,'#526464');line(c,x+37,y-4,x+37,y+6,'#526464');rect(c,x+26,y-17,4,5,'#d1c7a0');}
   // Call-sheet noticeboard and an entrance with striped barrier.
   rect(c,449,438,4,25,'#7e8d80');rect(c,492,438,4,25,'#7e8d80');rect(c,443,424,60,25,'#223945');rect(c,446,427,54,19,'#c5bd9a');pixelText(c,'CALL TIME',473,430,'#384c50',1,true);pixelText(c,'07.00',473,439,'#6b6757',1,true);
   rect(c,385,667,8,30,'#83978d');rect(c,563,667,8,30,'#83978d');rect(c,393,669,170,6,'#c1ac7b');for(let x=397;x<560;x+=16)poly(c,[[x,669],[x+7,669],[x+1,675],[x-6,675]],'#53544a');pixelText(c,'BEN TRAN / STUDIO LOT',480,701,'#80928a',1,true);
   pixelText(c,'STAGE 01',217,324,'#c3b99065',1,true);pixelText(c,'STAGE 02',734,324,'#b9c7ad65',1,true);pixelText(c,'STAGE 03',216,624,'#c7b8a265',1,true);pixelText(c,'STAGE 04',736,624,'#b9b3c465',1,true);
   this.productionTruck(c);this.lightingDesk(c,568,440);this.draftingTable(c,560,248);
-  rect(c,297,336,46,10,'#233940');pixelText(c,'CRAFT',320,339,'#d6c59b',1,true);line(c,339,346,339,369,'#8b9b88');
-  rect(c,324,349,9,11,'#7e9894');rect(c,325,348,7,2,'#d8c6a2');rect(c,326,351,5,3,'#2b4248');
+  this.craftServicesTruck(c);
   for(const item of curiosities.filter(item=>item.category)){const{x,y}=item.point;rect(c,x-9,y-9,18,10,'#c5b487');rect(c,x-6,y-6,12,1,'#78664d');rect(c,x-3,y-3,6,1,'#78664d');line(c,x,y,x,y+5,'#6a775f',2);}
   // Painted details and dithered light are cached rather than rebuilt each frame.
   this.backings=new Map();for(const s of stages.filter(s=>s.id==='narrative'||s.id==='commercial')){const layer=this.make(s.w,s.h),g=layer.getContext('2d');this.flatBack(g,22,66,s.w-44,67);this.backings.set(s.id,layer);}
   this.takeLight=this.make(WIDTH,HEIGHT);const g=this.takeLight.getContext('2d');rect(g,0,0,WIDTH,HEIGHT,'#08142566');poly(g,[[130,154],[337,154],[370,256],[99,256]],'#edc99720');this.light(g,228,217,120,57,'244,204,132',.2);
   this.lookLayers=new Map();for(const id of ['golden','night']){const layer=this.make(WIDTH,HEIGHT),g=layer.getContext('2d');
    if(id==='golden'){rect(g,0,0,WIDTH,HEIGHT,'#e4994030');poly(g,[[0,58],[190,0],[960,548],[960,720],[640,720]],'#f0ce7c19');this.light(g,302,240,300,180,'255,207,127',.2);}
-   else{rect(g,0,0,WIDTH,HEIGHT,'#0b113b78');poly(g,[[960,12],[960,260],[186,720],[38,720]],'#9ca9e20b');for(const [x,y]of [[355,305],[591,305],[354,553],[591,553],[472,238],[472,614],[catNook.x,catNook.y]])this.light(g,x,y,64,38,'255,204,130',.45);for(const [x,y]of [[228,214],[728,214],[216,530],[728,530]])this.light(g,x,y,98,54,'140,167,230',.3);}
+   else{rect(g,0,0,WIDTH,HEIGHT,'#0b113b78');poly(g,[[960,12],[960,260],[186,720],[38,720]],'#9ca9e20b');for(const [x,y]of [[355,305],[591,305],[354,553],[591,553],[472,238],[472,614],[catNook.x,catNook.y],[260,350]])this.light(g,x,y,64,38,'255,204,130',.45);for(const [x,y]of [[228,214],[728,214],[216,530],[728,530]])this.light(g,x,y,98,54,'140,167,230',.3);}
    this.lookLayers.set(id,layer);
   }
  }
@@ -78,13 +77,13 @@ export class Renderer{
   if(life?.found.has('cat')){rect(c,804,639,29,9,'#263d3d');pixelText(c,'CREW',819,641,'#cfdbbc',1,true);}
   this.slate(c,544,312,!!life?.take,life?.nearby(p)?.id==='slate');
   rect(c,558,415,19,4,lightingLooks.find(look=>look.id===life?.lighting)?.color||'#c4d3bb');
-  if(!this.reduced){const steam=Math.round(Math.sin(t*2)*2);line(c,317,350,318+steam,345,'#c1cfb060');line(c,316+steam,343,317,341,'#c1cfb040');}
+  this.craftSteam(c,t);
   if(life?.take)c.drawImage(this.takeLight,0,0);
   if(world.path.length){const dest=world.path[world.path.length-1];for(let i=4;i<world.path.length;i+=5){const q=world.path[i];rect(c,q.x-1,q.y-1,2,2,'#dfcd9477');}const pulse=this.reduced?0:Math.sin(t*5)*2;line(c,dest.x-6-pulse,dest.y,dest.x,dest.y-3,'#e7cc8d');line(c,dest.x,dest.y-3,dest.x+6+pulse,dest.y,'#e7cc8d');line(c,dest.x+6+pulse,dest.y,dest.x,dest.y+3,'#e7cc8d');line(c,dest.x,dest.y+3,dest.x-6-pulse,dest.y,'#e7cc8d');}
   const nearest=world.nearby();
   for(const s of stages){const near=nearest?.id===s.id,visited=world.visited.has(s.id);const py=s.door.y-8+(this.reduced?0:Math.round(Math.sin(t*2.5+Number(s.number))*1));oval(c,s.door.x,s.door.y+5,14,4,near?'#e6c98a50':'#b7c6ab15');rect(c,s.door.x-8,py-17,16,13,near?'#e5c68c':'#1d3241');rect(c,s.door.x-7,py-16,14,11,near?'#e5c68c':s.color+'33');pixelText(c,visited?'+' : s.number,s.door.x,py-14,near?'#26333c':s.color,1,true);if(visited){line(c,s.door.x-3,py-12,s.door.x-1,py-10,s.color);line(c,s.door.x-1,py-10,s.door.x+4,py-14,s.color);}poly(c,[[s.door.x-3,py-4],[s.door.x+3,py-4],[s.door.x,py-1]],near?'#e5c68c':s.color);}
   const ct=life?.take?(this.reduced?0:life.crewTime):t;
-  const actors=[{x:280,y:368,face:'right',step:0,moving:false,coat:'#829786'},{x:707,y:356+Math.sin(ct*.19)*12,face:'down',step:ct*4,moving:!life?.take,coat:'#a68078'},{x:553,y:601,face:'left',step:0,coat:'#859eaa'},{...p,player:true}];actors.sort((a,b)=>a.y-b.y);for(const a of actors)this.actor(c,a.x,a.y,a.face,a.step,a.moving&&!this.reduced,a.coat,!a.player);
+  const actors=[{...craftCrew,face:'right',step:0,moving:false,coat:'#829786'},{x:707,y:356+Math.sin(ct*.19)*12,face:'down',step:ct*4,moving:!life?.take,coat:'#a68078'},{x:553,y:601,face:'left',step:0,coat:'#859eaa'},{...p,player:true}];actors.sort((a,b)=>a.y-b.y);for(const a of actors)this.actor(c,a.x,a.y,a.face,a.step,a.moving&&!this.reduced,a.coat,!a.player);
   // The shop cat, a gently moving boom, and the working red tally lights.
   this.catSprite(c,life?.cat||{x:416,y:240,face:'right',step:0},t);
   line(c,815,374,815,303,'#22333e',4);line(c,815,303,747+Math.sin(ct*.24)*3,285,'#91a198',2);rect(c,740+Math.sin(ct*.24)*3,281,16,6,'#1b2b38');line(c,810,370,828,370,'#a0ab9d',2);rect(c,206,213,2,2,life?.take?'#ffba92':Math.sin(t)>0?'#f3ac8d':'#b16559');rect(c,692,213,2,2,'#eab081');
@@ -109,7 +108,7 @@ export class Renderer{
   for(let i=0;i<4;i++)line(c,x-18,y-23+i*3,x+17,y-23+i*3,'#c3d1b844');rect(c,x-10,y-23,19,10,'#cfddc4');rect(c,x-8,y-21,15,6,'#4f716e');rect(c,x-1,y-18,4,5,'#cfddc4');line(c,x+15,y-25,x+18,y-15,'#e3bd79',2);
   rect(c,x-18,y-8,36,6,'#5b5445');pixelText(c,'BUILD',x,y-6,'#d9c394',1,true);
  }
- drawLighting(canvas,world,life){const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);this.slate(c,544,312);this.actor(c,world.player.x,world.player.y,world.player.face);this.actor(c,280,368,'right',0,false,'#829786',true);this.catSprite(c,life.cat,0);this.paintLook(c,life.lighting);c.restore();}
+ drawLighting(canvas,world,life){const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);this.slate(c,544,312);this.actor(c,world.player.x,world.player.y,world.player.face);this.actor(c,craftCrew.x,craftCrew.y,'right',0,false,'#829786',true);this.catSprite(c,life.cat,0);this.paintLook(c,life.lighting);c.restore();}
  drawCrewPortrait(canvas){const c=canvas.getContext('2d');rect(c,0,0,128,128,'#283e46');for(let y=5;y<128;y+=8)line(c,0,y,128,y,'#71816b18');c.save();c.translate(64,111);c.scale(3,3);this.actor(c,0,0,'down',0,false,'#829786',true);c.restore();rect(c,8,116,112,4,'#ccbb8e');}
  drawConstruction(canvas,sequence){drawConstructionScene(canvas,sequence);}
 
@@ -134,6 +133,71 @@ export class Renderer{
   rect(c,x+(left?-9:3),y-11,7,7,'#d0b58b');rect(c,x+(left?-9:3),y-14,2,4,'#bc9876');rect(c,x+(left?-4:8),y-14,2,4,'#bc9876');rect(c,x+(left?-8:7),y-8,2,1,'#26393e');line(c,x-f*7,y-5,x-f*11,y-9+(this.reduced?0:Math.round(Math.sin(t*2))),'#ae916d',2);
   if(cat.heart>0){const yy=y-25;poly(c,[[x-5,yy],[x-5,yy-3],[x-2,yy-3],[x,yy-1],[x+2,yy-3],[x+5,yy-3],[x+5,yy],[x,yy+5]],'#e7a6a0');}
   else if(cat.waiting){for(let i=-1;i<=1;i++)rect(c,x+i*4-1,y-23,2,2,'#f1d9a2');}
+ }
+ craftServicesTruck(c){
+  // The craft van is intentionally distinct from the production cube truck.
+  // A shallow roof and front return keep the reference's broad serving side.
+  poly(c,[[198,356],[341,346],[360,367],[221,374]],'#101e29a0');
+  line(c,216,358,339,358,'#20343b',5);
+  // Tall blank roof board on a light aluminium frame, like the reference.
+  line(c,219,296,219,310,'#a6b8b3',2);line(c,304,296,304,310,'#a6b8b3',2);
+  line(c,219,307,303,300,'#8b9e9c');line(c,219,300,303,307,'#b8c6bf');
+  poly(c,[[212,278],[311,278],[316,275],[217,275]],'#e1e8df');
+  rect(c,212,278,99,21,'#f4f4e9');rect(c,213,279,97,18,'#faf9ee');
+  rect(c,212,299,99,2,'#91a6a6');poly(c,[[311,278],[316,275],[316,297],[311,301]],'#b2c3c0');
+  // Roof lip and white stainless-sided body. The cab faces right.
+  poly(c,[[201,311],[308,311],[319,304],[212,304]],'#f0f2e6');
+  rect(c,202,313,108,45,'#dfe7df');rect(c,203,314,105,39,'#f0f0e3');
+  rect(c,202,355,108,4,'#9caeab');rect(c,203,357,105,2,'#c6d2c9');
+  poly(c,[[310,313],[320,307],[328,325],[349,337],[349,357],[310,359]],'#dce5df');
+  poly(c,[[310,313],[319,313],[327,331],[344,338],[344,356],[310,358]],'#edf0e5');
+  poly(c,[[344,338],[349,337],[349,357],[344,359]],'#a5b9b7');
+  rect(c,200,310,111,4,'#849c9b');rect(c,201,309,111,2,'#f7f5e8');
+  // Open hatch: deep warm recess, lit backsplash, coffee urns and shelves.
+  rect(c,214,316,84,30,'#91a7a2');rect(c,217,318,78,25,'#24393b');
+  rect(c,220,320,71,18,'#665a3f');rect(c,236,321,54,14,'#b48c4d');
+  rect(c,239,323,50,9,'#d0aa62');rect(c,239,323,50,2,'#efcf8c');
+  line(c,239,333,289,333,'#f1d295');line(c,241,326,287,326,'#c5a06b');
+  rect(c,220,319,72,2,'#f6d899');rect(c,222,321,68,1,'#e0b66f');
+  rect(c,221,333,71,3,'#7e8d7d');rect(c,220,336,73,5,'#b6beb0');
+  for(const x of [222,230]){rect(c,x,324,5,10,'#293c40');rect(c,x,323,5,2,'#c7d1bd');rect(c,x+1,326,3,6,'#738d88');rect(c,x+4,327,2,3,'#c0c8b4');}
+  rect(c,241,336,15,4,'#d8d8bd');rect(c,243,335,11,2,'#ede5c8');
+  for(const x of [263,269,275]){rect(c,x,336,4,5,'#f4e8c7');rect(c,x,335,4,1,'#adbea9');}
+  rect(c,285,328,5,9,'#c0c8b3');rect(c,286,326,3,2,'#e8dec0');rect(c,285,335,5,2,'#768b7d');
+  // Raised hatch has its own visible underside and slim support struts.
+  poly(c,[[213,316],[298,316],[293,308],[217,308]],'#dce8df');
+  line(c,214,315,297,315,'#f9f6e7',2);line(c,217,310,293,310,'#b5c8bd');
+  line(c,215,317,216,338,'#e1e7d7');line(c,297,316,296,340,'#7e9896');
+  // Fold-down serving ledge, aluminium front edge, braces and ready cups.
+  line(c,222,350,228,359,'#8ca49c',2);line(c,288,350,283,359,'#8ca49c',2);
+  poly(c,[[218,343],[294,343],[300,350],[214,350]],'#e7e6ce');
+  rect(c,214,350,86,3,'#a4b4a5');rect(c,215,350,84,1,'#f5efd6');
+  rect(c,221,339,9,5,'#4b6b55');rect(c,222,337,7,3,'#7d9464');rect(c,225,335,2,4,'#b7bf7b');
+  for(const x of [250,258,craftCup.x-2]){rect(c,x,339,4,6,'#faf1d4');rect(c,x,339,4,1,'#b8c5ae');rect(c,x+4,341,2,3,'#d8ddc5');}
+  // Cab door, upright windshield, dark mirror, amber lamps and chrome step.
+  rect(c,306,320,14,26,'#b2c3bd');rect(c,307,321,12,23,'#e9eee1');
+  rect(c,308,322,9,11,'#324f56');rect(c,309,323,7,8,'#9ab9b2');
+  line(c,309,324,315,329,'#dce9d4');rect(c,316,338,2,4,'#79938f');
+  poly(c,[[320,317],[325,329],[321,330],[317,318]],'#27454e');
+  line(c,320,319,322,327,'#94b7b2',2);rect(c,327,321,3,8,'#233e47');line(c,323,322,327,322,'#9eb8ae');
+  rect(c,342,342,3,3,'#e7b56f');rect(c,347,347,3,9,'#e1e5d2');
+  line(c,309,354,318,354,'#72928e',3);line(c,310,353,318,353,'#d3dcd0');
+  rect(c,205,348,3,2,'#e0b265');rect(c,203,354,2,3,'#c9826b');
+  // Stepped dark rubber and concentric polished rims rather than flat discs.
+  for(const x of [232,330]){
+   rect(c,x-9,354,18,10,'#182c32');rect(c,x-7,351,14,16,'#182c32');rect(c,x-4,349,8,20,'#182c32');
+   rect(c,x-6,354,12,10,'#91aaa4');rect(c,x-4,352,8,14,'#bfcfc3');
+   rect(c,x-5,356,10,6,'#e2e6d4');rect(c,x-3,354,6,10,'#e2e6d4');
+   rect(c,x-3,356,6,6,'#728f8e');rect(c,x-1,357,2,4,'#d8e2d0');
+   for(const [dx,dy]of [[-4,-3],[3,-3],[-4,3],[3,3]])rect(c,x+dx,359+dy,1,1,'#486b6c');
+  }
+  // Functional label is separate from the deliberately unbranded roof sign.
+  rect(c,259,300,34,9,'#405b5d');pixelText(c,'CRAFT',276,302,'#f0e7c9',1,true);
+ }
+ craftSteam(c,t){
+  if(this.reduced)return;
+  const {x,y}=craftCup,sway=Math.round(Math.sin(t*2)*2);
+  line(c,x,y-8,x+1+sway,y-13,'#e7e2c470');line(c,x+sway,y-15,x+1,y-17,'#ddd9b64d');
  }
  productionTruck(c){
   // White cube truck, parked nose-right. The rear faces the open crew apron.
