@@ -1,4 +1,4 @@
-import {findPath,GRID,HEIGHT,distance,clamp} from './world.mjs?v=living1';
+import {findPath,GRID,HEIGHT,distance,clamp} from './world.mjs?v=pocket2';
 import {crew} from './encounters.mjs?v=pocket1';
 
 // Build routes once, then sample by distance. Absolute time makes pause, manual

@@ -85,7 +85,7 @@ The prior [HANDOFF.md](HANDOFF.md) describes the archived CRT interface. This do
 
 ## Camera, crew and wrap — October 21 update
 
-Current Build: A camera approached at (488,312) opens the three existing hand-drawn real-build plates (Deathstalker, Nintendo × Donkey Kong, Beast Games), with framed/pulled-back compositions and links resolved from current project titles. Jules the scenic painter, Frankie the carpenter and Kit the PA have three rotating fictional lines each. The bell approached at (392,640), or Kit’s dialogue, starts a 12-second dusk vignette with closing stage doors, departing crew, a resting cat and credits. Pause, manual next, replay, close and Work index remain available. Reduced motion starts on the final tableau without autoplay. New discoveries use the existing browser save (nine total).
+Current Build: A camera approached at (736,328) opens the three existing hand-drawn real-build plates (Deathstalker, Nintendo × Donkey Kong, Beast Games), with framed/pulled-back compositions and links resolved from current project titles. Jules the scenic painter, Frankie the carpenter and Kit the PA have three rotating fictional lines each. The bell approached at (392,640), or Kit’s dialogue, starts a 12-second dusk vignette with closing stage doors, departing crew, a resting cat and credits. Pause, manual next, replay, close and Work index remain available. Reduced motion starts on the final tableau without autoplay. New discoveries use the existing browser save (nine total).
 
 Locked Decisions: Reuse the existing real-build pixel art. Crew dialogue is explicitly fictional and does not change production credits. No changes to content.json or the admin editor. Wrap is reversible and does not alter saved lighting or cat progress.
 
@@ -136,9 +136,22 @@ More camera builds need a selected real project and clear reference images. Othe
 
 ### Pocket notebook refinements
 
-- Field notes is now a compact cloth-covered book with a stitched spine, layered paper edges, ruled pages and a ribbon. Saved work, Lot notes and Crew retain their content and section structure. Saved builds appear two per leaf, discoveries three per leaf and crew two per leaf; the six places share a page.
+- Field notes is now a compact cloth-covered book with a stitched spine, layered paper edges, ruled pages and a ribbon. Saved work, Lot notes and Crew retain their content and section structure. The three sections each occupy one page: Saved work, Lot notes and Crew. Long lists scroll inside their page; the counter remains 1–3 regardless of saved builds or discoveries.
 - Previous/Next controls, left/right arrow keys, section tabs and horizontal touch swipes change pages. Numbered leaves turn in the chosen direction. Calmer motion switches instantly, and older browsers without Web Animations fall back to an instant change.
 - Page turns cancel when closing the notebook, changing to a project or other dialog, or requesting another page. Page changes do not alter bookmarks or introductions. The existing browser save and internal crew IDs remain compatible.
 - Conversations no longer offer a camera-view button. The physical camera remains the way to look through the camera. Frankie's displayed title is **Carpenter**; his artwork and personality are unchanged.
 
 Validation: `node backlot/checks/notebook-pages.test.mjs` covers complete pagination, the actual application markup and section changes, portraits/title wiring, both turn directions, instant fallback, reduced motion, rapid requests and cancelled/closed transitions. Its assertions and the existing notebook persistence suite passed in the available JavaScript runtime; changed application modules also passed syntax and import-target checks. The local workspace disconnected during this pass, so the final pocket-notebook styling and native touch behavior have not been freshly reviewed in a browser. Earlier browser and Canvas checks above apply to the preceding living-backlot revision.
+
+
+### Notebook, camera and portrait corrections
+
+Current Build: The pocket notebook has exactly three numbered pages, retaining its cover, paper styling, directional page turns, keyboard/swipe controls and existing saves. Lot notes includes all six places and nine discoveries; Crew includes all four people. The physical camera is now centred at (736,304) on Commercial’s forecourt, approached at (736,328). Its artwork, pointer silhouette and solid footprint derive from one location. The former central camera spot is clear. Conversations and notebook portraits call the current shared crew artwork directly, with explicit character IDs and refreshed asset URLs.
+
+Locked Decisions: Keep the approved crew designs, Carpenter title, notebook content, portfolio data and admin unchanged. The camera-view interaction remains on the physical camera.
+
+Validation: Notebook pagination and persistence suites passed, including three pages with 0–100 saved projects, complete contents, both turn directions and cancellation. Encounter checks passed all-stage camera approaches at 30/60/120 Hz, the new/old pointer targets and footprint, all four conversation portrait IDs, viewfinder compositions and dialogue rotation. Existing doorway routes, living crew, wrap motion and craft rendering suites passed. Native Canvas produced four distinct current crew portraits. Cloud Chromium reviewed all three notebook pages, the relocated camera and its nearby viewfinder entry, Commercial access, and the updated Jules conversation.
+
+Open Questions: Physical iPhone touch and advancing hosted-video playback remain unverified. No video code changed.
+
+Future Ideas: Unchanged; other brainstorm ideas remain parked.

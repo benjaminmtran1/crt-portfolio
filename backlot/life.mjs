@@ -1,12 +1,12 @@
-import {CrewRoutines} from './ambient.mjs?v=pocket1';
-import {distance,findPath,clamp,craftStop,craftHit} from './world.mjs?v=living1';
+import {CrewRoutines} from './ambient.mjs?v=pocket2';
+import {distance,findPath,clamp,craftStop,craftHit,cameraStop,cameraHit} from './world.mjs?v=pocket2';
 import {lightingLooks,crewReply} from './departments.mjs?v=crew3';
 
 import {crew} from './encounters.mjs?v=pocket1';
 
 // These props share the same walkable space as the portfolio destinations.
 export const curiosities=[
- {id:'camera',point:{x:488,y:312},label:'Look through the camera',caption:'CAMERA / VIEWFINDER',radius:28},
+ {id:'camera',point:cameraStop,label:'Look through the camera',caption:'CAMERA / VIEWFINDER',radius:28},
  {id:'wrap',point:{x:392,y:640},label:'Call it a day',caption:'THE WRAP BELL',radius:30},
  ...crew.map(person=>({id:person.id,point:person.point,label:'Talk to '+person.name,caption:person.role.toUpperCase(),radius:28})),
  {id:'slate',point:{x:544,y:312},label:'Roll a take',caption:'THE CLAPPERBOARD',radius:38},
@@ -36,7 +36,7 @@ export class LotLife{
  crewHotspots(){return curiosities.map(item=>this.routines.pose(item.id)?{...item,point:this.routines.pose(item.id)}:item);}
  hotspot(id){return id==='cat'?{id,point:this.cat,label:'Pet the cat',caption:this.cat.mode==='trusted'?'CREW APPROVED':this.cat.mode==='nook'?'THE CAT’S SECRET SPOT':'THE SHOP CAT',radius:38}:this.crewHotspots().find(item=>item.id===id);}
  nearby(player){if(this.take)return null;return [...this.crewHotspots(),this.hotspot('cat')].filter(item=>distance(item.point,player)<item.radius).sort((a,b)=>distance(a.point,player)-distance(b.point,player))[0]||null;}
- hit(point){if(this.take)return null;if(point.x>=458&&point.x<=523&&point.y>=240&&point.y<=300)return this.hotspot('camera');if(point.x>=378&&point.x<=421&&point.y>=571&&point.y<=630)return this.hotspot('wrap');if(Object.values(craftHit).some(r=>point.x>=r.x&&point.x<r.x+r.w&&point.y>=r.y&&point.y<r.y+r.h))return this.hotspot('craft');return [...this.crewHotspots(),this.hotspot('cat')].find(item=>Math.abs(point.x-item.point.x)<(item.id==='cat'?18:24)&&point.y>item.point.y-28&&point.y<item.point.y+12)||null;}
+ hit(point){if(this.take)return null;if(point.x>=cameraHit.x&&point.x<=cameraHit.x+cameraHit.w&&point.y>=cameraHit.y&&point.y<=cameraHit.y+cameraHit.h)return this.hotspot('camera');if(point.x>=378&&point.x<=421&&point.y>=571&&point.y<=630)return this.hotspot('wrap');if(Object.values(craftHit).some(r=>point.x>=r.x&&point.x<r.x+r.w&&point.y>=r.y&&point.y<r.y+r.h))return this.hotspot('craft');return [...this.crewHotspots(),this.hotspot('cat')].find(item=>Math.abs(point.x-item.point.x)<(item.id==='cat'?18:24)&&point.y>item.point.y-28&&point.y<item.point.y+12)||null;}
  backstage(player){return player.y<94?curiosities.find(item=>item.category&&Math.abs(player.x-item.point.x)<125)?.category:null;}
  interact(id,world){
   if(this.take)return;

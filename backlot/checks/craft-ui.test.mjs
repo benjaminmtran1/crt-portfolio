@@ -1,3 +1,6 @@
+import * as notebookAPI from '../notebook.mjs';
+import {NotebookPageTurn} from '../notebook-motion.mjs';
+import {createWrapCast} from '../wrap-motion.mjs';
 // Real DOM/event checks, matching the construction UI harness. Rendering is
 // stubbed here; the truck's native Canvas appearance is checked separately.
 // ADMIN_DOM_MODULE=/absolute/path/to/linkedom when not installed locally.
@@ -21,7 +24,7 @@ async function boot(reduced=false,saved={}){
  for(const el of document.querySelectorAll('*')){el.getBoundingClientRect=()=>({left:0,top:0,right:900,bottom:720,width:900,height:720});el.focus=function(){document.activeElement=this;};}
  document.activeElement=document.body;
  const renderer=new Proxy({camera:{},drawCrewPortrait(){portraits++;},screenToWorld:(x,y)=>({x,y})},{get:(o,k)=>k in o?o[k]:()=>{}});
- const env={document,window:{addEventListener:(k,fn)=>listeners.set(k,fn)},getComputedStyle:()=>({flexDirection:'column',gap:'0'}),matchMedia:q=>({matches:q.includes('reduced-motion')?reduced:false}),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{storage.set(k,v);writes.push({key:k,value:v});}},location:{hash:'',pathname:'/',search:''},history:{replaceState(){}},ResizeObserver:class{observe(){}},requestAnimationFrame(){},setTimeout(){},clearTimeout(){},fetch:async()=>({ok:true,json:async()=>structuredClone(raw)}),console,URLSearchParams,World,stages,WIDTH,HEIGHT,distance,LotLife,BuildSequence,buildSteps,lightingLooks,...contentAPI,...encounterAPI,Renderer:class{constructor(){return renderer;}},TitleScene:class{resize(){}render(){}}};
+ const env={...notebookAPI,NotebookPageTurn,createWrapCast,drawCrewPortrait(canvas,id){assert.equal(id,'craft');portraits++;},document,window:{addEventListener:(k,fn)=>listeners.set(k,fn)},getComputedStyle:()=>({flexDirection:'column',gap:'0'}),matchMedia:q=>({matches:q.includes('reduced-motion')?reduced:false}),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{storage.set(k,v);writes.push({key:k,value:v});}},location:{hash:'',pathname:'/',search:''},history:{replaceState(){}},ResizeObserver:class{observe(){}},requestAnimationFrame(){},setTimeout(){},clearTimeout(){},fetch:async()=>({ok:true,json:async()=>structuredClone(raw)}),console,URLSearchParams,World,stages,WIDTH,HEIGHT,distance,LotLife,BuildSequence,buildSteps,lightingLooks,...contentAPI,...encounterAPI,Renderer:class{constructor(){return renderer;}},TitleScene:class{resize(){}render(){}}};
  const app=await vm.runInNewContext('(async()=>{'+source+'\nreturn {dismissIntro,closePanel,openIndex,handleLifeEvents,settings,life,world,frame};})()',env);app.dismissIntro();
  return{app,get,document,storage,writes,portraits:()=>portraits,
   frame(hz=60){app.frame(now+=1000/hz);},

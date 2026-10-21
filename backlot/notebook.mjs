@@ -21,12 +21,7 @@ export class FieldNotebook{
  serialize(){return JSON.stringify({version:1,saved:this.saved,met:[...this.met]});}
 }
 
-// Sections keep their existing order; long lists occupy successive paper leaves.
-export function notebookLeaves(savedCount=0){
- const leaves=[];
- for(let start=0;start<Math.max(1,savedCount);start+=2)leaves.push({section:'saved',kind:'saved',start,count:2});
- leaves.push({section:'lot',kind:'places',start:0,count:6});
- for(let start=0;start<discoveryEntries.length;start+=3)leaves.push({section:'lot',kind:'discoveries',start,count:3});
- for(let start=0;start<4;start+=2)leaves.push({section:'crew',kind:'crew',start,count:2});
- return leaves;
+// One paper page per section; long lists scroll within their page.
+export function notebookLeaves(){
+ return ['saved','lot','crew'].map(section=>({section,kind:section}));
 }

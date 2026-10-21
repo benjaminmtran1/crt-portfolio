@@ -1,5 +1,5 @@
 import {crew} from './encounters.mjs?v=pocket1';
-import {findPath,distance,clamp,GRID} from './world.mjs?v=living1';
+import {findPath,distance,clamp,GRID} from './world.mjs?v=pocket2';
 const stop=(x,y,hold,task,face,carry=false)=>({point:{x,y},hold,task,face,carry});
 const scripts={
  scenic:[stop(704,356,4,'mix','down'),stop(736,368,7,'paint','right')],

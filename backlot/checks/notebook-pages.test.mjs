@@ -7,12 +7,8 @@ import {crew} from '../encounters.mjs';
 import {stages} from '../world.mjs';
 
 for(const count of [0,1,2,3,20,100]){
- const pages=notebookLeaves(count),saved=pages.filter(p=>p.section==='saved');
- assert.equal(saved.length,Math.max(1,Math.ceil(count/2)));
- assert.deepEqual(saved.flatMap(p=>Array.from({length:Math.max(0,Math.min(p.count,count-p.start))},(_,i)=>p.start+i)),Array.from({length:count},(_,i)=>i));
- assert.equal(pages.filter(p=>p.kind==='places').length,1);
- assert.deepEqual(pages.filter(p=>p.kind==='discoveries').flatMap(p=>discoveryEntries.slice(p.start,p.start+p.count)),discoveryEntries);
- assert.deepEqual(pages.filter(p=>p.section==='crew').flatMap(p=>Array.from({length:p.count},(_,i)=>p.start+i)),[0,1,2,3]);
+ const pages=notebookLeaves(count);
+ assert.deepEqual(pages.map(p=>p.section),['saved','lot','crew'],'Exactly three pages regardless of saved project count');
 }
 const fakeLeaf=()=>({animations:[],animate(frames,options){
  let resolve,reject;const finished=new Promise((yes,no)=>{resolve=yes;reject=no;});
@@ -50,19 +46,24 @@ notebook.met.add('grip');const saved=notebook.serialize(),panel={open:false,data
 const panelInner={innerHTML:'',querySelectorAll(){return [...this.innerHTML.matchAll(/data-notebook-portrait="([^"]+)"/g)].map(m=>({dataset:{notebookPortrait:m[1]}}));}};
 const env={content:{},notebook,projects,notebookLeaves,NotebookPageTurn,resolveBookmark,discoveryEntries,crew,stages,panel,panelInner,
  world:{visited:new Set(['about'])},life:{found:new Set(['crew'])},settings:{reduced:true},
- renderer:{drawCrewPortrait(canvas,id){drawn.push(id);}},$:()=>({focus(){}}),requestAnimationFrame:fn=>fn(),focusHeading(){},stopMedia(){},
+ drawCrewPortrait(canvas,id){drawn.push(id);},$:()=>({focus(){}}),requestAnimationFrame:fn=>fn(),focusHeading(){},stopMedia(){},
  escape:s=>String(s??'').replace(/[&<>"']/g,'_'),pic:s=>s,thumbnailFor:p=>p.image,placeholder:'placeholder.svg',stage:id=>stages.find(s=>s.id===id),
  openPanel(kind){panel.open=true;panel.dataset.kind=kind;}
 };
 const functions=source.slice(source.indexOf('function openNotebook('),source.indexOf('function openCamera()'));
 const app=runInNewContext("let notebookTab='saved',notebookPage=0;const notebookTurn=new NotebookPageTurn();"+functions+";({openNotebook,state:()=>({notebookTab,notebookPage})})",env);
-app.openNotebook();assert.match(panelInner.innerHTML,/Build 0/);assert.match(panelInner.innerHTML,/Build 1/);assert.doesNotMatch(panelInner.innerHTML,/Build 2/);
+app.openNotebook();for(let i=0;i<5;i++)assert.match(panelInner.innerHTML,new RegExp('Build '+i));
+assert.match(panelInner.innerHTML,/Page 1 of 3/);assert.match(panelInner.innerHTML,/01 \/ 03/);
 assert.match(panelInner.innerHTML,/data-notebook-step="-1"[^>]*disabled/);
-app.openNotebook('saved',2,true);assert.match(panelInner.innerHTML,/Build 4/);assert.doesNotMatch(panelInner.innerHTML,/Build 3/);
-app.openNotebook('lot',null,true);assert.equal(app.state().notebookTab,'lot');assert.match(panelInner.innerHTML,/Places visited/);assert.doesNotMatch(panelInner.innerHTML,/notebook-stamps/);
-app.openNotebook('lot',app.state().notebookPage+1,true);assert.match(panelInner.innerHTML,/Crew discoveries/);assert.equal((panelInner.innerHTML.match(/class="notebook-stamp /g)||[]).length,3);
-app.openNotebook('crew',null,true);assert.match(panelInner.innerHTML,/Carpenter/);assert.match(panelInner.innerHTML,/Frankie/);assert.doesNotMatch(panelInner.innerHTML,/Production assistant/);
-app.openNotebook('crew',app.state().notebookPage+1,true);assert.match(panelInner.innerHTML,/Production assistant/);assert.match(panelInner.innerHTML,/Craft services/);assert.match(panelInner.innerHTML,/data-notebook-step="1"[^>]*disabled/);
+app.openNotebook('saved',1,true);assert.equal(app.state().notebookTab,'lot');assert.match(panelInner.innerHTML,/Page 2 of 3/);
+assert.match(panelInner.innerHTML,/Places visited/);assert.match(panelInner.innerHTML,/Crew discoveries/);
+assert.equal((panelInner.innerHTML.match(/data-notebook-place=/g)||[]).length,6);
+assert.equal((panelInner.innerHTML.match(/class="notebook-stamp /g)||[]).length,9);
+app.openNotebook('lot',2,true);assert.equal(app.state().notebookTab,'crew');assert.match(panelInner.innerHTML,/Page 3 of 3/);
+for(const label of ['Carpenter','Frankie','Production assistant','Craft services'])assert.match(panelInner.innerHTML,new RegExp(label));
+assert.deepEqual(drawn,['scenic','grip','pa','craft'],'Every notebook portrait uses the matching new crew sprite');
+assert.match(panelInner.innerHTML,/data-notebook-step="1"[^>]*disabled/);
+app.openNotebook('saved',null,true);assert.match(panelInner.innerHTML,/Page 1 of 3/);
 assert.equal(notebook.serialize(),saved,'Turning pages must not alter saved projects or introductions');
 app.openNotebook('saved',999);assert.equal(app.state().notebookPage,notebookLeaves(5).length-1);
 app.openNotebook('saved',-1);assert.equal(app.state().notebookPage,0);

@@ -1,9 +1,10 @@
 import {pixelText} from './pixels.mjs?v=crew3';
+import {lotCamera} from './world.mjs?v=pocket2';
 const R=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),w,h);};
 const P=(c,pts,col)=>{c.fillStyle=col;c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();};
 const L=(c,x,y,xx,yy,col,w=1)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(Math.round(x)+.5,Math.round(y)+.5);c.lineTo(Math.round(xx)+.5,Math.round(yy)+.5);c.stroke();};
 export function drawLotCamera(c){
- const x=488,y=288;c.save();c.translate(x,y);
+ const {x,y}=lotCamera;c.save();c.translate(x,y);
  R(c,-20,4,42,3,'#08172366');
  // Spreader, telescoping tripod legs and castor feet.
  for(const end of [-17,18]){L(c,0,-12,end,5,'#263946',4);L(c,1,-10,end,4,'#9bafa8',1);R(c,end-3,3,6,4,'#182e3a');R(c,end-2,4,2,1,'#8a9d9b');}
