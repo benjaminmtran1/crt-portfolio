@@ -7,7 +7,10 @@ export const stages=[
  {id:'about',number:'05',name:'About Ben',place:'The workshop',sub:'The person behind the builds',x:400,y:100,w:144,h:112,door:{x:472,y:238},color:'#dbb96c'},
  {id:'contact',number:'06',name:'Contact',place:'Production office',sub:'Bookings & enquiries',x:400,y:508,w:144,h:80,door:{x:472,y:614},color:'#9ebdca'}
 ];
-export const obstacles=[...stages.map(s=>({x:s.x-4,y:s.y-4,w:s.w+8,h:s.h+8})),
+// The parked production truck and its lowered lift gate are solid scenery.
+// Keep the service lane above and the eastern footpath open around the vehicle.
+export const crewTruck={body:{x:752,y:596,w:100,h:74},cab:{x:852,y:620,w:38,h:50},liftGate:{x:722,y:654,w:62,h:29}};
+export const obstacles=[...stages.map(s=>({x:s.x-4,y:s.y-4,w:s.w+8,h:s.h+8})),...Object.values(crewTruck),
  {x:408,y:388,w:44,h:24},{x:512,y:388,w:40,h:24},
  {x:52,y:328,w:68,h:22},{x:832,y:328,w:68,h:22}];
 export const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));

@@ -1,4 +1,4 @@
-import {distance,findPath,clamp} from './world.mjs?v=crew3';
+import {distance,findPath,clamp} from './world.mjs?v=truck1';
 import {lightingLooks,crewReply} from './departments.mjs?v=crew3';
 
 // These props share the same walkable space as the portfolio destinations.
@@ -10,15 +10,17 @@ export const curiosities=[
  {id:'craft',point:{x:280,y:368},label:'Take a break',caption:'CRAFT SERVICES',radius:36},
  {id:'build',point:{x:560,y:248},label:'Build a little set',caption:'THE DRAFTING TABLE',radius:34}
 ];
-export const catNook={x:840,y:656};
+export const catHome={x:416,y:240},catNook={x:736,y:640};
+export const CAT_REST=8;
 export const TAKE_LENGTH=10.5;
 const discoveries=new Set(['take','backstage','cat','lighting','craft','build']);
 
 export class LotLife{
  constructor(saved=[]){
   this.found=new Set(Array.isArray(saved)?saved.filter(id=>discoveries.has(id)):[]);
-  this.cat={...(this.found.has('cat')?catNook:{x:416,y:240}),mode:this.found.has('cat')?'trusted':'idle',face:'right',moving:false,step:0,heart:0,waiting:false};
-  this.catPath=[];this.take=null;this.takeNumber=0;this.events=[];this.crewTime=0;this.lighting='work';this.chatCount=0;
+  // Trust is persistent; location is not. Returning visitors can follow again.
+  this.cat={...catHome,mode:'idle',face:'right',moving:false,step:0,heart:0,waiting:false,rest:0,idleTime:3,stroll:0};
+  this.catPath=[];this.take=null;this.takeNumber=0;this.events=[];this.crewTime=0;this.lighting='work';this.chatCount=0;this.reduced=false;
  }
  discover(id){if(!this.found.has(id)){this.found.add(id);this.events.push({type:'discovery',id});}}
  selectLight(id){if(!lightingLooks.some(look=>look.id===id))return;this.lighting=id;this.discover('lighting');this.events.push({type:'lighting-change',id});}
@@ -38,10 +40,10 @@ export class LotLife{
   if(id!=='cat')return;
   const cat=this.cat;cat.heart=2;
   if(cat.mode==='idle'){
-   cat.mode='leading';this.catPath=findPath(cat,catNook);this.events.push({type:'cat-follow'});
+   cat.mode='leading';cat.waiting=false;this.catPath=findPath(cat,catNook);this.events.push({type:'cat-follow'});
   }else if(cat.mode==='nook'){
-   cat.mode='trusted';this.discover('cat');this.events.push({type:'cat-approved'});
-  }else this.events.push({type:cat.mode==='trusted'?'cat-purr':'cat-follow'});
+   const known=this.found.has('cat');cat.mode='trusted';cat.rest=CAT_REST;this.discover('cat');this.events.push({type:known?'cat-purr':'cat-approved'});
+  }else this.events.push({type:cat.mode==='leading'?'cat-follow':'cat-purr'});
  }
  get phase(){if(!this.take)return '';return this.take.elapsed<1.5?'quiet':this.take.elapsed<8.5?'action':'cut';}
  get actionProgress(){return this.take?clamp((this.take.elapsed-1.5)/7,0,1):0;}
@@ -51,11 +53,22 @@ export class LotLife{
   if(this.take){this.take.elapsed+=dt;if(this.take.elapsed>=TAKE_LENGTH)this.finishTake();return;}
   this.crewTime=world.t;
   const cat=this.cat;cat.heart=Math.max(0,cat.heart-dt);cat.moving=false;
-  if(cat.mode!=='leading')return;
-  // The guide waits when it gets ahead. No timers or precision chase required.
-  cat.waiting=distance(cat,world.player)>88;
+  cat.waiting=false;
+  if(cat.mode==='nook')return; // The first reward never expires while exploring.
+  if(cat.mode==='trusted'){
+   cat.rest=Math.max(0,cat.rest-dt);if(cat.rest>0)return;
+   cat.mode='returning';this.catPath=findPath(cat,catHome);
+  }
+  if(cat.mode==='idle'){
+   // A small workshop stroll, just like before the crew discovery was added.
+   // Stop near a visitor so clicking or tapping the cat stays straightforward.
+   if(this.reduced||distance(cat,world.player)<56)return;
+   if(!this.catPath.length){cat.idleTime-=dt;if(cat.idleTime>0)return;cat.stroll=1-cat.stroll;this.catPath=findPath(cat,{x:cat.stroll?400:424,y:catHome.y});}
+  }
+  // Only the outward guide waits for the player; the return is its own stroll.
+  if(cat.mode==='leading')cat.waiting=distance(cat,world.player)>88;
   if(cat.waiting||cat.heart>1.25)return;
-  let budget=52*dt;
+  let budget=(cat.mode==='idle'?12:52)*dt;
   while(budget>0&&this.catPath.length){
    const next=this.catPath[0],dx=next.x-cat.x,dy=next.y-cat.y,length=Math.hypot(dx,dy);
    if(length<.01){this.catPath.shift();continue;}
@@ -63,7 +76,12 @@ export class LotLife{
    cat.face=Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up');cat.moving=true;cat.step+=step/5;
    if(step>=length-.001)this.catPath.shift();
   }
-  if(!this.catPath.length){cat.mode='nook';cat.waiting=false;cat.moving=false;this.events.push({type:'cat-arrived'});}
+  if(!this.catPath.length){
+   cat.waiting=false;cat.moving=false;
+   if(cat.mode==='leading'){cat.mode=this.found.has('cat')?'trusted':'nook';cat.rest=CAT_REST;this.events.push({type:'cat-arrived'});}
+   else if(cat.mode==='returning'){cat.mode='idle';cat.idleTime=3;}
+   else cat.idleTime=3;
+  }
  }
  drain(){return this.events.splice(0);}
 }

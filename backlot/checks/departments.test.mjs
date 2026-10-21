@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {World} from '../world.mjs?v=crew3';
-import {LotLife} from '../life.mjs?v=crew3';
+import {LotLife,catHome} from '../life.mjs?v=crew3';
 import {BuildSequence,BUILD_LENGTH,lightingLooks,crewReply} from '../departments.mjs?v=crew3';
 
 const world=new World(),life=new LotLife(['take','cat']);
@@ -29,6 +29,6 @@ seq.playing=false;seq.update(.05);assert.equal(seq.elapsed,before);
 for(let i=0;i<4;i++){seq.show(i);assert.equal(seq.step,i);assert.equal(seq.playing,false);assert.ok(seq.progress(i)>.999);}
 seq.show(-1);assert.equal(seq.step,3);seq.show(12);assert.equal(seq.step,3);
 const calm=new BuildSequence(true);assert.equal(calm.playing,false);calm.update(.05);assert.equal(calm.step,0);calm.show(3);assert.ok(calm.complete,'Reduced motion users can reach the finished set without autoplay');
-life.discover('build');const saved=new LotLife([...life.found]);for(const id of ['take','cat','lighting','craft','build'])assert.ok(saved.found.has(id));assert.equal(saved.cat.mode,'trusted');
+life.discover('build');const saved=new LotLife([...life.found]);for(const id of ['take','cat','lighting','craft','build'])assert.ok(saved.found.has(id));assert.equal(saved.cat.mode,'idle');assert.equal(saved.cat.x,catHome.x);assert.equal(saved.cat.y,catHome.y);
 life.interact('slate',world);life.drain();for(const id of ['lighting','craft','build'])life.interact(id,world);assert.equal(life.drain().length,0,'Crew props must not interrupt a take');
 console.log('Departments passed: lighting choices, evolving crew dialogue, manual and timed construction, reduced motion, pause/resume, existing rewards and take isolation.');

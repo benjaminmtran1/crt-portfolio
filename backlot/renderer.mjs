@@ -1,6 +1,6 @@
-import {WIDTH,HEIGHT,stages,clamp} from './world.mjs?v=crew3';
+import {WIDTH,HEIGHT,stages,clamp} from './world.mjs?v=truck1';
 import {pixelText} from './pixels.mjs?v=crew3';
-import {curiosities} from './life.mjs?v=crew3';
+import {curiosities,catNook} from './life.mjs?v=truck1';
 import {lightingLooks} from './departments.mjs?v=crew3';
 const factory=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 function random(seed=18){return()=>{seed=(Math.imul(seed,1664525)+1013904223)|0;return(seed>>>0)/4294967296;};}
@@ -39,7 +39,7 @@ export class Renderer{
   // Perimeter wire fence, distant warehouse silhouette and greenery.
   for(let x=30;x<930;x+=40){rect(c,x,29,2,31,'#738980');line(c,x,35,x+40,35,'#516773');line(c,x,52,x+40,52,'#516773');for(let dx=0;dx<40;dx+=8){line(c,x+dx,36,x+dx+12,51,'#57696a70');line(c,x+dx,51,x+dx+12,36,'#57696a70');}}
   for(let x=50;x<930;x+=98){rect(c,x,0,80,25,'#142734');rect(c,x-5,18,90,9,'#1c303b');for(let xx=x+5;xx<x+75;xx+=14)rect(c,xx,8,7,4,(xx%3)?'#47605f':'#8b8262');}
-  for(let i=0;i<32;i++){const x=i%2?18:938,y=65+Math.floor(i/2)*43;this.tree(c,x,y,.8+r()*.3);}for(const [x,y]of [[70,94],[885,98],[74,240],[886,238],[65,459],[891,462],[73,564],[884,567],[164,671],[253,685],[696,677],[805,669]])this.tree(c,x,y,.7+r()*.25);
+  for(let i=0;i<32;i++){const x=i%2?18:938,y=65+Math.floor(i/2)*43;this.tree(c,x,y,.8+r()*.3);}for(const [x,y]of [[70,94],[885,98],[74,240],[886,238],[65,459],[891,462],[73,564],[884,567],[164,671],[253,685],[696,677]])this.tree(c,x,y,.7+r()*.25);
   for(let i=0;i<180;i++){const x=40+r()*875,y=50+r()*610;if((x>67&&x<892&&y>260&&y<400)||(x>363&&x<580))continue;rect(c,x,y,2,3,'#596b4f');rect(c,x-2,y+2,2,2,'#768369');}
   for(const s of stages){if(s.id==='about')this.workshop(c,s);else if(s.id==='contact')this.trailer(c,s);else{this.stageShell(c,s);this[s.id](c,s);}}
   // Film-set details: cable runs, carts, stacks of flats, lumber and unit signage.
@@ -54,7 +54,7 @@ export class Renderer{
   rect(c,449,438,4,25,'#7e8d80');rect(c,492,438,4,25,'#7e8d80');rect(c,443,424,60,25,'#223945');rect(c,446,427,54,19,'#c5bd9a');pixelText(c,'CALL TIME',473,430,'#384c50',1,true);pixelText(c,'07.00',473,439,'#6b6757',1,true);
   rect(c,385,667,8,30,'#83978d');rect(c,563,667,8,30,'#83978d');rect(c,393,669,170,6,'#c1ac7b');for(let x=397;x<560;x+=16)poly(c,[[x,669],[x+7,669],[x+1,675],[x-6,675]],'#53544a');pixelText(c,'BEN TRAN / STUDIO LOT',480,701,'#80928a',1,true);
   pixelText(c,'STAGE 01',217,324,'#c3b99065',1,true);pixelText(c,'STAGE 02',734,324,'#b9c7ad65',1,true);pixelText(c,'STAGE 03',216,624,'#c7b8a265',1,true);pixelText(c,'STAGE 04',736,624,'#b9b3c465',1,true);
-  this.nook(c,false);this.lightingDesk(c,568,440);this.draftingTable(c,560,248);
+  this.productionTruck(c);this.lightingDesk(c,568,440);this.draftingTable(c,560,248);
   rect(c,297,336,46,10,'#233940');pixelText(c,'CRAFT',320,339,'#d6c59b',1,true);line(c,339,346,339,369,'#8b9b88');
   rect(c,324,349,9,11,'#7e9894');rect(c,325,348,7,2,'#d8c6a2');rect(c,326,351,5,3,'#2b4248');
   for(const item of curiosities.filter(item=>item.category)){const{x,y}=item.point;rect(c,x-9,y-9,18,10,'#c5b487');rect(c,x-6,y-6,12,1,'#78664d');rect(c,x-3,y-3,6,1,'#78664d');line(c,x,y,x,y+5,'#6a775f',2);}
@@ -63,7 +63,7 @@ export class Renderer{
   this.takeLight=this.make(WIDTH,HEIGHT);const g=this.takeLight.getContext('2d');rect(g,0,0,WIDTH,HEIGHT,'#08142566');poly(g,[[130,154],[337,154],[370,256],[99,256]],'#edc99720');this.light(g,228,217,120,57,'244,204,132',.2);
   this.lookLayers=new Map();for(const id of ['golden','night']){const layer=this.make(WIDTH,HEIGHT),g=layer.getContext('2d');
    if(id==='golden'){rect(g,0,0,WIDTH,HEIGHT,'#e4994030');poly(g,[[0,58],[190,0],[960,548],[960,720],[640,720]],'#f0ce7c19');this.light(g,302,240,300,180,'255,207,127',.2);}
-   else{rect(g,0,0,WIDTH,HEIGHT,'#0b113b78');poly(g,[[960,12],[960,260],[186,720],[38,720]],'#9ca9e20b');for(const [x,y]of [[355,305],[591,305],[354,553],[591,553],[472,238],[472,614],[840,656]])this.light(g,x,y,64,38,'255,204,130',.45);for(const [x,y]of [[228,214],[728,214],[216,530],[728,530]])this.light(g,x,y,98,54,'140,167,230',.3);}
+   else{rect(g,0,0,WIDTH,HEIGHT,'#0b113b78');poly(g,[[960,12],[960,260],[186,720],[38,720]],'#9ca9e20b');for(const [x,y]of [[355,305],[591,305],[354,553],[591,553],[472,238],[472,614],[catNook.x,catNook.y]])this.light(g,x,y,64,38,'255,204,130',.45);for(const [x,y]of [[228,214],[728,214],[216,530],[728,530]])this.light(g,x,y,98,54,'140,167,230',.3);}
    this.lookLayers.set(id,layer);
   }
  }
@@ -73,7 +73,7 @@ export class Renderer{
  actor(c,x,y,face,step=0,moving=false,coat='#dfb96b',npc=false){x=Math.round(x);y=Math.round(y);const bob=moving?Math.round(Math.sin(step)*1):0,feet=moving?Math.round(Math.sin(step)*2):0;oval(c,x+1,y+1,8,3,'#0916228f');y+=bob;rect(c,x-5,y-10,4,9+feet,'#203342');rect(c,x+1,y-10,4,9-feet,'#2c4552');rect(c,x-6,y-2+feet,5,3,'#172936');rect(c,x+1,y-2-feet,6,3,'#172936');rect(c,x-6,y-20,12,13,coat);rect(c,x-5,y-18,2,9,'#ebca8999');rect(c,x-8,y-18,3,9-feet,coat);rect(c,x+6,y-18,3,9+feet,coat);rect(c,x-8,y-10-feet,3,3,'#be9170');rect(c,x+6,y-10+feet,3,3,'#be9170');rect(c,x-5,y-29,10,10,'#c29c77');rect(c,x-6,y-31,11,6,'#293f49');rect(c,x-4,y-33,8,3,npc?'#8c7258':'#caa56a');rect(c,x-6,y-28,14,3,npc?'#8c7258':'#caa56a');if(face==='down'){rect(c,x-3,y-24,1,2,'#2d3337');rect(c,x+2,y-24,1,2,'#2d3337');rect(c,x-2,y-20,4,2,'#6c5749');}else if(face==='left')rect(c,x-6,y-24,2,3,'#dfb38a');else if(face==='right')rect(c,x+5,y-24,2,3,'#dfb38a');else{rect(c,x-5,y-24,10,5,'#39464a');rect(c,x-4,y-17,8,9,'#8d7659');}rect(c,x-6,y-9,13,2,'#6b5a40');rect(c,x+3,y-9,4,5,'#7c654b');}
  render(world,dt=1/60,life=null){const c=this.c,p=world.player,t=this.reduced?0:world.t,focus=life?.take?{x:235,y:224}:p;const targetX=clamp(focus.x,Math.min(WIDTH/2,this.w/2),Math.max(WIDTH/2,WIDTH-this.w/2)),targetY=clamp(focus.y,Math.min(HEIGHT/2,this.h/2),Math.max(HEIGHT/2,HEIGHT-this.h/2));const ease=this.reduced?1:1-Math.exp(-dt*(life?.take?3:6));this.camera.x+=(targetX-this.camera.x)*ease;this.camera.y+=(targetY-this.camera.y)*ease;const ox=Math.round(this.w/2-this.camera.x),oy=Math.round(this.h/2-this.camera.y);rect(c,0,0,this.w,this.h,'#182935');c.save();c.translate(ox,oy);c.drawImage(this.base,0,0);
   const rear=life?.take?null:life?.backstage(p);if(rear){const s=stages.find(s=>s.id===rear);c.drawImage(this.backings.get(rear),s.x,s.y);}
-  if(life?.found.has('cat')){rect(c,826,675,42,9,'#263d3d');pixelText(c,'CREW',847,676,'#b9c59a',1,true);}
+  if(life?.found.has('cat')){rect(c,804,639,29,9,'#263d3d');pixelText(c,'CREW',819,641,'#cfdbbc',1,true);}
   this.slate(c,544,312,!!life?.take,life?.nearby(p)?.id==='slate');
   rect(c,558,415,19,4,lightingLooks.find(look=>look.id===life?.lighting)?.color||'#c4d3bb');
   if(!this.reduced){const steam=Math.round(Math.sin(t*2)*2);line(c,317,350,318+steam,345,'#c1cfb060');line(c,316+steam,343,317,341,'#c1cfb040');}
@@ -157,13 +157,46 @@ export class Renderer{
   if(cat.heart>0){const yy=y-25;poly(c,[[x-5,yy],[x-5,yy-3],[x-2,yy-3],[x,yy-1],[x+2,yy-3],[x+5,yy-3],[x+5,yy],[x,yy+5]],'#e7a6a0');}
   else if(cat.waiting){for(let i=-1;i<=1;i++)rect(c,x+i*4-1,y-23,2,2,'#f1d9a2');}
  }
- nook(c,approved=false){
-  rect(c,795,645,93,37,'#536359');this.texture(c,795,645,93,37,'#8c93703a',19,.1);
-  for(let xx=791;xx<897;xx+=13){rect(c,xx,686,7,13,'#667762');rect(c,xx+1,686,2,12,'#94a184');}rect(c,790,690,107,3,'#9ba180');
-  this.crate(c,800,656,22,17);rect(c,802,654,18,3,'#baa477');rect(c,808,648,5,7,'#b7cac0');
-  rect(c,876,660,14,17,'#a1715d');this.tree(c,882,659,.28);oval(c,857,666,7,3,'#c6b9a0');oval(c,857,665,5,1,'#e4d9bc');
-  line(c,793,643,897,643,'#233c3a');for(let xx=800;xx<895;xx+=18){rect(c,xx,643,2,4,'#788e72');rect(c,xx-1,647,4,3,'#e6ca87');}
-  if(approved){rect(c,826,675,42,9,'#263d3d');pixelText(c,'CREW',847,676,'#b9c59a',1,true);}
+ productionTruck(c){
+  // White cube truck, parked nose-right. The rear faces the open crew apron.
+  poly(c,[[748,651],[880,640],[900,668],[772,683],[719,674]],'#101e29aa');
+  line(c,774,661,883,641,'#243b45',7);
+  // High box roof, uninterrupted white side panels and aluminium rub rails.
+  poly(c,[[752,612],[820,596],[852,608],[784,624]],'#f5f3df');
+  poly(c,[[784,624],[852,608],[852,650],[784,666]],'#dce3dc');
+  line(c,784,624,852,608,'#ffffff',2);line(c,786,660,850,645,'#8b9f9d',3);
+  for(let x=800;x<850;x+=16){const y=624-(x-784)*16/68;line(c,x,y+2,x,y+33,'#bac9c5');rect(c,x+1,y+5,1,2,'#f7f5e7');rect(c,x+1,y+27,1,2,'#f7f5e7');}
+  line(c,786,664,850,649,'#b4c3bf',2);rect(c,818,621,20,8,'#bccdc8');pixelText(c,'UNIT',828,623,'#46605f',1,true);
+  // A genuinely open cargo bay: pale frame, roll-up door, warm floor, cases.
+  poly(c,[[752,612],[784,624],[784,666],[752,654]],'#a8bdb9');
+  poly(c,[[756,619],[780,628],[780,660],[756,651]],'#20343b');
+  poly(c,[[756,642],[780,651],[780,660],[756,651]],'#a28c68');
+  for(let i=0;i<3;i++)line(c,757,645+i*3,779,653+i*3,'#cfb78b');
+  poly(c,[[752,612],[784,624],[784,631],[752,619]],'#edf0e0');line(c,754,615,782,626,'#91a6a4');line(c,754,618,782,629,'#b6c6be');
+  line(c,753,620,753,654,'#f1f2e3',3);line(c,782,631,782,664,'#f1f2e3',3);
+  rect(c,759,632,11,12,'#526a6b');rect(c,760,632,9,2,'#91a6a0');rect(c,763,637,3,2,'#c1cfbe');rect(c,759,644,3,3,'#132a33');rect(c,768,644,3,3,'#132a33');
+  // Compact cab, windscreen, mirror, step and amber marker lights.
+  poly(c,[[852,630],[869,626],[882,637],[890,638],[890,655],[852,665]],'#eaf0e5');
+  poly(c,[[853,629],[866,626],[878,637],[853,643]],'#35515b');
+  poly(c,[[855,630],[865,628],[874,636],[855,640]],'#92b2b3');line(c,859,631,869,634,'#d9e6d4');
+  line(c,853,645,853,660,'#99aeac');rect(c,858,646,5,2,'#607e80');rect(c,883,639,5,3,'#e1c086');rect(c,888,647,3,6,'#9daca7');
+  line(c,855,662,871,658,'#6d898a',3);rect(c,849,635,3,7,'#203b46');line(c,851,636,855,636,'#829b98',2);
+  // Dark stepped tyre silhouettes sit over the lower body, with small hubs.
+  for(const [x,y]of [[798,663],[873,663]]){
+   rect(c,x-7,y-5,14,13,'#14252e');rect(c,x-5,y-8,10,20,'#14252e');
+   rect(c,x-5,y-4,10,12,'#3c4a4c');rect(c,x-3,y-6,6,16,'#334348');
+   rect(c,x-2,y-2,4,6,'#a3b4b0');rect(c,x-1,y,2,2,'#dce0cc');
+  }
+  rect(c,754,652,3,4,'#d68673');rect(c,780,661,3,4,'#d68673');
+  // Lift gate is lowered and extended HORIZONTALLY, not a vertical ramp.
+  // Its top face continues the cargo-floor perspective, with visible metal ribs.
+  line(c,750,660,738,674,'#526c71',3);line(c,780,672,765,680,'#526c71',3);
+  poly(c,[[752,654],[784,666],[754,680],[722,668]],'#9badad');
+  poly(c,[[722,668],[754,680],[754,684],[722,672]],'#566e75');
+  poly(c,[[754,680],[784,666],[784,670],[754,684]],'#71888c');
+  for(let i=1;i<5;i++){const dx=-i*6,dy=i*2.8;line(c,752+dx,654+dy,784+dx,666+dy,'#d5ddd1');}
+  line(c,723,668,754,680,'#e1c178',2);for(let i=0;i<4;i++)line(c,726+i*8,669+i*3,729+i*8,670+i*3,'#394f59',2);
+  oval(c,735,655,7,3,'#a4b7b0');oval(c,735,654,5,2,'#d8d8bd');oval(c,735,654,3,1,'#547578');
  }
  filmScene(c,life){
   const progress=life.actionProgress,walking=life.phase==='action',x=151+progress*122,y=226;
