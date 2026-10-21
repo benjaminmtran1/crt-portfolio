@@ -1,7 +1,8 @@
 {
   "site": {
     "pageTitle": "BENJAMIN TRAN",
-    "heroName": "BENJAMIN TRAN"
+    "heroName": "BENJAMIN TRAN",
+    "updatedAt": "2026-10-21T15:45:19.526Z"
   },
   "channels": [
     {
@@ -712,7 +713,7 @@
     },
     {
       "id": "installation",
-      "label": "INSTALLS",
+      "label": "INSTALLS and Editorial",
       "type": "guide",
       "title": "PUBLIC ACCESS",
       "sub": "INSTALLATIONS & EXPERIENTIAL",
