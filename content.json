@@ -2,7 +2,7 @@
   "site": {
     "pageTitle": "BENJAMIN TRAN",
     "heroName": "BENJAMIN TRAN",
-    "updatedAt": "2026-10-21T16:00:10.554Z"
+    "updatedAt": "2026-10-21T16:09:05.749Z"
   },
   "channels": [
     {
@@ -723,6 +723,29 @@
         "caption": "MAIN FEATURE — REEL"
       },
       "projects": [
+        {
+          "title": "Time Magazine",
+          "desc": "Editorial shoot for Time Magazine featuring Shai Gilgeous-Alexander",
+          "tags": "Construction/ Paint",
+          "image": "assets/images2.jpg",
+          "caption": "",
+          "writeup": "",
+          "meta": [],
+          "gallery": [
+            {
+              "src": "assets/tim261026-sga-cover-final.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/images1.jpg",
+              "caption": ""
+            },
+            {
+              "src": "assets/images.jpg",
+              "caption": ""
+            }
+          ]
+        },
         {
           "time": "19:00",
           "title": "Toronto Raptors x Häagen-Dazs",
