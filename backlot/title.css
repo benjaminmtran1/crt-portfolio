@@ -41,3 +41,24 @@
 @media(max-width:360px){.title-screen .title-role{font-size:7px;letter-spacing:.5px}.title-screen .title-work{font-size:8px}.title-work span{display:block;margin-left:0}.title-screen .title-footer{left:13px;right:13px}.title-screen .title-content{width:90%}}
 @media(prefers-reduced-motion:reduce){.scene-transition>span{transition:none}.title-screen .start-button{transition:none}}
 body.calm .scene-transition>span{transition:none}
+
+/* Cinematic lettering only: the live soundstage, props and controls stay intact. */
+@font-face{font-family:BacklotTitle;src:url('assets/title-pixel.woff2') format('woff2');font-display:swap;font-style:normal;font-weight:900}
+.title-screen .title-content h1.title-logo{max-width:1120px;flex-direction:row;justify-content:center;gap:26px;margin:0;font-family:BacklotTitle,Impact,'Arial Black',sans-serif;font-weight:900;filter:none}
+.title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(70px,min(15vw,27vh),220px);display:block;font-size:calc(var(--title-size) * var(--fit,1));font-weight:900;line-height:.95;letter-spacing:0;margin:0;transform:none;z-index:auto}
+.title-screen .title-logo .title-word i,.title-screen .title-logo .title-word i:nth-child(3n+1){font:inherit;color:#f02725;font-style:normal;transform:none;-webkit-text-stroke:0;text-shadow:.02em .02em 0 #8b1b22,.055em .065em 0 #061722}
+.title-screen .title-role{margin-top:20px}
+@media(max-width:700px){
+ .title-screen .title-content h1.title-logo{flex-direction:column;gap:1px;max-width:560px}
+ .title-screen .title-logo .title-word{--title-size:clamp(65px,24vw,150px);line-height:1.02}
+ .title-screen .title-logo .title-word:last-child{--title-size:clamp(100px,35vw,220px);line-height:1.02;letter-spacing:0}
+ .title-screen .title-role{margin-top:24px}
+}
+@media(max-height:700px){
+ .title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(58px,min(22vw,24vh),160px)}
+}
+@media(max-height:540px) and (min-width:600px){
+ .title-screen .title-content h1.title-logo{flex-direction:row;gap:22px;max-width:900px}
+ .title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(60px,min(16vw,23vh),120px);line-height:.95;margin:0;letter-spacing:0;transform:none}
+ .title-screen .title-role{margin-top:18px}
+}
