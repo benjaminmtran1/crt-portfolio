@@ -1,7 +1,8 @@
+import {crew,cameraBuilds,projectTerms,drawViewfinder,wrapChapters,wrapStep} from './encounters.mjs?v=encounters1';
 import {TitleScene} from './title-scene.mjs?v=titlemenu2';
 import {World,stages,WIDTH,HEIGHT,distance} from './world.mjs?v=craft2';
-import {Renderer} from './renderer.mjs?v=craft2';
-import {LotLife} from './life.mjs?v=craft2';
+import {Renderer} from './renderer.mjs?v=encounters1';
+import {LotLife} from './life.mjs?v=encounters1';
 import {BuildSequence,buildSteps,lightingLooks} from './departments.mjs?v=drafting1';
 import {normalizeContent,mediaURL,mediaKind,hostedVideo,galleryFor,watchLinks,thumbnailFor,featuredProjects,plainText,safeURL} from './content.mjs?v=video1';
 const $=s=>document.querySelector(s),world=new World(),renderer=new Renderer($('#world'));
@@ -24,6 +25,7 @@ const save=(k,v)=>{try{localStorage.setItem(k,v);}catch{}};
 let crewSave=[];try{crewSave=JSON.parse(safeRead('backlot-crew-v1')||'[]');}catch{}
 const life=new LotLife(crewSave);world.paused=true;
 const savedLight=safeRead('backlot-light-v1');if(lightingLooks.some(look=>look.id===savedLight))life.lighting=savedLight;
+let cameraIndex=0,cameraWide=false,wrapElapsed=null,wrapPlaying=false,wrapChapter=-1;const crewVisits={};
 let buildSequence=null,buildStep=-1;
 try{const stored=JSON.parse(safeRead('backlot-display-v1')||'{}');if(typeof stored.rain==='boolean')settings.rain=stored.rain;if(typeof stored.reduced==='boolean'&&!settings.reduced)settings.reduced=stored.reduced;for(const id of JSON.parse(safeRead('backlot-visited-v1')||'[]'))if(stages.some(s=>s.id===id))world.visited.add(id);}catch{}
 const escape=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -57,13 +59,13 @@ function enterBacklot(){
 function dismissIntro(){if(welcomed||!content)return;welcomed=true;$('#title-screen').hidden=true;$('.app').inert=false;$('.skip').href='#index-button';$('#lot').classList.add('playing');resetInput();world.paused=document.hidden;ambience.pause(world.paused);$('#world').focus({preventScroll:true});}
 function showTitle(){cancelTitleEntry();closePanel();if(life.take){life.finishTake(true);handleLifeEvents();}welcomed=false;world.paused=true;world.path=[];world.destination=null;world.arrived=null;resetInput();$('.app').inert=true;$('#title-screen').hidden=false;$('.skip').href='#title-work';ambience.pause(true);resize();$('#start-button').focus({preventScroll:true});}
 function mark(id){world.visited.add(id);save('backlot-visited-v1',JSON.stringify([...world.visited]));const count=stages.filter(s=>Number(s.number)<5&&world.visited.has(s.id)).length;$('#visited-count').textContent=`${count} OF 4 SETS VISITED`;}
-function openPanel(kind=''){panel.dataset.kind=kind;if(kind!=='build')buildSequence=null;resetInput();world.path=[];world.destination=null;world.arrived=null;world.paused=true;if(!panel.open){previousFocus=document.activeElement;panel.showModal();}panel.scrollTop=0;ambience.pause(true);}
+function openPanel(kind=''){if(kind!=='wrap'){wrapElapsed=null;wrapPlaying=false;}panel.dataset.kind=kind;if(kind!=='build')buildSequence=null;resetInput();world.path=[];world.destination=null;world.arrived=null;world.paused=true;if(!panel.open){previousFocus=document.activeElement;panel.showModal();}panel.scrollTop=0;ambience.pause(true);}
 function stopMedia(root){
  root.querySelectorAll('video').forEach(video=>{video.pause();video.removeAttribute('src');video.load();});
  root.querySelectorAll('iframe[data-film-player]').forEach(frame=>{frame.src='about:blank';frame.remove();});
 }
 function closePanel(){if(panel.open)panel.close();}
-panel.addEventListener('close',()=>{buildSequence=null;stopMedia(panelInner);world.paused=!welcomed||document.hidden;resetInput();ambience.pause(world.paused||!!life.take);history.replaceState(null,'',location.pathname+location.search);const focus=!welcomed?$('#start-button'):previousFocus?.isConnected&&!previousFocus.closest('[hidden]')?previousFocus:$('#world');focus.focus({preventScroll:true});});
+panel.addEventListener('close',()=>{wrapElapsed=null;wrapPlaying=false;buildSequence=null;stopMedia(panelInner);world.paused=!welcomed||document.hidden;resetInput();ambience.pause(world.paused||!!life.take);history.replaceState(null,'',location.pathname+location.search);const focus=!welcomed?$('#start-button'):previousFocus?.isConnected&&!previousFocus.closest('[hidden]')?previousFocus:$('#world');focus.focus({preventScroll:true});});
 panel.addEventListener('click',e=>{if(e.target!==panel)return;const r=panel.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closePanel();});
 function bar(label,back=''){return `<div class="panel-bar">${back?`<button data-back="${escape(back)}">← ${escape(stage(back)?.name||'Work index')}</button>`:`<span class="panel-label">${escape(label)}</span>`}<span>${escape(displayName())} / THE BACKLOT</span><button class="panel-close" data-close aria-label="Close window and return to the set">×</button></div>`;}
 function heading(kicker,title,description,count=''){return `<div class="panel-heading"><div><div class="eyebrow">${escape(kicker)}</div><h2 id="panel-title" tabindex="-1">${escape(title)}</h2><p>${escape(description)}</p></div>${count?`<span class="count-mark" aria-hidden="true">${escape(count)}</span>`:''}</div>`;}
@@ -114,6 +116,31 @@ function openBuild(){
  openPanel('build');buildSequence=new BuildSequence(settings.reduced);buildStep=-1;syncBuild();focusHeading();
 }
 function syncBuild(){if(!buildSequence||!$('#build-preview'))return;const step=buildSequence.step;if(step!==buildStep){buildStep=step;$('#build-note').textContent=buildSteps[step].note;$('#build-preview').setAttribute('aria-label','Miniature set, step '+(step+1)+': '+buildSteps[step].title+'. '+buildSteps[step].note);panelInner.querySelectorAll('[data-build-step]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.buildStep)===step)));}$('#build-play').textContent=buildSequence.complete?'REPLAY BUILD':buildSequence.playing?'PAUSE BUILD':'PLAY BUILD';renderer.drawConstruction($('#build-preview'),buildSequence);if(buildSequence.complete){life.discover('build');handleLifeEvents();}}
+function openCamera(){
+ stopMedia(panelInner);const build=cameraBuilds[cameraIndex],project=projects.find(p=>p.title.toLowerCase().includes(projectTerms[cameraIndex]));
+ panelInner.innerHTML=bar('CAMERA / VIDEO VILLAGE')+heading('THROUGH THE LENS',build.title,'A pixel-art interpretation of a real build. Find the shot, then explore the project.')+`<div class="department-body"><canvas id="camera-view" class="department-scene" width="720" height="400" role="img" aria-label="${escape(build.description)}"></canvas><div class="encounter-controls">${cameraBuilds.map((b,i)=>`<button data-camera="${i}" aria-pressed="${i===cameraIndex}">${escape(b.detail)}</button>`).join('')}</div><div class="encounter-controls"><button data-camera-wide aria-pressed="${cameraWide}">${cameraWide?'FRAME THE SHOT':'PULL BACK / SEE THE LIGHTS'}</button>${project?`<button data-project="${escape(project.id)}">EXPLORE THIS BUILD →</button>`:''}</div><button class="department-return" data-close>LEAVE THE VIEWFINDER →</button></div>`;
+ openPanel('camera');drawViewfinder($('#camera-view'),cameraIndex,cameraWide);life.discover('camera');handleLifeEvents();focusHeading();
+}
+function openCrew(id){
+ const person=crew.find(p=>p.id===id);if(!person)return;
+ const count=crewVisits[id]||0;crewVisits[id]=count+1;
+ stopMedia(panelInner);panelInner.innerHTML=bar('ON THE CREW / '+person.role.toUpperCase())+heading(person.role,person.name,'Between setups on the backlot.')+`<div class="department-body"><div class="crew-conversation"><canvas id="person-portrait" width="128" height="128" aria-hidden="true"></canvas><div class="crew-speech"><span>${escape(person.role)}</span><p id="person-line" role="status">${escape(person.lines[count%person.lines.length])}</p></div></div><div class="encounter-controls"><button data-person="${person.id}">KEEP CHATTING</button>${id==='pa'?'<button data-call-wrap>CALL WRAP</button>':'<button data-open-camera>SHOW ME THE CAMERA VIEW</button>'}</div><p class="department-note">Fictional backlot crew. Project credits are listed with each build.</p><button class="department-return" data-close>SEE YOU ON SET →</button></div>`;
+ openPanel('crew');const c=$('#person-portrait').getContext('2d');c.fillStyle='#283e46';c.fillRect(0,0,128,128);c.save();c.translate(64,111);c.scale(3,3);renderer.actor(c,0,0,'down',0,false,person.coat,true);c.restore();life.discover('crew');handleLifeEvents();focusHeading();
+}
+function openWrap(){
+ stopMedia(panelInner);wrapElapsed=settings.reduced?9:0;wrapPlaying=!settings.reduced;wrapChapter=-1;
+ panelInner.innerHTML=bar('END OF DAY / THE BACKLOT')+heading('ONE LAST LOOK','That’s a wrap.','The work is done. Leave the lights for tomorrow.')+`<div class="department-body"><canvas id="wrap-view" class="department-scene" width="720" height="540" role="img" aria-label="The studio winding down at the end of the day"></canvas><div class="wrap-credits" aria-live="polite"><p id="wrap-note"></p><div id="wrap-credit" hidden><small>Construction Coordinator</small><h3>${escape(displayName())}</h3><p>From the first drawing to the final strike.</p><p>Thanks for stopping by the backlot.<br>And to the shop cat: good work today.</p></div></div><div class="encounter-controls"><button data-wrap-play></button><button data-wrap-next>NEXT MOMENT</button><button data-filter="all">WORK INDEX</button></div><button class="department-return" data-close>BACK TO EXPLORING →</button></div>`;
+ openPanel('wrap');syncWrap();focusHeading();
+}
+function syncWrap(){
+ if(wrapElapsed===null||!$('#wrap-view'))return;
+ const step=wrapStep(wrapElapsed);renderer.drawWrap($('#wrap-view'),wrapElapsed);
+ if(step!==wrapChapter){wrapChapter=step;$('#wrap-note').textContent=wrapChapters[step];$('#wrap-credit').hidden=step!==3;$('#wrap-view').setAttribute('aria-label',wrapChapters[step]+': the backlot at dusk.');}
+ if(wrapElapsed>=12){wrapPlaying=false;life.discover('wrap');handleLifeEvents();}
+ $('#wrap-play')?.removeAttribute('disabled');
+ $('[data-wrap-play]').textContent=wrapElapsed>=12?'REPLAY':wrapPlaying?'PAUSE':'PLAY';
+ $('[data-wrap-next]').disabled=wrapElapsed>=12;
+}
 function activateEgg(id){
  const item=life.hotspot(id);if(!item||life.take)return;
  if(distance(world.player,item.point)>item.radius){world.goTo(item.point,'egg:'+id);return;}
@@ -125,6 +152,9 @@ function handleLifeEvents(){for(const event of life.drain()){
  else if(event.type==='lighting')openLighting();
  else if(event.type==='craft')openCraft();
  else if(event.type==='build')openBuild();
+ else if(event.type==='camera')openCamera();
+ else if(event.type==='wrap')openWrap();
+ else if(crew.some(p=>p.id===event.type))openCrew(event.type);
  else if(event.type==='lighting-change')save('backlot-light-v1',event.id);
  else if(event.type==='cat-follow')toast('Follow the cat. It’ll wait for you.');
  else if(event.type==='cat-arrived')toast('The crew truck. A little peace behind the lift gate.');
@@ -134,9 +164,16 @@ function handleLifeEvents(){for(const event of life.drain()){
  else if(event.type==='take-end'){$('#lot').classList.remove('rolling');$('#take-hud').hidden=true;resetInput();ambience.pause(panel.open||document.hidden);if(welcomed&&!panel.open)$('#world').focus({preventScroll:true});if(!event.skipped)toast('That’s a wrap. Back to one.');}
 }}
 function openMap(){stopMedia(panelInner);panelInner.innerHTML=bar('LOCATION GUIDE / STUDIO LOT')+heading('YOU HAVE THE RUN OF THE PLACE','Pick your next stop.','Choose a location and I’ll walk you there.')+`<div class="map-layout"><canvas id="big-map" class="big-map" width="640" height="480" aria-label="The studio lot, with six numbered destinations"></canvas><div class="map-list">${stages.map(s=>`<button data-walk="${s.id}"><span class="map-number">${s.number}</span><span><strong>${escape(s.name)}</strong><small>${escape(s.place)}${world.visited.has(s.id)?' · VISITED':''}</small></span><span>→</span></button>`).join('')}<div class="map-foot">You can also tap a set directly in the world.<br>All projects are always available in Work index.</div></div></div>`;openPanel();renderer.drawMap($('#big-map'),world);focusHeading();}
-function openSettings(){stopMedia(panelInner);panelInner.innerHTML=bar('STUDIO CONTROLS')+heading('MAKE YOURSELF AT HOME','Set the atmosphere.','Display, sound and controls.')+`<div class="settings-list">${[['rain','Light rain','Rain on the backlot.'],['reduced','Calmer motion','Stops decorative weather and crew animation; removes camera easing and title-screen motion.'],['sound','Studio ambience','Rain, electrical hum and a few tiny game sounds. Always off until you turn it on.']].map(([key,title,desc])=>`<div class="setting"><div><strong>${title}</strong><small>${desc}</small></div><button class="toggle" data-setting="${key}" aria-pressed="${settings[key]}">${settings[key]?'ON':'OFF'}</button></div>`).join('')}${life.found.has('cat')?'<p class="crew-note">CREW PASS / APPROVED ♥<br>The shop cat has vouched for you. Find it strolling by the workshop between visits to the crew truck.</p>':''}<p class="crew-discoveries">${life.found.size} / 6 CREW DISCOVERIES</p><div class="help-copy"><strong>TAKE A WALK</strong><br>Desktop: <kbd>WASD</kbd> or arrow keys to move. <kbd>E</kbd> or <kbd>Enter</kbd> to look. <kbd>M</kbd> for the map. Click a set, prop or cat to walk to it.<br><br>Phone: drag the left stick, or tap the ground. Tap <kbd>A</kbd> near a stage, prop or cat to interact. Tap a set to walk there and open it automatically.<br><br>Inside a project: use the thumbnails, arrows or swipe the photo. <kbd>Esc</kbd> closes the window. During a take, <kbd>Esc</kbd> or CUT returns to exploring.<br><br>There’s more to a set than the camera sees. Try the rear service lane.</div><button class="title-return" data-title>← RETURN TO TITLE SCREEN</button></div>`;openPanel();focusHeading();}
+function openSettings(){stopMedia(panelInner);panelInner.innerHTML=bar('STUDIO CONTROLS')+heading('MAKE YOURSELF AT HOME','Set the atmosphere.','Display, sound and controls.')+`<div class="settings-list">${[['rain','Light rain','Rain on the backlot.'],['reduced','Calmer motion','Stops decorative weather and crew animation; removes camera easing and title-screen motion.'],['sound','Studio ambience','Rain, electrical hum and a few tiny game sounds. Always off until you turn it on.']].map(([key,title,desc])=>`<div class="setting"><div><strong>${title}</strong><small>${desc}</small></div><button class="toggle" data-setting="${key}" aria-pressed="${settings[key]}">${settings[key]?'ON':'OFF'}</button></div>`).join('')}${life.found.has('cat')?'<p class="crew-note">CREW PASS / APPROVED ♥<br>The shop cat has vouched for you. Find it strolling by the workshop between visits to the crew truck.</p>':''}<p class="crew-discoveries">${life.found.size} / 9 CREW DISCOVERIES</p><div class="help-copy"><strong>TAKE A WALK</strong><br>Desktop: <kbd>WASD</kbd> or arrow keys to move. <kbd>E</kbd> or <kbd>Enter</kbd> to look. <kbd>M</kbd> for the map. Click a set, prop or cat to walk to it.<br><br>Phone: drag the left stick, or tap the ground. Tap <kbd>A</kbd> near a stage, prop or cat to interact. Tap a set to walk there and open it automatically.<br><br>Inside a project: use the thumbnails, arrows or swipe the photo. <kbd>Esc</kbd> closes the window. During a take, <kbd>Esc</kbd> or CUT returns to exploring.<br><br>There’s more to a set than the camera sees. Try the rear service lane.</div><button class="title-return" data-title>← RETURN TO TITLE SCREEN</button></div>`;openPanel();focusHeading();}
 panelInner.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  if(b.hasAttribute('data-close'))closePanel();
+ else if(b.hasAttribute('data-camera')){cameraIndex=Number(b.dataset.camera);openCamera();}
+ else if(b.hasAttribute('data-camera-wide')){cameraWide=!cameraWide;openCamera();}
+ else if(b.dataset.person){const person=crew.find(p=>p.id===b.dataset.person);const count=crewVisits[person.id]||0;crewVisits[person.id]=count+1;$('#person-line').textContent=person.lines[count%person.lines.length];}
+ else if(b.hasAttribute('data-open-camera'))openCamera();
+ else if(b.hasAttribute('data-call-wrap'))openWrap();
+ else if(b.hasAttribute('data-wrap-play')){if(wrapElapsed>=12)wrapElapsed=0;wrapPlaying=!wrapPlaying;syncWrap();}
+ else if(b.hasAttribute('data-wrap-next')){wrapPlaying=false;wrapElapsed=Math.min(12,(wrapStep(wrapElapsed)+1)*3);syncWrap();}
  else if(b.dataset.filter)openIndex(b.dataset.filter);
  else if(b.dataset.project)openProject(b.dataset.project);
  else if(b.dataset.back)openIndex(b.dataset.back);
@@ -185,7 +222,7 @@ function releaseJoy(){joyId=null;stick.x=stick.y=0;$('#stick-knob').style.transf
 window.addEventListener('blur',()=>{resetInput();releaseJoy();world.paused=true;world.path=[];world.destination=null;ambience.pause(true);});window.addEventListener('focus',()=>{world.paused=!welcomed||panel.open||document.hidden;ambience.pause(world.paused||!!life.take);});document.addEventListener('visibilitychange',()=>{resetInput();releaseJoy();world.paused=!welcomed||document.hidden||panel.open;ambience.pause(world.paused||!!life.take);});
 function resize(){const r=$('#lot').getBoundingClientRect();if(r.width&&r.height)renderer.resize(r.width,r.height);resetInput();releaseJoy();renderer.render(world,1,life);renderer.drawMap($('#minimap'),world);if(!welcomed&&!entering){const title=$('#title-screen').getBoundingClientRect();titleScene.resize(title.width,title.height);titleScene.render(titleClock*1000);fitTitle();}}const resizer=new ResizeObserver(resize);resizer.observe($('#lot'));resizer.observe($('#title-screen'));
 function updateLocation(){const s=world.nearby(),egg=life.nearby(world.player),id=egg?'egg:'+egg.id+':'+egg.caption:s?.id||'';if(id!==nearbyId){nearbyId=id;$('#interaction').hidden=!id||!!life.take;$('#place-number').textContent=egg?'CREW':s?s.number:'EXT.';$('#place-name').textContent=egg?egg.caption:s?s.place.toUpperCase():'THE BACKLOT';if(id){$('#interaction-caption').textContent=egg?egg.caption:s.place.toUpperCase();$('#interact-label').textContent=egg?egg.label:s.id==='about'?'Meet Ben':s.id==='contact'?'Get in touch':'View '+s.name;}}}
-function frame(now){const dt=Math.min((now-last)/1000||.016,.05);last=now;if(buildSequence?.playing&&panel.open&&!document.hidden&&document.hasFocus()){buildSequence.update(dt);syncBuild();}if(!welcomed&&!document.hidden&&!$('#title-screen').hidden){titleClock+=dt;titleScene.render(titleClock*1000);}if(!world.paused){const x=stick.x+(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0),y=stick.y+(keys.has('s')||keys.has('arrowdown')?1:0)-(keys.has('w')||keys.has('arrowup')?1:0);world.update(dt,life.take?{x:0,y:0}:{x,y});life.update(dt,world);handleLifeEvents();if(world.arrived){const id=world.arrived;world.arrived=null;if(id.startsWith('egg:'))activateEgg(id.slice(4));else openStage(id);}if(life.take&&takePhase!==life.phase){takePhase=life.phase;$('#take-call').textContent={quiet:'QUIET ON SET',action:'ACTION!',cut:'CUT. THAT’S A WRAP.'}[takePhase];if(takePhase==='action')ambience.cue('clap');}updateLocation();renderer.render(world,dt,life);mapClock+=dt;if(mapClock>.15){mapClock=0;renderer.drawMap($('#minimap'),world);}}requestAnimationFrame(frame);}
+function frame(now){const dt=Math.min((now-last)/1000||.016,.05);last=now;if(wrapPlaying&&panel.open&&panel.dataset.kind==='wrap'&&!document.hidden&&document.hasFocus()){wrapElapsed=Math.min(12,wrapElapsed+dt);syncWrap();}if(buildSequence?.playing&&panel.open&&!document.hidden&&document.hasFocus()){buildSequence.update(dt);syncBuild();}if(!welcomed&&!document.hidden&&!$('#title-screen').hidden){titleClock+=dt;titleScene.render(titleClock*1000);}if(!world.paused){const x=stick.x+(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0),y=stick.y+(keys.has('s')||keys.has('arrowdown')?1:0)-(keys.has('w')||keys.has('arrowup')?1:0);world.update(dt,life.take?{x:0,y:0}:{x,y});life.update(dt,world);handleLifeEvents();if(world.arrived){const id=world.arrived;world.arrived=null;if(id.startsWith('egg:'))activateEgg(id.slice(4));else openStage(id);}if(life.take&&takePhase!==life.phase){takePhase=life.phase;$('#take-call').textContent={quiet:'QUIET ON SET',action:'ACTION!',cut:'CUT. THAT’S A WRAP.'}[takePhase];if(takePhase==='action')ambience.cue('clap');}updateLocation();renderer.render(world,dt,life);mapClock+=dt;if(mapClock>.15){mapClock=0;renderer.drawMap($('#minimap'),world);}}requestAnimationFrame(frame);}
 applySettings();resize();document.fonts.ready.then(fitTitle);requestAnimationFrame(frame);
 try{
  const response=await fetch('content.json',{cache:'no-store'});if(!response.ok)throw new Error('Portfolio content could not be loaded');contentLoaded(await response.json());updateFeature();markCount();$('#loading').hidden=true;$('#title-screen').classList.remove('is-loading');
@@ -197,3 +234,4 @@ try{
 function markCount(){const count=stages.slice(0,4).filter(s=>world.visited.has(s.id)).length;$('#visited-count').textContent=`${count} OF 4 SETS VISITED`;}
 
 document.addEventListener('error',e=>{if(e.target.tagName==='IMG'&&!e.target.dataset.fallback){e.target.dataset.fallback='true';e.target.src=placeholder;}},true);
+

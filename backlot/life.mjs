@@ -1,8 +1,13 @@
 import {distance,findPath,clamp,craftStop,craftHit} from './world.mjs?v=craft2';
 import {lightingLooks,crewReply} from './departments.mjs?v=crew3';
 
+import {crew} from './encounters.mjs?v=encounters1';
+
 // These props share the same walkable space as the portfolio destinations.
 export const curiosities=[
+ {id:'camera',point:{x:488,y:300},label:'Look through the camera',caption:'CAMERA / VIEWFINDER',radius:28},
+ {id:'wrap',point:{x:392,y:632},label:'Call it a day',caption:'THE WRAP BELL',radius:30},
+ ...crew.map(person=>({id:person.id,point:person.point,label:'Talk to '+person.name,caption:person.role.toUpperCase(),radius:28})),
  {id:'slate',point:{x:544,y:312},label:'Roll a take',caption:'THE CLAPPERBOARD',radius:38},
  {id:'rear-narrative',point:{x:224,y:64},label:'Look behind the set',caption:'REAR OF STAGE 01',category:'narrative',radius:40},
  {id:'rear-commercial',point:{x:736,y:64},label:'Look behind the set',caption:'REAR OF STAGE 02',category:'commercial',radius:40},
@@ -13,7 +18,7 @@ export const curiosities=[
 export const catHome={x:416,y:240},catNook={x:736,y:640};
 export const CAT_REST=8;
 export const TAKE_LENGTH=10.5;
-const discoveries=new Set(['take','backstage','cat','lighting','craft','build']);
+const discoveries=new Set(['take','backstage','cat','lighting','craft','build','camera','crew','wrap']);
 
 export class LotLife{
  constructor(saved=[]){
@@ -36,7 +41,7 @@ export class LotLife{
    this.take={elapsed:0,number:++this.takeNumber};this.crewTime=world.t;this.events.push({type:'take-start'});return;
   }
   const item=this.hotspot(id);if(item?.category){this.discover('backstage');this.events.push({type:'backstage',category:item.category});return;}
-  if(['lighting','craft','build'].includes(id)){this.events.push({type:id});return;}
+  if(['lighting','craft','build','camera','wrap',...crew.map(p=>p.id)].includes(id)){this.events.push({type:id});return;}
   if(id!=='cat')return;
   const cat=this.cat;cat.heart=2;
   if(cat.mode==='idle'){
@@ -85,3 +90,4 @@ export class LotLife{
  }
  drain(){return this.events.splice(0);}
 }
+

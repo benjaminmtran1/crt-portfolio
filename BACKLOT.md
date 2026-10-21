@@ -81,3 +81,16 @@ Physical iPhone touch feel and final visual polish; whether individual projects 
 Remaining brainstorm ideas are parked: a suspiciously large door, a production-office directory, recurring incidents and a wrap photo. Additional map areas and project-specific props are separate design changes, rather than content-only admin edits.
 
 The prior [HANDOFF.md](HANDOFF.md) describes the archived CRT interface. This document describes the current homepage. The separate private Sites prototype remains an earlier design snapshot; GitHub is now the source for this live release.
+
+
+## Camera, crew and wrap — October 21 update
+
+Current Build: A camera at (488,300) opens the three existing hand-drawn real-build plates (Deathstalker, Nintendo × Donkey Kong, Beast Games), with framed/pulled-back compositions and links resolved from current project titles. Jules the scenic painter, Frankie the grip and Kit the PA have three rotating fictional lines each. The bell at (392,632), or Kit’s dialogue, starts a 12-second dusk vignette with closing stage doors, departing crew, a resting cat and credits. Pause, manual next, replay, close and Work index remain available. Reduced motion starts on the final tableau without autoplay. New discoveries use the existing browser save (nine total).
+
+Locked Decisions: Reuse the existing real-build pixel art. Crew dialogue is explicitly fictional and does not change production credits. No changes to content.json or the admin editor. Wrap is reversible and does not alter saved lighting or cat progress.
+
+Open Questions: Full browser and physical iPhone visual/input QA remain pending; the local environment blocks opening a preview server and dependency downloads. Automated route, rendering-coordinate and application panel tests pass.
+
+Future Ideas: More bespoke camera builds need a chosen project and one or two clear reference images. Remaining brainstorm ideas stay parked.
+
+Validation: `node backlot/checks/encounters.test.mjs`, plus existing routes, life, departments, craft rendering and title showcase suites.

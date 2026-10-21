@@ -1,7 +1,8 @@
+import {crew} from './encounters.mjs?v=encounters1';
 import {WIDTH,HEIGHT,stages,clamp,craftCrew,craftCup} from './world.mjs?v=craft2';
 import {pixelText} from './pixels.mjs?v=crew3';
 import {drawPlayer} from './player.mjs?v=likeness1';
-import {curiosities,catNook} from './life.mjs?v=craft2';
+import {curiosities,catNook} from './life.mjs?v=encounters1';
 import {lightingLooks} from './departments.mjs?v=drafting1';
 import {drawConstructionScene} from './construction.mjs?v=drafting1';
 const factory=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
@@ -78,12 +79,18 @@ export class Renderer{
   this.slate(c,544,312,!!life?.take,life?.nearby(p)?.id==='slate');
   rect(c,558,415,19,4,lightingLooks.find(look=>look.id===life?.lighting)?.color||'#c4d3bb');
   this.craftSteam(c,t);
+  // Camera tripod and the little production wrap bell.
+  for(const end of [478,498])line(c,488,287,end,303,'#b2b9a0',2);
+  rect(c,477,275,20,13,'#152b38');rect(c,497,278,8,8,'#93b9ae');rect(c,481,271,8,4,'#c7ad79');
+  line(c,392,605,392,634,'#b39769',3);oval(c,392,612,9,8,'#d2ac60');rect(c,381,618,22,3,'#f3d28c');
+  for(const person of crew){if(life?.nearby(p)?.id===person.id)pixelText(c,'...',person.point.x,person.point.y-44,'#f3d28c',1,true);}
+
   if(life?.take)c.drawImage(this.takeLight,0,0);
   if(world.path.length){const dest=world.path[world.path.length-1];for(let i=4;i<world.path.length;i+=5){const q=world.path[i];rect(c,q.x-1,q.y-1,2,2,'#dfcd9477');}const pulse=this.reduced?0:Math.sin(t*5)*2;line(c,dest.x-6-pulse,dest.y,dest.x,dest.y-3,'#e7cc8d');line(c,dest.x,dest.y-3,dest.x+6+pulse,dest.y,'#e7cc8d');line(c,dest.x+6+pulse,dest.y,dest.x,dest.y+3,'#e7cc8d');line(c,dest.x,dest.y+3,dest.x-6-pulse,dest.y,'#e7cc8d');}
   const nearest=world.nearby();
   for(const s of stages){const near=nearest?.id===s.id,visited=world.visited.has(s.id);const py=s.door.y-8+(this.reduced?0:Math.round(Math.sin(t*2.5+Number(s.number))*1));oval(c,s.door.x,s.door.y+5,14,4,near?'#e6c98a50':'#b7c6ab15');rect(c,s.door.x-8,py-17,16,13,near?'#e5c68c':'#1d3241');rect(c,s.door.x-7,py-16,14,11,near?'#e5c68c':s.color+'33');pixelText(c,visited?'+' : s.number,s.door.x,py-14,near?'#26333c':s.color,1,true);if(visited){line(c,s.door.x-3,py-12,s.door.x-1,py-10,s.color);line(c,s.door.x-1,py-10,s.door.x+4,py-14,s.color);}poly(c,[[s.door.x-3,py-4],[s.door.x+3,py-4],[s.door.x,py-1]],near?'#e5c68c':s.color);}
   const ct=life?.take?(this.reduced?0:life.crewTime):t;
-  const actors=[{...craftCrew,face:'right',step:0,moving:false,coat:'#829786'},{x:707,y:356+Math.sin(ct*.19)*12,face:'down',step:ct*4,moving:!life?.take,coat:'#a68078'},{x:553,y:601,face:'left',step:0,coat:'#859eaa'},{...p,player:true}];actors.sort((a,b)=>a.y-b.y);for(const a of actors)this.actor(c,a.x,a.y,a.face,a.step,a.moving&&!this.reduced,a.coat,!a.player);
+  const actors=[{...craftCrew,face:'right',step:0,moving:false,coat:'#829786'},...crew.map(person=>({...person.point,face:'down',step:0,moving:false,coat:person.coat})),{...p,player:true}];actors.sort((a,b)=>a.y-b.y);for(const a of actors)this.actor(c,a.x,a.y,a.face,a.step,a.moving&&!this.reduced,a.coat,!a.player);
   // The shop cat, a gently moving boom, and the working red tally lights.
   this.catSprite(c,life?.cat||{x:416,y:240,face:'right',step:0},t);
   line(c,815,374,815,303,'#22333e',4);line(c,815,303,747+Math.sin(ct*.24)*3,285,'#91a198',2);rect(c,740+Math.sin(ct*.24)*3,281,16,6,'#1b2b38');line(c,810,370,828,370,'#a0ab9d',2);rect(c,206,213,2,2,life?.take?'#ffba92':Math.sin(t)>0?'#f3ac8d':'#b16559');rect(c,692,213,2,2,'#eab081');
@@ -94,6 +101,14 @@ export class Renderer{
   if(!life?.take)this.paintLook(c,life?.lighting);
   c.restore();
   if(this.rain&&!this.reduced){c.globalAlpha=.25;for(let i=0;i<100;i++){const x=((i*79.37-t*47)%this.w+this.w)%this.w,y=(i*47.3+t*(150+i%31))%this.h;line(c,x,y,x-2,y+6,'#b0c7c6');}c.globalAlpha=1;for(let i=0;i<13;i++){const x=(i*73.37)%this.w,y=(i*79.3)%this.h,phase=(t*1.2+i*.37)%1;if(phase<.28){c.globalAlpha=(.28-phase)*.6;oval(c,x,y,2+phase*10,1,'#b7d0c7');}}c.globalAlpha=1;}
+ }
+ drawWrap(canvas,elapsed){
+  const c=canvas.getContext('2d'),progress=clamp(elapsed/9,0,1);c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);
+  for(const s of stages){rect(c,s.door.x-13,s.y+s.h-30,26,Math.round(30*progress),'#35464b');}
+  if(elapsed<9)for(const [i,person] of crew.entries()){const x=person.point.x+(472-person.point.x)*progress,y=person.point.y+(704-person.point.y)*progress;this.actor(c,x,y,'down',elapsed*6,!this.reduced,person.coat,true);}
+  this.paintLook(c,'night');c.fillStyle=`rgba(5,14,28,${progress*.48})`;c.fillRect(0,0,WIDTH,HEIGHT);
+  this.catSprite(c,{x:416,y:240,face:'right',step:0},0);if(elapsed>=6){rect(c,406,227,20,9,'#ac9574');pixelText(c,'Z',432,221,'#dac9a1',1);}
+  c.restore();
  }
  paintLook(c,id){const layer=this.lookLayers.get(id);if(layer)c.drawImage(layer,0,0);}
  lightingDesk(c,x,y){
@@ -266,3 +281,4 @@ export class Renderer{
  }
  drawMap(canvas,world){const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(this.base,0,0,canvas.width,canvas.height);const sx=canvas.width/WIDTH,sy=canvas.height/HEIGHT;for(const s of stages){rect(c,s.door.x*sx-2,s.door.y*sy-2,4,4,s.color);}rect(c,world.player.x*sx-2,world.player.y*sy-2,5,5,'#fff2c6');rect(c,world.player.x*sx-1,world.player.y*sy-1,3,3,'#d98d5e');}
 }
+
