@@ -35,6 +35,7 @@ async function boot({reduced=false,hash='',failure=false,saved={}}={}){
 }
 {
  const {app,get,document,tick}=await boot();
+ assert.equal(document.activeElement,document.body,'Initial loading must not autofocus and draw a touch focus ring');
  assert.equal(app.state().welcomed,false);assert.equal(app.world.paused,true);assert.equal(get('.app').inert,true);assert.equal(get('#start-button').disabled,false);assert.equal(app.settings.sound,false);assert.equal(get('#title-name').getAttribute('aria-label'),'BENJAMIN TRAN');
  app.enterBacklot();app.enterBacklot();assert.equal(app.state().entering,true);assert.equal(get('#start-button').disabled,true);assert.equal(get('.app').inert,true);
  tick(279);assert.equal(get('#title-screen').hidden,false);assert.equal(app.world.paused,true);
@@ -43,6 +44,14 @@ async function boot({reduced=false,hash='',failure=false,saved={}}={}){
  app.showTitle();assert.equal(app.state().welcomed,false);assert.equal(app.world.paused,true);assert.equal(get('.app').inert,true);assert.equal(get('#title-screen').hidden,false);assert.equal(document.activeElement,get('#start-button'));
  app.enterBacklot();tick(100);app.showTitle();tick(1000);assert.equal(app.state().welcomed,false,'Returning to title cancels pending entry');assert.equal(get('#title-screen').hidden,false);
  get('#title-work').click();assert.equal(app.state().welcomed,true);assert.equal(get('#panel').open,true);assert.equal(app.world.paused,true);app.closePanel();assert.equal(get('#panel').open,false);assert.equal(app.world.paused,false);
+}
+{
+ const {app,get,document,listeners,tick}=await boot();
+ let prevented=0;const enter=(target=document.body,repeat=false)=>listeners.get('window:keydown')({key:'Enter',repeat,target,preventDefault(){prevented++;}});
+ enter(document.body,true);assert.equal(app.state().entering,false,'Held Enter does not accidentally start after load');
+ enter();assert.equal(prevented,1);assert.equal(app.state().entering,true,'Initial keyboard Enter still starts without autofocus');
+ tick(580);assert.equal(app.state().welcomed,true);assert.equal(document.activeElement,get('#world'));
+ app.showTitle();assert.equal(document.activeElement,get('#start-button'),'Deliberate return keeps focus on the title entry control');
 }
 {
  const {app,get}=await boot({reduced:true,saved:{'backlot-crew-v1':'["cat","lighting","craft","build"]','backlot-light-v1':'night'}});

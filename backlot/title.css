@@ -20,8 +20,8 @@
 .title-screen .start-button>span{position:static;font-size:12px;line-height:1;animation:none;color:inherit}.title-screen .start-button>span:last-child{font-family:var(--mono);font-size:20px}
 .title-screen button:focus-visible{outline:3px solid #35d6c5;outline-offset:7px}
 .title-screen .title-instruction{font-family:var(--pixel);font-size:6px;letter-spacing:1px;color:#b7d1c9;margin:17px 0 9px;line-height:1.7}
-.title-screen .title-work{font-family:var(--mono);font-size:10px;line-height:1.8;letter-spacing:0;color:#bed5d0;min-height:44px;padding:8px 16px;text-shadow:1px 1px 0 #102137}
-.title-work span{font-family:var(--pixel);font-size:7px;margin-left:9px;color:#ffe4b5;white-space:nowrap}.title-screen .title-work:hover,.title-screen .title-work:hover span{color:#35d6c5}
+.title-screen .title-work{font-family:var(--mono);font-size:16px;line-height:1.8;letter-spacing:0;color:#bed5d0;min-height:44px;padding:8px 16px;text-shadow:1px 1px 0 #102137}
+.title-work span{font-family:var(--pixel);font-size:10px;margin-left:12px;color:#ffe4b5;white-space:nowrap}.title-screen .title-work:hover,.title-screen .title-work:hover span{color:#35d6c5}
 .title-screen.is-loading .title-menu{display:none}
 .title-screen .title-loading{margin-top:12px;font-family:var(--pixel);font-size:8px;line-height:1.8;color:#ffe4b5;max-width:340px;text-shadow:2px 2px #102137}.title-screen .title-loading:not([hidden]){background:#102b37e8;border:1px solid #5b7982;padding:12px 18px}.title-loading a{display:inline-block;margin-top:10px}
 .title-screen .title-footer{position:absolute;bottom:max(20px,env(safe-area-inset-bottom));left:38px;right:38px;display:flex;align-items:center;justify-content:space-between;gap:16px;color:#b9d0c8;font-family:var(--pixel);font-size:7px;letter-spacing:.2px;text-shadow:2px 2px 0 #102137}
@@ -35,10 +35,10 @@
 .scene-transition>span:last-child{right:0;transform:translateX(103%);border-left:6px solid #35d6c5;box-shadow:-6px 0 0 #081c29}
 .scene-transition.closed>span{transform:translateX(0)}
 @media(min-width:1450px){.title-screen .title-content{padding-bottom:130px}.title-kicker{margin-bottom:36px}.title-menu{margin-top:40px}}
-@media(max-width:700px){.title-topline{left:20px;right:20px;top:max(22px,env(safe-area-inset-top));font-size:6px;letter-spacing:0}.title-topline>span{gap:6px}.title-topline i{width:5px;height:5px}.title-screen .title-content{width:92%;min-height:540px;padding:75px 0 135px}.title-kicker{font-size:6px;letter-spacing:1px;margin-bottom:26px;gap:8px}.title-kicker span{width:15px}.title-screen .title-logo .title-word{--title-size:clamp(46px,18vw,108px)}.title-screen .title-logo .title-word:last-child{--title-size:clamp(70px,28vw,164px);margin-top:13px}.title-word i{-webkit-text-stroke:.8px #102137}.title-screen .title-role{font-size:8px;letter-spacing:1px;margin-top:27px;max-width:310px}.title-menu{margin-top:29px}.title-screen .start-button{font-size:11px;min-height:51px;padding:13px 15px 11px;gap:14px}.title-screen .start-button>span{font-size:10px}.title-screen .title-instruction{font-size:5px;letter-spacing:.6px;margin:16px 0 7px}.title-screen .title-work{font-size:9px;padding:9px 5px}.title-work span{font-size:6px;margin-left:6px}.title-screen .title-footer{left:20px;right:20px;bottom:max(17px,env(safe-area-inset-bottom));font-size:5px;letter-spacing:0}.title-screen .title-footer button{font-size:6px;min-width:87px;padding:8px}.title-screen .crew-seal{right:20px;bottom:92px;font-size:6px;padding:8px 10px}.title-screen .title-loading{font-size:6px;max-width:260px}}
+@media(max-width:700px){.title-topline{left:20px;right:20px;top:max(22px,env(safe-area-inset-top));font-size:6px;letter-spacing:0}.title-topline>span{gap:6px}.title-topline i{width:5px;height:5px}.title-screen .title-content{width:92%;min-height:540px;padding:75px 0 135px}.title-kicker{font-size:6px;letter-spacing:1px;margin-bottom:26px;gap:8px}.title-kicker span{width:15px}.title-screen .title-logo .title-word{--title-size:clamp(46px,18vw,108px)}.title-screen .title-logo .title-word:last-child{--title-size:clamp(70px,28vw,164px);margin-top:13px}.title-word i{-webkit-text-stroke:.8px #102137}.title-screen .title-role{font-size:8px;letter-spacing:1px;margin-top:27px;max-width:310px}.title-menu{margin-top:29px}.title-screen .start-button{font-size:11px;min-height:51px;padding:13px 15px 11px;gap:14px}.title-screen .start-button>span{font-size:10px}.title-screen .title-instruction{font-size:5px;letter-spacing:.6px;margin:16px 0 7px}.title-screen .title-work{font-size:14px;padding:6px 8px}.title-work span{font-size:8px;margin-left:8px}.title-screen .title-footer{left:20px;right:20px;bottom:max(17px,env(safe-area-inset-bottom));font-size:5px;letter-spacing:0}.title-screen .title-footer button{font-size:6px;min-width:87px;padding:8px}.title-screen .crew-seal{right:20px;bottom:92px;font-size:6px;padding:8px 10px}.title-screen .title-loading{font-size:6px;max-width:260px}}
 @media(max-height:700px){.title-screen .title-content{min-height:100%;padding-top:65px;padding-bottom:90px}.title-kicker{margin-bottom:18px}.title-screen .title-logo .title-word{--title-size:clamp(35px,min(18vw,12vh),100px)}.title-screen .title-logo .title-word:last-child{--title-size:clamp(55px,min(28vw,17vh),140px);margin-top:7px}.title-screen .title-role{margin-top:22px}.title-menu{margin-top:22px}.title-screen .title-instruction{margin-top:15px}.title-screen .crew-seal{bottom:90px}}
-@media(max-height:540px) and (min-width:600px){.title-topline{top:18px;font-size:6px}.title-screen .title-content{width:85%;padding:48px 10px 54px;min-height:390px}.title-kicker{display:none;font-size:6px;margin-bottom:13px}.title-screen .title-content h1.title-logo{flex-direction:row;justify-content:center;gap:22px;max-width:900px}.title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(40px,10vw,90px);line-height:1.15;margin:0;letter-spacing:0;transform:rotate(-3deg)}.title-screen .title-role{font-size:8px;margin-top:22px}.title-menu{margin-top:18px}.title-screen .start-button{font-size:10px;min-height:44px;padding:9px 13px}.title-screen .title-instruction{font-size:5px;margin:13px 0 1px}.title-screen .title-work{font-size:8px;min-height:44px;padding:6px 12px}.title-work span{font-size:6px}.title-screen .title-footer{bottom:10px;font-size:5px}.title-screen .title-footer button{font-size:6px;min-height:44px}.title-screen .crew-seal{right:25px;bottom:65px;font-size:6px;padding:7px 9px}}
-@media(max-width:360px){.title-screen .title-role{font-size:7px;letter-spacing:.5px}.title-screen .title-work{font-size:8px}.title-work span{display:block;margin-left:0}.title-screen .title-footer{left:13px;right:13px}.title-screen .title-content{width:90%}}
+@media(max-height:540px) and (min-width:600px){.title-topline{top:18px;font-size:6px}.title-screen .title-content{width:85%;padding:48px 10px 54px;min-height:390px}.title-kicker{display:none;font-size:6px;margin-bottom:13px}.title-screen .title-content h1.title-logo{flex-direction:row;justify-content:center;gap:22px;max-width:900px}.title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(40px,10vw,90px);line-height:1.15;margin:0;letter-spacing:0;transform:rotate(-3deg)}.title-screen .title-role{font-size:8px;margin-top:22px}.title-menu{margin-top:18px}.title-screen .start-button{font-size:10px;min-height:44px;padding:9px 13px}.title-screen .title-instruction{font-size:5px;margin:13px 0 1px}.title-screen .title-work{font-size:13px;min-height:44px;padding:6px 12px}.title-work span{font-size:8px}.title-screen .title-footer{bottom:10px;font-size:5px}.title-screen .title-footer button{font-size:6px;min-height:44px}.title-screen .crew-seal{right:25px;bottom:65px;font-size:6px;padding:7px 9px}}
+@media(max-width:360px){.title-screen .title-role{font-size:7px;letter-spacing:.5px}.title-screen .title-work{font-size:13px}.title-work span{display:block;margin-left:0}.title-screen .title-footer{left:13px;right:13px}.title-screen .title-content{width:90%}}
 @media(prefers-reduced-motion:reduce){.scene-transition>span{transition:none}.title-screen .start-button{transition:none}}
 body.calm .scene-transition>span{transition:none}
 
@@ -92,8 +92,8 @@ body.calm .scene-transition>span{transition:none}
  .title-screen .title-menu{top:77%}
  .title-screen .start-button{min-height:48px;font-size:10px;padding:11px 14px 10px;gap:12px}
  .title-screen .title-instruction{margin-top:11px;margin-bottom:1px;font-size:4px}
- .title-screen .title-work{font-size:8px;min-height:40px;padding:5px}
- .title-work span{font-size:5px}
+ .title-screen .title-work{font-size:14px;min-height:44px;padding:6px 8px}
+ .title-work span{font-size:8px}
  .title-showcase{top:69%;width:88%;gap:13px;min-height:47px}
  .title-set-label{gap:3px}.title-set-label strong{font-size:9px;letter-spacing:0}.title-set-label>span:first-child,.title-set-label>span:last-child{font-size:6px;letter-spacing:.5px}
  .title-screen .title-set-buttons button{min-width:34px;min-height:44px;padding:7px;font-size:15px}
@@ -107,7 +107,7 @@ body.calm .scene-transition>span{transition:none}
  .title-screen .title-menu{top:76%}
  .title-screen .start-button{font-size:10px;min-height:44px;padding:9px 13px}
  .title-screen .title-instruction{margin-top:10px;font-size:4px}
- .title-screen .title-work{font-size:8px;min-height:34px;padding:4px}.title-work span{font-size:5px}
+ .title-screen .title-work{font-size:14px;min-height:44px;padding:5px 8px}.title-work span{font-size:8px}
  .title-screen .title-footer{bottom:10px}.title-screen .title-footer button{min-height:36px}
  .title-showcase{top:68.5%;min-height:42px}
 }
@@ -116,8 +116,8 @@ body.calm .scene-transition>span{transition:none}
  .title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(50px,min(12vw,18vh),86px)}
  .title-screen .title-role{margin-top:8px;font-size:6px}
  .title-screen .title-menu{top:77%;align-items:center}
- .title-screen .title-instruction{display:none}.title-screen .title-work{position:absolute;top:8px;left:calc(50% + 140px);white-space:nowrap;font-size:7px}
- .title-work span{display:block;font-size:5px;margin-left:0}
+ .title-screen .title-instruction{display:none}.title-screen .title-work{position:absolute;top:0;left:calc(50% + 120px);max-width:calc(50% - 132px);white-space:normal;font-size:12px;line-height:1.4}
+ .title-work span{display:block;font-size:8px;margin-left:0}
  .title-showcase{top:65%;gap:18px}
  .title-set-label strong{font-size:6px}.title-set-label>span:first-child,.title-set-label>span:last-child{font-size:4px}
  .title-screen .title-footer{bottom:6px;font-size:4px}.title-screen .title-footer button{min-height:30px}
@@ -127,5 +127,10 @@ body.calm .scene-transition>span{transition:none}
 @media(max-height:620px) and (max-width:599px){
  .title-screen .title-showcase{top:65%}
  .title-screen .title-menu{top:74%}
- .title-screen .title-work{min-height:30px;font-size:7px}
+ .title-screen .title-work{min-height:44px;font-size:13px}
+}
+
+@media(max-width:360px){
+ .title-screen .title-work{font-size:13px;line-height:1.5}
+ .title-work span{display:block;font-size:8px;margin:2px 0 0;line-height:1.5}
 }

@@ -1,4 +1,4 @@
-import {TitleScene} from './title-scene.mjs?v=beastcash1';
+import {TitleScene} from './title-scene.mjs?v=titlemenu2';
 import {World,stages,WIDTH,HEIGHT,distance} from './world.mjs?v=truck1';
 import {Renderer} from './renderer.mjs?v=likeness1';
 import {LotLife} from './life.mjs?v=truck1';
@@ -190,7 +190,9 @@ applySettings();resize();document.fonts.ready.then(fitTitle);requestAnimationFra
 try{
  const response=await fetch('content.json',{cache:'no-store'});if(!response.ok)throw new Error('Portfolio content could not be loaded');contentLoaded(await response.json());updateFeature();markCount();$('#loading').hidden=true;$('#title-screen').classList.remove('is-loading');
  $('#start-button').disabled=false;$('#title-work').disabled=false;
- const hash=new URLSearchParams(location.hash.slice(1)),id=hash.get('project');if(id&&projects.some(p=>p.id===id)){dismissIntro();openProject(id);}else if(document.activeElement===document.body)$('#start-button').focus({preventScroll:true});
+ const hash=new URLSearchParams(location.hash.slice(1)),id=hash.get('project');if(id&&projects.some(p=>p.id===id)){dismissIntro();openProject(id);}
+ // Do not autofocus on load: touch visitors should not start with a focus ring.
+ // Enter still starts the lot from the page, and Tab exposes visible keyboard focus.
 }catch(error){$('#loading').innerHTML='<div>THE STUDIO IS TAKING A MOMENT.<br><br><button id="retry-load">Try again ↻</button><br><br><a href="mailto:contact@benjamintran.ca">Contact Ben ↗</a></div>';$('#retry-load').onclick=()=>location.reload();console.error(error);}
 function markCount(){const count=stages.slice(0,4).filter(s=>world.visited.has(s.id)).length;$('#visited-count').textContent=`${count} OF 4 SETS VISITED`;}
 

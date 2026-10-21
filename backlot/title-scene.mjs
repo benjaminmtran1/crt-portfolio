@@ -163,10 +163,8 @@ export class TitleScene {
       const y = floor + 7 + r() * Math.max(1, h - floor - 7);
       rect(c, r() * w, y, 2 + r() * 7, 1, i % 2 ? '#355662' : '#1D3C47');
     }
-    // A film-set spike mark quietly points toward the central entrance.
-    const mx = q(w * .5), my = q(floor + (h - floor) * .57);
-    line(c, mx - 5, my - 2, mx + 5, my + 2, P.apricot, 2);
-    line(c, mx - 5, my + 2, mx + 5, my - 2, P.apricot, 2);
+    // Keep the menu’s floor area clear. A former cream spike mark sat behind
+    // Enter Backlot and peeked below its shadow like leftover lettering.
     // Dark foreground lip sells the whole image as a physical stage.
     rect(c, 0, h - 9, w, 9, P.ink);
     rect(c, 0, h - 10, w, 1, '#428B91');
