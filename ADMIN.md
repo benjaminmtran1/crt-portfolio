@@ -12,6 +12,14 @@
 
 Import replaces the current draft only after confirmation when there are unpublished changes. Invalid files are rejected before replacing the draft. Successful import clears the previous draft's queued media, while canceled or invalid imports leave both intact. Edits are not automatically saved to browser storage.
 
+## Safe publishing and conflict recovery
+
+The publisher reads GitHub file versions with `cache: 'no-store'`, so a second save cannot reuse the browser's cached SHA from the first save. Before uploading media, it compares current repository JSON with the content originally loaded by this tab (or its last successful publish). Formatting and object-key order do not count as content changes. It holds that exact content SHA through the final write, so a concurrent content update during media uploads is still rejected rather than silently overwritten.
+
+On a conflict, the draft and queued media remain in the tab and there is no automatic retry. Export before refreshing or closing. Reload to inspect the latest content, then compare and reapply your edits, or import a reviewed draft. Import replaces the full draft; it does not merge another editor's changes and does not adopt the imported file as the repository baseline. Imported content that differs from the baseline remains marked unpublished. If initial content could not load, publishing an imported file is blocked until a current baseline can be loaded. Media already uploaded before a later content conflict can exist in the repository, but the conflicting content write does not go through.
+
+Publish submits a snapshot. Edits and new media added while it is in flight remain unpublished afterward. GitHub account-level repository write access is not proof of a fine-grained token's Contents permission; diagnostics distinguish these rather than recommending a token change for a content conflict.
+
 ## Field audit against the live runtime
 
 The audit uses `backlot/content.mjs` (`normalizeContent`, `galleryFor`, `watchLinks`, `featuredProjects`) and `backlot/app.mjs` (`contentLoaded`, `openIndex`, `openProject`, `openAbout`, `openContact`). No data migration is performed.
@@ -51,7 +59,7 @@ The audit uses `backlot/content.mjs` (`normalizeContent`, `galleryFor`, `watchLi
 | Section id/type | IDs connect six physical destinations; guide type supplies Work index | Preserved; IDs not editable. New guide categories use unique IDs and appear in Work index, not as new buildings |
 | Section/project/gallery ordering | Work index/filter order, featured project, gallery order | Existing ordering retained; structure controls placed away from everyday editing |
 | Unknown properties, unknown section types | Potential future/legacy data | Preserved without normalization. Unsupported section type gets a read-only explanation |
-| GitHub owner/repository/branch/token/remember | Existing direct GitHub Contents API workflow | Folded into Publish; unchanged localStorage keys, opt-in token behavior and GitHub request mechanics |
+| GitHub owner/repository/branch/token/remember | Direct GitHub Contents API workflow | Folded into Publish; unchanged localStorage keys and opt-in token behavior; cache-safe version reads and conflict guard |
 
 The actual title-screen credit remains `Construction Coordinator`; the Site identity role control labels its narrower in-game-header effect. Contact's main invitation remains runtime copy rather than pretending the unused legacy title controls it. No content.json, media, map ID, credit, authentication, permission or security setting is changed by the overhaul.
 
@@ -62,9 +70,10 @@ Existing runtime regression suites remain unchanged. The new editor test uses Li
 ```sh
 npm install --prefix /tmp/backlot-admin-tests --cache /tmp/backlot-admin-tests/npm-cache linkedom --ignore-scripts --no-audit --no-fund
 ADMIN_DOM_MODULE=/tmp/backlot-admin-tests/node_modules/linkedom node backlot/checks/admin-editor.test.mjs
+node backlot/checks/admin-publish.test.mjs
 node backlot/checks/admin-compat.test.mjs
 ```
 
-The editor suite exercises lossless load/navigation/import/export, unknown and legacy fields, single-field-only mutation, repeated expand/collapse, reorder persistence, project/gallery CRUD, new guide categories, site/About/Contact edits, sparse legacy sections, canceled and malformed imports, label/control associations, and mocked GitHub media/content ordering, successful publish, failure/retry state and opt-in token storage. It makes no real GitHub writes and uses no real token.
+The editor suite exercises lossless load/navigation/import/export, unknown and legacy fields, single-field-only mutation, repeated expand/collapse, reorder persistence, project/gallery CRUD, new guide categories, site/About/Contact edits, sparse legacy sections, canceled and malformed imports, label/control associations, and mocked GitHub media/content ordering, successful publish, failure/retry state and opt-in token storage. Publishing regression checks also cover stale cached metadata across repeated saves, equal JSON with reordered keys, concurrent edits before and during uploads, no blind conflict retry, failed metadata reads, imported baseline preservation, and draft/media edits made during a pending request. They make no real GitHub writes and use no real token.
 
 Local native Chromium was unavailable because the execution sandbox disallowed its required socket. The cloud browser also could not open the local preview. Native browser visual and interaction checks are therefore separate from these DOM/data checks and must be performed against the deployed revision. Physical-phone testing is not claimed.

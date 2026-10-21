@@ -13,8 +13,9 @@ const raw=JSON.parse(fs.readFileSync(path.join(root,'content.json'),'utf8'));
 const source=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const {document,Event}=parseHTML(html);
 const storage=new Map(),downloads=[],puts=[],windowEvents=new Map();
-let confirmAnswer=true,promptAnswer='',fetchHook=null;
-const context=vm.createContext({document,console,Blob,Uint8Array,Date,JSON,Set,WeakSet,WeakMap,Promise,queueMicrotask,encodeURIComponent,unescape,atob,btoa,
+let confirmAnswer=true,promptAnswer='',fetchHook=null,remoteContent=structuredClone(raw),remoteSha='existing-sha';
+const fileResponse=()=>({sha:remoteSha,encoding:'base64',content:Buffer.from(JSON.stringify(remoteContent)).toString('base64')});
+const context=vm.createContext({document,console,Blob,Uint8Array,TextDecoder,Date,JSON,Set,WeakSet,WeakMap,Promise,queueMicrotask,encodeURIComponent,unescape,atob,btoa,
   URL:{createObjectURL:blob=>{downloads.push(blob);return 'blob:test';},revokeObjectURL:()=>{}},
   localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)},
   window:{addEventListener:(type,fn)=>windowEvents.set(type,fn)},
@@ -22,7 +23,8 @@ const context=vm.createContext({document,console,Blob,Uint8Array,Date,JSON,Set,W
   fetch:async(url,options={})=>{
     if(fetchHook)return fetchHook(url,options);
     if(url==='content.json')return {ok:true,json:async()=>structuredClone(raw)};
-    if(options.method==='PUT'){puts.push({url,payload:JSON.parse(options.body)});return {ok:true};}
+    if(options.method==='PUT'){const payload=JSON.parse(options.body);puts.push({url,payload});if(url.endsWith('/content.json')){assert.equal(payload.sha,remoteSha);remoteContent=JSON.parse(Buffer.from(payload.content,'base64').toString('utf8'));remoteSha='saved-'+puts.length;}return {ok:true};}
+    if(url.includes('/contents/content.json?')){assert.equal(options.cache,'no-store');return {ok:true,json:async()=>fileResponse()};}
     return {ok:true,json:async()=>({sha:'existing-sha'})};
   }
 });
@@ -94,11 +96,60 @@ select('sparse-custom');click('[data-add-blk="text"]');assert.equal(state().chan
 // New work categories use the existing guide schema, no map IDs are rewritten.
 run('boot(JSON.parse(JSON.stringify(fixture)))');click('#btnAddChannel');assert.equal(state().channels.at(-1).type,'guide');assert.ok(state().channels.at(-1).id.startsWith('ch-'));assert.deepEqual(state().channels.slice(0,-1),fixture.channels);
 // Publishing exercised against a mocked GitHub transport only: media before content, branch, UTF-8 and SHA.
-run('boot(JSON.parse(JSON.stringify(fixture)))');run("pendingAssets['assets/qa.jpg']={base64:'YWJj',mime:'image/jpeg'}");input('#ghToken','test-token');input('#ghOwner','test-owner');input('#ghRepo','test-repo');
+run('boot(JSON.parse(JSON.stringify(fixture)))');remoteContent=structuredClone(fixture);run("pendingAssets['assets/qa.jpg']={base64:'YWJj',mime:'image/jpeg'}");input('#ghToken','test-token');input('#ghOwner','test-owner');input('#ghRepo','test-repo');
 await document.getElementById('btnPublish').onclick();assert.equal(puts.length,2);assert.ok(puts[0].url.endsWith('/assets/qa.jpg'));assert.ok(puts[1].url.endsWith('/content.json'));assert.equal(puts[1].payload.branch,'main');assert.equal(puts[1].payload.sha,'existing-sha');
 const published=JSON.parse(Buffer.from(puts[1].payload.content,'base64').toString('utf8'));assert.deepEqual({...published.site,updatedAt:undefined},{...fixture.site,updatedAt:undefined});assert.deepEqual(published.channels,fixture.channels);assert.deepEqual(published.future,fixture.future);assert.ok(published.site.updatedAt);assert.equal(run('hasDraftChanges()'),false);assert.equal(run('Object.keys(pendingAssets).length'),0);assert.equal(document.getElementById('btnPublish').disabled,false);
 // Failure does not clear queued media, and repeated attempts never stack UI listeners.
-run("pendingAssets['assets/retry.jpg']={base64:'YWJj',mime:'image/jpeg'}");fetchHook=async(url,opts)=>opts.method==='PUT'?{ok:false,json:async()=>({message:'Simulated failure'})}:{ok:true,status:200,json:async()=>url.endsWith('/user')?{login:'test-owner'}:url.includes('?ref=')?{sha:'existing'}:{full_name:'test-owner/test-repo',default_branch:'main',permissions:{push:true}}};
+run("pendingAssets['assets/retry.jpg']={base64:'YWJj',mime:'image/jpeg'}");fetchHook=async(url,opts)=>opts.method==='PUT'?{ok:false,json:async()=>({message:'Simulated failure'})}:{ok:true,status:200,json:async()=>url.endsWith('/user')?{login:'test-owner'}:url.includes('/contents/content.json?')?fileResponse():url.includes('?ref=')?{sha:'existing'}:{full_name:'test-owner/test-repo',default_branch:'main',permissions:{push:true}}};
 await document.getElementById('btnPublish').onclick();assert.equal(run('Object.keys(pendingAssets).length'),1);assert.match(document.getElementById('pubStatus').textContent,/Simulated failure/);assert.equal(document.getElementById('btnPublish').disabled,false);
 assert.equal(storage.size,0,'No token saved without existing opt-in');
+// Repeated saves advance the baseline to exactly what was submitted.
+fetchHook=null;run('pendingAssets={}');select('narrative');input('[data-f="p.0.title"]','A second save');
+await document.getElementById('btnPublish').onclick();assert.equal(puts.length,3);assert.equal(remoteContent.channels.find(c=>c.id==='narrative').projects[0].title,'A second save');assert.equal(run('hasDraftChanges()'),false);
+assert.deepEqual(JSON.parse(run('repositoryBaseline')),remoteContent);
+// Equivalent JSON key ordering/formatting is not a content change.
+remoteContent={channels:remoteContent.channels,future:remoteContent.future,site:remoteContent.site};
+await document.getElementById('btnPublish').onclick();assert.equal(puts.length,4);assert.equal(run('hasDraftChanges()'),false);
+// A prior concurrent update is caught before any media or content write.
+remoteContent.channels.find(c=>c.id==='narrative').projects[0].title='Another editor changed this';remoteSha='another-editor-sha';
+input('[data-f="p.0.title"]','My unpublished edit');run("pendingAssets['assets/keep.jpg']={base64:'YWJj',mime:'image/jpeg'}");
+const conflictedDraft=state(),beforeConflictWrites=puts.length;
+await document.getElementById('btnPublish').onclick();assert.equal(puts.length,beforeConflictWrites);assert.deepEqual(state(),conflictedDraft);assert.equal(run('Object.keys(pendingAssets).length'),1);assert.match(document.getElementById('pubStatus').textContent,/PUBLISH CONFLICT/);assert.doesNotMatch(document.getElementById('pubStatus').textContent,/TOKEN|token/i);
+await document.getElementById('btnPublish').onclick();assert.equal(puts.length,beforeConflictWrites,'Repeated clicks cannot turn a known conflict into an overwrite');
+// Importing does not adopt the imported draft as a repository baseline or merge it.
+const baselineBeforeImport=run('repositoryBaseline');
+await document.getElementById('jsonPicker').onchange({target:{files:[{text:async()=>JSON.stringify(fixture)}],value:'chosen'}});assert.equal(run('repositoryBaseline'),baselineBeforeImport);assert.match(document.getElementById('pubStatus').textContent,/rather than merges/);
+await document.getElementById('btnPublish').onclick();assert.equal(puts.length,beforeConflictWrites);
+// A race after preflight, while uploading media, is rejected using the held SHA.
+run('boot(JSON.parse(JSON.stringify(fixture)));pendingAssets={};');remoteContent=structuredClone(fixture);remoteSha='before-race';run("pendingAssets['assets/race.jpg']={base64:'YWJj',mime:'image/jpeg'}");
+let contentReads=0,raceContentWrites=0,diagnosticReads=0;
+fetchHook=async(url,opts)=>{
+  if(opts.method==='PUT'){
+    if(url.endsWith('/content.json')){raceContentWrites++;assert.equal(JSON.parse(opts.body).sha,'before-race');return {ok:false,status:409,json:async()=>({message:'content.json does not match newer-sha'})};}
+    remoteSha='newer-sha';remoteContent.site.heroName='Other editor';return {ok:true};
+  }
+  if(url.includes('/contents/content.json?')){contentReads++;return {ok:true,json:async()=>fileResponse()};}
+  if(url.includes('/contents/assets/'))return {ok:true,json:async()=>({sha:'asset-before'})};
+  diagnosticReads++;throw new Error('Conflict should not trigger token diagnostics');
+};
+const raceDraft=state();await document.getElementById('btnPublish').onclick();assert.equal(contentReads,1);assert.equal(raceContentWrites,1);assert.equal(diagnosticReads,0);assert.deepEqual(state(),raceDraft);assert.equal(run('Object.keys(pendingAssets).length'),1);assert.match(document.getElementById('pubStatus').textContent,/No automatic conflict retry/);assert.match(document.getElementById('pubStatus').textContent,/Some media may already have uploaded/);
+// Editing during a pending request remains unpublished; double clicks do not start a second write.
+run('boot(JSON.parse(JSON.stringify(fixture)));pendingAssets={};');remoteContent=structuredClone(fixture);remoteSha='before-edit';
+let resolveWrite,inFlightWrites=0;
+fetchHook=async(url,opts)=>{
+  if(opts.method==='PUT'){inFlightWrites++;const payload=JSON.parse(opts.body);remoteContent=JSON.parse(Buffer.from(payload.content,'base64').toString('utf8'));remoteSha='after-edit';return new Promise(resolve=>{resolveWrite=resolve;});}
+  return {ok:true,json:async()=>fileResponse()};
+};
+const inFlight=document.getElementById('btnPublish').onclick();await drain();assert.equal(typeof resolveWrite,'function');
+await document.getElementById('btnPublish').onclick();assert.equal(inFlightWrites,1);
+select('narrative');input('[data-f="p.0.title"]','Typed while publishing');run("pendingAssets['assets/newer.jpg']={base64:'ZGVm',mime:'image/jpeg'}");resolveWrite({ok:true});await inFlight;
+assert.equal(run('hasDraftChanges()'),true);assert.equal(state().channels.find(c=>c.id==='narrative').projects[0].title,'Typed while publishing');assert.notEqual(remoteContent.channels.find(c=>c.id==='narrative').projects[0].title,'Typed while publishing');assert.equal(run('Object.keys(pendingAssets).length'),1);assert.deepEqual(JSON.parse(run('repositoryBaseline')),remoteContent);assert.match(document.getElementById('pubStatus').textContent,/Newer edits/);assert.equal(document.getElementById('btnPublish').disabled,false);
+assert.equal(storage.size,0,'No credential persistence change');
+// Import-only startup cannot silently claim an unknown baseline or discard a draft on close.
+run('repositoryBaseline=null;pendingAssets={};boot(JSON.parse(JSON.stringify(fixture)),true)');
+assert.equal(run('repositoryBaseline'),null);assert.equal(run('hasDraftChanges()'),true);
+let unloadPrevented=false;const unloadEvent={preventDefault:()=>{unloadPrevented=true;}};windowEvents.get('beforeunload')(unloadEvent);assert.equal(unloadPrevented,true);assert.equal(unloadEvent.returnValue,'');
+let unknownBaseWrites=0;fetchHook=async(url,opts)=>{if(opts.method==='PUT')unknownBaseWrites++;return {ok:true,json:async()=>fileResponse()};};
+await document.getElementById('btnPublish').onclick();assert.equal(unknownBaseWrites,0);assert.match(document.getElementById('pubStatus').textContent,/no loaded repository baseline/);assert.deepEqual(state(),fixture);
 console.log('Admin editor integration passed: lossless load/navigation/import/export, unknown and legacy fields, precise edits, repeated expansion, project/gallery ordering and removal, category creation, site/About/Contact edits, sparse legacy sections, canceled/invalid import, mocked GitHub publish order/success/failure and unchanged opt-in token storage.');
+console.log('Publish concurrency passed: repeated saves, equivalent JSON, preflight conflict, no blind retry, imported baseline preservation, held SHA during media upload, in-flight draft/media preservation, and double-click guard.');

@@ -65,6 +65,8 @@ let selected = 0;
 let pendingAssets = {};   // path -> { base64, mime }
 let mediaTarget = null;   // callback for the shared file picker
 let loadedSnapshot = '';
+let repositoryBaseline = null;
+let publishing = false;
 const MAP_IDS = new Set(['narrative','commercial','reality','installation','about','contact']);
 
 const $ = id => document.getElementById(id);
@@ -102,12 +104,15 @@ function updateDraftStatus() {
   const count = cats.reduce((n,c) => n + (c.projects || []).length, 0);
   $('publishSummary').textContent = count + ' projects / ' + cats.length + ' categories';
 }
-function boot(c) {
+function boot(c, imported = false) {
   validateContent(c);
   content = c;
-  loadedSnapshot = JSON.stringify(c);
+  // Importing is a draft replacement, not evidence of what is on GitHub.
+  if (!imported) repositoryBaseline = JSON.stringify(c);
+  loadedSnapshot = imported ? (repositoryBaseline || '') : JSON.stringify(c);
   selected = Math.max(0, c.channels.findIndex(ch => ch.type === 'guide'));
   ['btnDownload','btnPublish','btnAddChannel','btnAddLegacy'].forEach(id => $(id).disabled = false);
+  $('btnPublish').disabled = publishing;
   renderChannelList();
   renderEditor();
   updateDraftStatus();
@@ -131,7 +136,7 @@ $('jsonPicker').onchange = async e => {
   try {
     const next = JSON.parse(await f.text()); validateContent(next);
     if (hasDraftChanges() && !confirm('Replace this draft and its queued media? Export it first if you want to keep your unpublished changes.')) return;
-    pendingAssets = {}; boot(next); renderPending(); setStatus('Draft imported. Review it, then publish when ready.', 'ok');
+    pendingAssets = {}; boot(next, true); renderPending(); setStatus('Draft imported. This replaces, rather than merges, portfolio content. Compare it with the latest version before publishing.', 'ok');
   } catch (err) { setStatus('Could not import: ' + err.message, 'err'); }
   finally { e.target.value = ''; }
 };
@@ -835,9 +840,9 @@ async function diagnose(owner, repo, branch, token) {
     const perms = info.permissions || {};
     lines.push(`Repo reachable: ${info.full_name} (default branch: ${info.default_branch})`);
     if (!perms.push) {
-      lines.push('⚠ TOKEN IS READ-ONLY on this repo. Edit the token: Repository access → Only select repositories → pick this repo; Permissions → Contents → Read and write.');
+      lines.push('⚠ This account does not have write access to this repository.');
     } else {
-      lines.push('Token can write to the repo.');
+      lines.push('Account has repository write access. The token also needs Contents: read and write; account access alone does not verify its permissions.');
       if (branch !== info.default_branch)
         lines.push(`⚠ BRANCH field says "${branch}" — repo default is "${info.default_branch}". Check the branch exists.`);
     }
@@ -847,55 +852,114 @@ async function diagnose(owner, repo, branch, token) {
   return lines;
 }
 
-async function ghPut(owner, repo, branch, token, path, base64, message) {
+async function ghRead(owner, repo, branch, token, path) {
   const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
   const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' };
-  let sha;
-  const get = await fetch(url + '?ref=' + branch, { headers });
-  if (get.ok) sha = (await get.json()).sha;
-  else if (get.status !== 404) {
+  // A PUT to the bare URL need not invalidate a cached GET with ?ref=.
+  // Always read the current version; never refresh/retry a conflicted PUT.
+  const get = await fetch(url + '?ref=' + encodeURIComponent(branch), { headers, cache:'no-store' });
+  if (get.ok) return get.json();
+  if (get.status === 404) return null;
+  if (path !== 'content.json') {
     /* files >1 MB can't be fetched via the JSON API — find the sha
        through the parent directory listing instead */
     const dir = path.includes('/') ? path.slice(0, path.lastIndexOf('/')) : '';
-    const ls = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${dir}?ref=${branch}`, { headers });
-    if (ls.ok) sha = ((await ls.json()).find(x => x.path === path) || {}).sha;
+    const ls = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${dir}?ref=${encodeURIComponent(branch)}`, { headers, cache:'no-store' });
+    if (ls.ok) {
+      const entries = await ls.json();
+      const file = Array.isArray(entries) && entries.find(x => x.path === path);
+      if (file && file.sha) return file;
+    }
   }
+  const error = new Error(path + ': Could not read the current repository version. No write was attempted for this file.');
+  error.status = get.status;
+  throw error;
+}
+function sameContent(a, b) {
+  if (a === b) return true;
+  if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every(key => Object.prototype.hasOwnProperty.call(b, key) && sameContent(a[key], b[key]));
+}
+async function contentPublishBase(owner, repo, branch, token) {
+  const file = await ghRead(owner, repo, branch, token, 'content.json');
+  if (!file) {
+    const error = new Error('content.json was not found on the selected branch. Check the repository and branch before publishing.');
+    error.status = 404;
+    throw error;
+  }
+  if (!file.sha || file.encoding !== 'base64' || typeof file.content !== 'string') throw new Error('Could not read content.json for a safe version comparison. Your draft has not been published.');
+  const remote = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(file.content.replace(/\s/g, '')), c => c.charCodeAt(0))));
+  if (!repositoryBaseline || !sameContent(remote, JSON.parse(repositoryBaseline))) {
+    const error = new Error(!repositoryBaseline
+      ? 'This tab has no loaded repository baseline. Export your draft, then open the editor from the live site and compare the current content before importing or reapplying your changes.'
+      : 'The repository content differs from the version this tab loaded. Export your draft, then reload and compare the latest content before importing or reapplying your changes.');
+    error.status = 409;
+    throw error;
+  }
+  return { sha:file.sha };
+}
+async function ghPut(owner, repo, branch, token, path, base64, message, expectedVersion) {
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' };
+  const file = expectedVersion || await ghRead(owner, repo, branch, token, path);
+  const sha = file && file.sha;
+  if (file && !sha) throw new Error(path + ': Could not read the file version. No write was attempted.');
   const put = await fetch(url, {
     method: 'PUT', headers,
     body: JSON.stringify({ message, content: base64, branch, ...(sha ? { sha } : {}) })
   });
-  if (!put.ok) throw new Error(path + ': ' + (await put.json()).message);
+  if (!put.ok) {
+    const error = new Error(path + ': ' + (await put.json()).message);
+    error.status = put.status;
+    throw error;
+  }
 }
 
 $('btnPublish').onclick = async () => {
-  if (!content) return;
+  if (!content || publishing) return;
   const owner = $('ghOwner').value.trim(), repo = $('ghRepo').value.trim(),
         branch = $('ghBranch').value.trim() || 'main', token = $('ghToken').value.trim();
   if (!owner || !repo || !token) { $('repoSettings').open = true; setStatus('Fill in owner, repository, and token first.', 'err'); (!owner ? $('ghOwner') : !repo ? $('ghRepo') : $('ghToken')).focus(); return; }
 
   const btn = $('btnPublish');
+  publishing = true;
   btn.disabled = true;
   try {
+    const draftSource = content;
+    const draft = JSON.parse(JSON.stringify(content));
     const assets = Object.entries(pendingAssets);
+    setStatus('Checking the current repository version…');
+    // Compare before any upload, and hold this exact SHA until the final write.
+    // A concurrent content update during media upload must still cause a conflict.
+    const expectedVersion = await contentPublishBase(owner, repo, branch, token);
     let n = 0;
     for (const [path, { base64 }] of assets) {
       setStatus(`Uploading media ${++n}/${assets.length}…\n${path}`);
       await ghPut(owner, repo, branch, token, path, base64, 'Add media: ' + path.split('/').pop());
     }
     setStatus('Committing content.json…');
-    content.site = content.site || {};
-    content.site.updatedAt = new Date().toISOString();
-    const jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
-    await ghPut(owner, repo, branch, token, 'content.json', jsonB64, 'Update site content');
-    pendingAssets = {};
+    draft.site.updatedAt = new Date().toISOString();
+    const jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(draft, null, 2))));
+    await ghPut(owner, repo, branch, token, 'content.json', jsonB64, 'Update site content', expectedVersion);
+    // Retain edits and media added while the request was in flight.
+    for (const [path, asset] of assets) if (pendingAssets[path] === asset) delete pendingAssets[path];
+    if (content === draftSource) content.site.updatedAt = draft.site.updatedAt;
+    repositoryBaseline = JSON.stringify(draft);
+    loadedSnapshot = JSON.stringify(draft);
     renderPending();
-    loadedSnapshot = JSON.stringify(content); updateDraftStatus();
-    setStatus('Published to GitHub. Pages is rebuilding; give it a minute, then view the site.', 'ok');
+    updateDraftStatus();
+    setStatus('Published to GitHub. Pages is rebuilding; give it a minute, then view the site.' + (hasDraftChanges() ? '\nNewer edits are still in this tab and have not been published.' : ''), 'ok');
   } catch (err) {
+    if (err.status === 409 || /does not match/i.test(err.message)) {
+      setStatus('PUBLISH CONFLICT — ' + err.message + '\nYour draft and queued media are still in this tab. No automatic conflict retry was attempted. Some media may already have uploaded. Export before refreshing or closing.', 'err');
+      return;
+    }
     setStatus('FAILED — ' + err.message + '\nRunning diagnostics…', 'err');
     const findings = await diagnose(owner, repo, branch, token);
     setStatus('FAILED — ' + err.message + '\n' + findings.join('\n'), 'err');
   } finally {
+    publishing = false;
     btn.disabled = false;
   }
 };
