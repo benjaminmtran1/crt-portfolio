@@ -4,27 +4,30 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#142430">
 <title>Benjamin Tran</title>
 <meta name="description" content="Walk through a pixel-art film set and explore Benjamin Tran's scenic construction work for film, television, commercials and installations.">
-<link rel="icon" href="backlot/assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="backlot/style.css?v=crew3">
+<link rel="preload" href="backlot/assets/pixel.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="icon" href="backlot/assets/mark.svg" type="image/svg+xml"><link rel="stylesheet" href="backlot/style.css?v=title4"><link rel="stylesheet" href="backlot/title.css?v=title4">
 </head>
 <body>
 <a class="skip" href="#title-work">Browse the work</a>
-<section id="title-screen" class="title-screen" aria-labelledby="title-name">
+<section id="title-screen" class="title-screen is-loading" aria-labelledby="title-name">
  <canvas id="title-scene" aria-hidden="true"></canvas>
- <div class="title-shade" aria-hidden="true"></div>
- <div class="cartridge-frame" aria-hidden="true"><span>1 PLAYER</span><span>TORONTO / ON</span></div>
+ <div class="title-print" aria-hidden="true"></div>
+ <div class="title-topline" aria-hidden="true"><span><i></i> SCENE 01</span><span>THE BACKLOT / TORONTO</span></div>
  <div class="title-content">
-  <div class="title-spark" aria-hidden="true">✦</div>
-  <h1 id="title-name"><span>BENJAMIN</span><span>TRAN</span></h1>
+  <div class="title-kicker" aria-hidden="true"><span></span> A PLAYABLE PORTFOLIO <span></span></div>
+  <h1 id="title-name" class="title-logo" aria-label="Benjamin Tran"><span class="title-word">BENJAMIN</span><span class="title-word">TRAN</span></h1>
   <p class="title-role">CONSTRUCTION COORDINATOR</p>
-  <div class="title-rule" aria-hidden="true"><i></i><i></i><i></i></div>
-  <button id="start-button" class="start-button" disabled><span aria-hidden="true">▶</span> PRESS START</button>
-  <button id="title-work" class="title-work" disabled>WORK INDEX</button>
-  <p class="title-instruction">ENTER / TAP TO BEGIN</p>
+  <div class="title-menu">
+   <button id="start-button" class="start-button" disabled><span aria-hidden="true">▶</span> ENTER BACKLOT <span aria-hidden="true">↗</span></button>
+   <p class="title-instruction">PRESS ENTER OR TAP TO PLAY</p>
+   <button id="title-work" class="title-work" disabled>Just here for the work? <span>WORK INDEX ↗</span></button>
+  </div>
   <div id="loading" class="title-loading" role="status">LOADING THE LOT…</div>
-  <span id="crew-seal" class="crew-seal" hidden>CREW APPROVED <span aria-hidden="true">♥</span></span>
  </div>
+ <span id="crew-seal" class="crew-seal" hidden>CREW<br>APPROVED <span aria-hidden="true">♥</span></span>
  <footer class="title-footer"><span>© 2026 <span id="title-credit">BENJAMIN TRAN</span></span><button id="title-sound" aria-pressed="false">SOUND OFF</button></footer>
 </section>
+<div id="scene-transition" class="scene-transition" aria-hidden="true" hidden><span></span><span></span></div>
 <div class="app" inert>
  <header class="topbar">
   <a class="identity" href="#" id="home-button" aria-label="Benjamin Tran, return to the lot entrance"><span class="clapper" aria-hidden="true">BT</span><span><strong id="identity-name">BENJAMIN TRAN</strong><small id="identity-role">CONSTRUCTION COORDINATOR · DESIGNER</small></span></a>
@@ -50,6 +53,6 @@
 <dialog id="panel" class="panel" aria-labelledby="panel-title"><div id="panel-inner"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <noscript><div class="no-js">This interactive portfolio needs JavaScript. Enable JavaScript to browse the projects, or <a href="mailto:contact@benjamintran.ca">contact Ben</a>.</div></noscript>
-<script type="module" src="backlot/app.mjs?v=crew3"></script>
+<script type="module" src="backlot/app.mjs?v=title4"></script>
 </body>
 </html>

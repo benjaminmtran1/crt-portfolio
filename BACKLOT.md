@@ -1,6 +1,6 @@
 # The Backlot — live portfolio
 
-The homepage is now an explorable pixel-art film set. The original admin and content format remain the publishing workflow. No build step or package installation is required.
+The homepage is now an explorable pixel-art film set. The rebuilt Backlot Studio admin keeps the original content format and GitHub publishing workflow. No build step or package installation is required.
 
 ## Current Build
 
@@ -10,7 +10,7 @@ The homepage is now an explorable pixel-art film set. The original admin and con
 - `index.html` is the game frame. The implementation and original pixel artwork are in `backlot/`.
 - `content.json` and `assets/` remain canonical. There is no generated image manifest to rebuild after edits. Images are the admin's existing 1920px maximum uploads.
 - All project counts and category filters come from the current content. A new guide category appears in Work index automatically. The six physical map destinations keep their existing IDs.
-- A 1990s game title screen opens each visit: **Benjamin Tran** with **Construction Coordinator**, Press Start, a direct Work index option and optional sound. The name follows `site.heroName`; the requested title-screen role is fixed. Settings can return to the title screen. Shared project links open the project directly.
+- A separate, full-screen theatrical title scene opens each visit: oversized, colourful **Benjamin Tran** lettering with **Construction Coordinator**, original soundstage artwork, Enter Backlot, a direct Work index option and optional sound. A short curtain transition enters the playable lot; calmer motion skips it. The name follows `site.heroName`; the requested title-screen role is fixed. Settings can return to the title screen. Shared project links open the project directly.
 - The clapperboard beside the central avenue starts a 10.5-second scene: quiet on set, a lantern-carrying performer, a moving camera and a wrap. CUT or Escape skips it. Dialogs and background tabs pause it.
 - Walk behind stages 01 and 02 through the northern service lane to reveal the timber backs, braces and sandbags. Inspect the small rear placards to open an illustrated cutaway and links to the current project galleries.
 - Pet the workshop cat, then follow it. It waits if you fall behind and leads to a small crew corner beyond the prop garden. Pet it there to earn a Crew Approved stamp. The stamp and the cat's new resting place are saved in this browser.
@@ -35,6 +35,8 @@ Supported in the Backlot:
 
 Map location IDs: `narrative`, `commercial`, `reality`, `installation`, `about`, `contact`. Keep these IDs when editing the existing destinations. New guide categories are immediately available in Work index; creating another building or changing the map requires a code update. Non-guide custom/process channels, television timeslots, test bars, the old SIGNAL carousel and other CRT-specific effects do not drive the game map.
 
+The editor now puts project titles, roles and media first. Optional details and legacy-only fields stay available without cluttering the main form, and opening or exporting content does not remove stored values. See [ADMIN.md](ADMIN.md) for the field audit and editor integration test setup.
+
 ## Rollback
 
 The old homepage is preserved in branch `archive/crt-before-backlot-2026-10-20`, at commit `fd991678b2fef974df1ff62a26be47715133df02`. Reverting the Backlot release commit restores the former homepage without erasing newer repository history. The `CNAME` file and original project media were preserved.
@@ -46,10 +48,13 @@ node backlot/checks/routes.test.mjs
 node backlot/checks/admin-compat.test.mjs
 node backlot/checks/life.test.mjs
 node backlot/checks/departments.test.mjs
+node backlot/checks/title.test.mjs
 node --check backlot/app.mjs
 ```
 
 The route checks cover every destination from the start and all destination pairs, collision, pause, manual override and movement at different frame rates. The crew checks cover every new prop route, timed takes, skipping and pausing, cat path collision, waiting for the player, and saved rewards. Department checks cover all lighting cues, changing dialogue hints, construction timing at 30/60/120 Hz, manual stepping, pause/replay and calmer motion. The admin checks exercise adding/relabeling/removing projects and categories, new photos, videos, metadata, missing content and filename replacement. Native Canvas renders check the pixel artwork and drawing performance; all three lighting looks and four construction steps have been visually reviewed.
+
+Title lifecycle checks cover repeated entry, curtain timing, interrupted transitions, returning to the title, direct Work index, shared project links, reduced motion, saved discoveries and failed-load recovery. Editor integration checks also verify lossless import/export and mocked publishing success/failure.
 
 No real publish was performed through the user's personal token during testing. The managed preview server started, but the cloud browser timed out before opening it; browser and physical iPhone touch QA remain unverified. GitHub Pages deployment is checked separately after the source push.
 

@@ -3,230 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CONTROL ROOM — CRT Portfolio Admin</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --tube: #0b0e0c;
-  --panel: #10140f;
-  --phosphor: #a8bfa0;
-  --phosphor-dim: #5f6f5b;
-  --amber: #c2a35c;
-  --ghost: #6e7f8d;
-  --burn: #d8d4c4;
-  --line: rgba(168,191,160,0.22);
-  --osd: 'VT323', monospace;
-  --mono: 'IBM Plex Mono', monospace;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  background: #060806;
-  color: var(--phosphor);
-  font-family: var(--mono);
-  font-size: 13px;
-  min-height: 100vh;
-}
-/* faint scanlines over the whole tool */
-body::after {
-  content:""; position: fixed; inset:0; pointer-events:none; z-index: 999;
-  background: repeating-linear-gradient(to bottom, transparent 0 3px, rgba(0,0,0,0.12) 3px 4px);
-}
-header {
-  display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--line);
-  background: var(--panel);
-}
-header h1 { font-family: var(--osd); font-weight:400; font-size: 28px; color: var(--burn);
-  text-shadow: 1.5px 0 0 rgba(194,120,92,0.35), -1.5px 0 0 rgba(110,141,141,0.35); }
-header .sub { font-family: var(--osd); color: var(--ghost); font-size: 17px; letter-spacing: 0.08em; }
-header .spacer { flex:1; }
-
-.layout { display: grid; grid-template-columns: 260px 1fr 320px; min-height: calc(100vh - 61px); }
-@media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
-
-/* ---------- panels ---------- */
-.panel { border-right: 1px solid var(--line); padding: 16px; }
-.panel:last-child { border-right: 0; }
-.panel h2 {
-  font-family: var(--osd); font-weight:400; font-size: 20px; color: var(--amber);
-  letter-spacing: 0.1em; margin-bottom: 12px;
-}
-
-/* ---------- channel list ---------- */
-.ch-item {
-  display:flex; align-items:center; gap:8px;
-  padding: 9px 10px; margin-bottom: 6px;
-  border: 1px solid var(--line);
-  cursor: pointer;
-  font-family: var(--osd); font-size: 17px; letter-spacing: 0.06em;
-  color: var(--phosphor-dim);
-}
-.ch-item:hover { color: var(--phosphor); border-color: rgba(168,191,160,0.5); }
-.ch-item.active { color: var(--amber); border-color: rgba(194,163,92,0.7); background: rgba(194,163,92,0.06); }
-.ch-item .num { color: var(--ghost); }
-.ch-item .grow { flex:1; }
-.ch-item .mini { font-size: 14px; padding: 0 4px; background:none; border:0; color: var(--ghost); cursor:pointer; }
-.ch-item .mini:hover { color: var(--burn); }
-
-/* ---------- form controls ---------- */
-label.f { display:block; margin: 12px 0 4px; color: var(--ghost); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
-input[type=text], textarea, select {
-  width: 100%;
-  background: #0a0d0a;
-  border: 1px solid var(--line);
-  color: var(--phosphor);
-  font-family: var(--mono);
-  font-size: 13px;
-  padding: 8px 10px;
-}
-textarea { min-height: 72px; resize: vertical; line-height: 1.6; }
-input:focus, textarea:focus, select:focus { outline: 1px solid var(--amber); border-color: var(--amber); }
-
-button.act {
-  font-family: var(--osd); font-size: 17px; letter-spacing: 0.08em;
-  background: transparent; color: var(--phosphor);
-  border: 1px solid var(--line);
-  padding: 8px 16px; cursor: pointer; margin-top: 10px;
-}
-button.act:hover { color: var(--amber); border-color: rgba(194,163,92,0.7); }
-button.act.primary { color: var(--amber); border-color: rgba(194,163,92,0.7); }
-button.act.primary:hover { color: var(--burn); border-color: var(--burn); }
-button.act.danger:hover { color: #b0564a; border-color: #b0564a; }
-button.act.small { font-size: 15px; padding: 4px 10px; }
-
-/* ---------- cards (projects / steps / blocks) ---------- */
-.card {
-  border: 1px solid var(--line);
-  padding: 12px;
-  margin: 12px 0;
-  background: var(--panel);
-}
-.card .card-head {
-  display:flex; align-items:center; gap:8px;
-  font-family: var(--osd); font-size: 17px; color: var(--phosphor);
-  margin-bottom: 4px;
-}
-.card .card-head .grow { flex: 1; }
-.card .card-head button { background:none; border:0; color: var(--ghost); cursor:pointer; font-size: 15px; font-family: var(--osd); }
-.card .card-head button:hover { color: var(--burn); }
-/* collapsible cards */
-.card .card-head[data-toggle] { cursor: pointer; user-select: none; }
-.card .card-head[data-toggle]:hover .grow { color: var(--burn); }
-.card.collapsed { margin: 6px 0; padding: 8px 12px; }
-.card.collapsed .card-body { display: none; }
-.card .card-head .caret { color: var(--amber); width: 14px; flex: 0 0 auto; }
-.card .card-head .num { color: var(--ghost); flex: 0 0 auto; }
-.card .card-head .sum {
-  flex: 0 1 auto; font-size: 11px; color: var(--phosphor-dim);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 45%;
-}
-.card .card-head .warn { color: #b0564a; }
-.list-head { display: flex; align-items: center; gap: 8px; margin-top: 24px; }
-.list-head h2 { margin: 0; flex: 1; }
-
-/* ---------- media picker & preview ---------- */
-.media-row { display:flex; gap:12px; align-items:flex-start; margin-top: 6px; flex-wrap: wrap; }
-.tv-frame {
-  position: relative; overflow: hidden; border-radius: 8px / 6px;
-  background: #000; width: 180px; aspect-ratio: 4/3; flex: 0 0 auto;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.9), 0 0 0 1px var(--line);
-}
-.tv-frame.wide { width: 260px; aspect-ratio: 16/9; }
-.tv-frame img, .tv-frame video {
-  width:100%; height:100%; object-fit: cover; display:block;
-  filter: saturate(0.55) contrast(1.08) brightness(0.88) sepia(0.18) hue-rotate(-8deg);
-}
-.tv-frame::before {
-  content:""; position:absolute; inset:0; pointer-events:none;
-  background: repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0,0,0,0.28) 2px 3px);
-}
-.tv-frame::after {
-  content:""; position:absolute; inset:0; pointer-events:none;
-  background: radial-gradient(ellipse at center, transparent 58%, rgba(0,0,0,0.55) 100%);
-}
-.tv-frame .ns {
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-family: var(--osd); color: var(--phosphor-dim); letter-spacing: 0.2em; font-size: 16px;
-}
-.media-meta { flex: 1; min-width: 180px; }
-.media-meta .path { font-size: 11px; color: var(--ghost); word-break: break-all; margin-top: 6px; }
-input[type=file] { display: none; }
-
-/* ---------- publish panel ---------- */
-.status {
-  font-family: var(--osd); font-size: 16px; letter-spacing: 0.06em;
-  margin-top: 12px; min-height: 20px; color: var(--ghost); white-space: pre-line;
-}
-.status.ok { color: var(--phosphor); }
-.status.err { color: #b0564a; }
-.pending { margin-top: 10px; font-size: 11px; color: var(--ghost); }
-.pending div { padding: 3px 0; border-bottom: 1px dashed var(--line); word-break: break-all; }
-.hint { font-size: 11px; color: var(--phosphor-dim); line-height: 1.6; margin-top: 8px; }
-.hint a { color: var(--amber); }
-.rec-dot { color:#b0564a; animation: blink 1.2s steps(2) infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .rec-dot { animation: none; } }
-</style>
+<title>Backlot Studio · Portfolio editor</title>
+<link rel="stylesheet" href="backlot/admin.css?v=studio1">
 </head>
 <body>
 
-<header>
-  <h1>CONTROL ROOM</h1>
-  <span class="sub"><span class="rec-dot">●</span> EDITING — THE BACKLOT</span>
-  <span class="spacer"></span>
-  <button class="act small" id="btnLoadFile">LOAD JSON FILE</button>
-  <button class="act small" id="btnDownload">DOWNLOAD JSON</button>
+<a class="skip" href="#editor">Skip to editor</a>
+<header class="topbar">
+  <a class="brand" href="./" target="_blank" rel="noopener" aria-label="Open the live Backlot portfolio"><span class="brand-mark" aria-hidden="true">B.</span><span>THE BACKLOT<small>STUDIO / CONTENT EDITOR</small></span></a>
+  <div class="top-actions">
+    <span class="draft-state" id="draftState" role="status">Loading content…</span>
+    <a class="act small live-link" href="./" target="_blank" rel="noopener">View site ↗</a>
+    <button class="act small" id="btnLoadFile">Import JSON</button>
+    <button class="act small" id="btnDownload" disabled>Export draft ↓</button>
+  </div>
 </header>
-
 <div class="layout">
-
-  <!-- LEFT: channel list -->
-  <div class="panel">
-    <h2>CHANNELS</h2>
-    <div id="chList"></div>
-    <button class="act" id="btnAddChannel">+ NEW CHANNEL</button>
-    <label class="f" style="margin-top:20px;">Site title (browser tab)</label>
-    <input type="text" id="sitePageTitle">
-    <label class="f">Hero name (use &lt;br&gt; for line breaks)</label>
-    <input type="text" id="siteHeroName">
-  </div>
-
-  <!-- MIDDLE: editor -->
-  <div class="panel" id="editor">
-    <h2 id="editorTitle">EDITOR</h2>
-    <div id="editorBody"><p class="hint">Select a channel to edit.</p></div>
-  </div>
-
-  <!-- RIGHT: publish -->
-  <div class="panel">
-    <h2>TRANSMIT</h2>
-    <p class="hint"><b>BACKLOT EDITING</b><br>Projects, roles, captions, galleries, videos, write-ups, info fields, category labels, About, Contact and site identity feed the new game portfolio. The four existing project categories have map locations. New guide categories appear in Work index; new buildings require a code update. TV timeslots, test bars and the old SIGNAL carousel do not control the map.</p>
-    <p class="hint"><a href="./" target="_blank" rel="noopener">OPEN LIVE PORTFOLIO ↗</a></p>
-    <label class="f">GitHub owner</label>
-    <input type="text" id="ghOwner" value="benjaminmtran1" placeholder="your-username">
-    <label class="f">Repo</label>
-    <input type="text" id="ghRepo" value="crt-portfolio" placeholder="crt-portfolio">
-    <label class="f">Branch</label>
-    <input type="text" id="ghBranch" value="main">
-    <label class="f">Fine-grained token (Contents: read/write)</label>
-    <input type="password" id="ghToken" placeholder="github_pat_…">
-    <label style="display:flex; gap:6px; align-items:center; margin-top:8px; font-size:11px; color: var(--ghost); cursor:pointer;">
-      <input type="checkbox" id="ghRemember" style="accent-color:#c2a35c;"> remember settings in this browser
-    </label>
-    <button class="act primary" id="btnPublish">⏵ PUBLISH TO GITHUB</button>
-    <div class="status" id="pubStatus"></div>
-    <div class="pending" id="pendingList"></div>
-    <p class="hint">
-      Publishing commits <b>content.json</b> plus any newly added media to the repo.
-      GitHub Pages redeploys automatically (give it a minute).<br><br>
-      Create a token at github.com → Settings → Developer settings →
-      Fine-grained tokens. Scope it to this one repo, permission
-      "Contents: Read and write". The token stays in your browser only.
-    </p>
-  </div>
+  <aside class="sidebar">
+    <div class="sidebar-top"><span class="eyebrow">ON THE LOT</span><h1>Your studio.</h1><p>Good work. Ready for its close-up.</p></div>
+    <nav id="chList" aria-label="Portfolio sections"></nav>
+    <button class="act add-category" id="btnAddChannel" disabled>+ Add work category</button>
+    <details class="sidebar-tools"><summary>Archive &amp; structure</summary><p class="hint">Legacy sections stay in your file. They do not appear in the Backlot.</p><div id="legacyList"></div><button class="act small" id="btnAddLegacy" disabled>+ Legacy section</button></details>
+    <div class="sidebar-note"><span class="tiny-slate" aria-hidden="true"></span><p>CONTENT, NOT CODE.<br><span>Projects update here. The map and its discoveries live in the site code.</span></p></div>
+  </aside>
+  <main class="editor panel" id="editor" tabindex="-1">
+    <div class="editor-heading"><div><span class="eyebrow" id="editorKicker">THE EDITING ROOM</span><h2 id="editorTitle">Loading the studio.</h2><p id="editorNote">Fetching your current portfolio.</p></div><span class="section-stamp" id="editorStamp" aria-hidden="true">01</span></div>
+    <div id="editorBody"><p class="hint">Your projects will appear here.</p></div>
+  </main>
+  <aside class="publish-panel" aria-label="Publish your changes">
+    <div class="publish-card">
+      <span class="eyebrow">READY WHEN YOU ARE</span><h2>Make it live.</h2>
+      <div class="publish-summary" id="publishSummary">Current portfolio</div>
+      <p class="hint">Edits stay in this tab until you publish or export. Nothing goes live as you type.</p>
+      <details class="repo-settings" id="repoSettings"><summary>GitHub connection <span>↗</span></summary>
+        <label class="f" for="ghOwner">GitHub owner</label><input type="text" id="ghOwner" value="benjaminmtran1" placeholder="your-username">
+        <label class="f" for="ghRepo">Repository</label><input type="text" id="ghRepo" value="crt-portfolio" placeholder="crt-portfolio">
+        <label class="f" for="ghBranch">Branch</label><input type="text" id="ghBranch" value="main">
+        <label class="f" for="ghToken">Fine-grained token</label><input type="password" id="ghToken" placeholder="github_pat_…">
+        <label class="check"><input type="checkbox" id="ghRemember"> Remember settings and token in this browser</label>
+        <p class="hint">Use your existing token with Contents: read/write for this repository. The token stays in this browser, never in content.json.</p>
+      </details>
+      <button class="act primary publish-button" id="btnPublish" disabled>Publish to GitHub <span>↗</span></button>
+      <div class="status" id="pubStatus" role="status" aria-live="polite"></div>
+      <div class="pending" id="pendingList"></div>
+      <p class="publish-footnote">Uploads new media + content.json.<br>GitHub Pages rebuilds after publishing.</p>
+    </div>
+    <div class="studio-tip"><span class="eyebrow">A NOTE FROM THE SHOP</span><p>First in each category gets the spotlight.</p><span>Reorder projects to choose the featured work.</span></div>
+  </aside>
 </div>
 
 <input type="file" id="jsonPicker" accept="application/json">
@@ -241,6 +64,8 @@ let content = null;
 let selected = 0;
 let pendingAssets = {};   // path -> { base64, mime }
 let mediaTarget = null;   // callback for the shared file picker
+let loadedSnapshot = '';
+const MAP_IDS = new Set(['narrative','commercial','reality','installation','about','contact']);
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -258,74 +83,91 @@ const BLANK = {
 /* ============================================================
    LOAD
    ============================================================ */
+function validateContent(c) {
+  if (!c || typeof c !== 'object' || Array.isArray(c) || !c.site || typeof c.site !== 'object' || Array.isArray(c.site) || !Array.isArray(c.channels)) throw new Error('Use a portfolio JSON file with a site object and channels array.');
+  for (const ch of c.channels) {
+    if (!ch || typeof ch !== 'object' || Array.isArray(ch)) throw new Error('Every section must be an object.');
+    for (const key of ['projects','steps','rows','tx','slate','blocks','carousel']) if (ch[key] !== undefined && (!Array.isArray(ch[key]) || ch[key].some(x => !x || typeof x !== 'object' || Array.isArray(x)))) throw new Error('Invalid ' + key + ' list in ' + (ch.label || 'section') + '.');
+    if (ch.paragraphs !== undefined && (!Array.isArray(ch.paragraphs) || ch.paragraphs.some(x => typeof x !== 'string'))) throw new Error('Biography paragraphs must be a list of text.');
+    for (const project of ch.projects || []) for (const key of ['meta','gallery']) if (project[key] !== undefined && (!Array.isArray(project[key]) || project[key].some(x => !x || typeof x !== 'object' || Array.isArray(x)))) throw new Error('Invalid project ' + key + ' list.');
+  }
+}
+function hasDraftChanges() { return !!content && (JSON.stringify(content) !== loadedSnapshot || Object.keys(pendingAssets).length > 0); }
+function updateDraftStatus() {
+  if (!content) return;
+  const changed = hasDraftChanges();
+  $('draftState').textContent = changed ? '● Unpublished edits' : '● Content loaded';
+  $('draftState').classList.toggle('changed', changed);
+  const cats = content.channels.filter(c => c.type === 'guide');
+  const count = cats.reduce((n,c) => n + (c.projects || []).length, 0);
+  $('publishSummary').textContent = count + ' projects / ' + cats.length + ' categories';
+}
 function boot(c) {
+  validateContent(c);
   content = c;
-  $('sitePageTitle').value = c.site.pageTitle || '';
-  $('siteHeroName').value = c.site.heroName || '';
-  selected = 0;
+  loadedSnapshot = JSON.stringify(c);
+  selected = Math.max(0, c.channels.findIndex(ch => ch.type === 'guide'));
+  ['btnDownload','btnPublish','btnAddChannel','btnAddLegacy'].forEach(id => $(id).disabled = false);
   renderChannelList();
   renderEditor();
+  updateDraftStatus();
 }
+window.addEventListener('beforeunload', e => { if (hasDraftChanges()) { e.preventDefault(); e.returnValue = ''; } });
+['input','change','click'].forEach(type => document.addEventListener(type, () => queueMicrotask(updateDraftStatus)));
 fetch('content.json', { cache:'no-store' })
   .then(r => r.ok ? r.json() : Promise.reject())
-  .then(boot)
+  .then(c => { if (!content) boot(c); })
   .catch(() => {
-    $('editorBody').innerHTML = '<p class="hint">Could not fetch content.json (this is normal when opening admin.html straight from disk — browsers block local fetch). Click <b>LOAD JSON FILE</b> and pick your content.json, or run a local server: <code>python3 -m http.server</code></p>';
+    if (content) return;
+    $('editorTitle').textContent = 'Bring your content.';
+    $('editorNote').textContent = 'The portfolio file could not be loaded.';
+    $('draftState').textContent = 'Not loaded';
+    $('editorBody').innerHTML = '<p class="notice">Import your content.json to start editing, or open the editor from the live site rather than directly from disk.</p>';
   });
 
 $('btnLoadFile').onclick = () => $('jsonPicker').click();
-$('jsonPicker').onchange = e => {
+$('jsonPicker').onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
-  f.text().then(t => boot(JSON.parse(t))).catch(() => setStatus('Could not parse that file as JSON.', 'err'));
+  try {
+    const next = JSON.parse(await f.text()); validateContent(next);
+    if (hasDraftChanges() && !confirm('Replace this draft and its queued media? Export it first if you want to keep your unpublished changes.')) return;
+    pendingAssets = {}; boot(next); renderPending(); setStatus('Draft imported. Review it, then publish when ready.', 'ok');
+  } catch (err) { setStatus('Could not import: ' + err.message, 'err'); }
+  finally { e.target.value = ''; }
 };
-
-$('sitePageTitle').oninput = e => { if (content) content.site.pageTitle = e.target.value; };
-$('siteHeroName').oninput = e => { if (content) content.site.heroName = e.target.value; };
 
 /* ============================================================
    CHANNEL LIST
    ============================================================ */
+function activeSection(ch) { return ch.type === 'guide' || ch.id === 'signal' || ch.id === 'about' || ch.id === 'contact'; }
+function sectionName(ch) { return ch.id === 'signal' ? 'Site identity' : ch.id === 'about' ? 'About' : ch.id === 'contact' ? 'Contact' : ch.label || 'Untitled'; }
 function renderChannelList() {
-  const el = $('chList');
-  el.innerHTML = '';
-  content.channels.forEach((ch, i) => {
-    const d = document.createElement('div');
-    d.className = 'ch-item' + (i === selected ? ' active' : '');
-    d.innerHTML = `<span class="num">CH ${String(i+1).padStart(2,'0')}</span>
-      <span class="grow">${esc(ch.label)}</span>
-      <button class="mini" data-a="up" title="Move up">▲</button>
-      <button class="mini" data-a="down" title="Move down">▼</button>
-      <button class="mini" data-a="del" title="Delete">✕</button>`;
-    d.onclick = e => {
-      const a = e.target.dataset.a;
-      if (a === 'up' && i > 0) { swap(i, i-1); return; }
-      if (a === 'down' && i < content.channels.length-1) { swap(i, i+1); return; }
-      if (a === 'del') {
-        if (confirm(`Delete channel "${ch.label}"? This only takes effect when you publish.`)) {
-          content.channels.splice(i,1);
-          selected = Math.max(0, selected - (i <= selected ? 1 : 0));
-          renderChannelList(); renderEditor();
-        }
-        return;
-      }
-      selected = i; renderChannelList(); renderEditor();
-    };
-    el.appendChild(d);
-  });
+  const live = $('chList'), legacy = $('legacyList'); live.innerHTML = ''; legacy.innerHTML = '';
+  const ordered = content.channels.map((ch,i) => ({ch,i})).sort((a,b) => Number(b.ch.type === 'guide') - Number(a.ch.type === 'guide'));
+  for (const {ch,i} of ordered) {
+    const button = document.createElement('button'); button.className = 'ch-item' + (i === selected ? ' active' : '');
+    button.setAttribute('aria-current', i === selected ? 'page' : 'false');
+    button.innerHTML = `<span class="nav-symbol" aria-hidden="true">${ch.type === 'guide' ? '▧' : ch.id === 'about' ? '☺' : ch.id === 'contact' ? '↗' : '✦'}</span><span class="grow">${esc(sectionName(ch))}</span>${ch.type === 'guide' ? `<span class="nav-count">${(ch.projects || []).length}</span>` : ''}`;
+    button.onclick = () => { selected = i; renderChannelList(); renderEditor(); };
+    (activeSection(ch) ? live : legacy).appendChild(button);
+  }
 }
 function swap(a, b) {
   [content.channels[a], content.channels[b]] = [content.channels[b], content.channels[a]];
   if (selected === a) selected = b; else if (selected === b) selected = a;
   renderChannelList(); renderEditor();
 }
-$('btnAddChannel').onclick = () => {
-  const type = prompt('Channel type — one of: hero, guide, process, profile, contact, custom\n(guide = project listings, profile = interview segment, custom = free-form text/image/video blocks)', 'custom');
-  if (!type || !BLANK[type]) return;
-  const ch = JSON.parse(JSON.stringify(BLANK[type]));
-  ch.id = 'ch-' + Date.now().toString(36);
-  content.channels.push(ch);
-  selected = content.channels.length - 1;
-  renderChannelList(); renderEditor();
+function addSection(type) {
+  if (!content || !BLANK[type]) return;
+  const ch = JSON.parse(JSON.stringify(BLANK[type])); ch.id = 'ch-' + Date.now().toString(36);
+  if (type === 'guide') { ch.label = 'New category'; ch.reel.caption = ''; }
+  content.channels.push(ch); selected = content.channels.length - 1;
+  renderChannelList(); renderEditor(); updateDraftStatus();
+}
+$('btnAddChannel').onclick = () => addSection('guide');
+$('btnAddLegacy').onclick = () => {
+  const type = prompt('Legacy section type: hero, process, profile, contact or custom. These do not add a Backlot map destination.', 'custom');
+  if (type && type !== 'guide') addSection(type);
 };
 
 /* ============================================================
@@ -342,12 +184,14 @@ function setMediaStatus(msg, isErr) {
 }
 $('mediaPicker').onchange = async e => {
   const f = e.target.files[0]; if (!f || !mediaTarget) return;
+  const target = mediaTarget, targetContent = content;
   setMediaStatus('PROCESSING ' + f.name + '…');
   try {
     const { base64, mime, name } = await prepareMedia(f);
+    if (content !== targetContent) { mediaTarget = null; e.target.value = ''; setStatus('The draft changed during upload. Add that media again to the current draft.', 'err'); return; }
     const path = 'assets/' + name;
     pendingAssets[path] = { base64, mime };
-    mediaTarget(path, 'data:' + mime + ';base64,' + base64);
+    target(path, 'data:' + mime + ';base64,' + base64);
   } catch (err) {
     console.error('Media prepare failed:', err);
     setMediaStatus('✕ ' + err.message, true);
@@ -363,12 +207,14 @@ function pickMediaMulti(cb, btn) { mediaMultiTarget = cb; mediaMultiBtn = btn ||
 $('mediaPickerMulti').onchange = async e => {
   const files = Array.from(e.target.files || []);
   if (!files.length || !mediaMultiTarget) return;
+  const target = mediaMultiTarget, targetContent = content;
   const label = mediaMultiBtn ? mediaMultiBtn.textContent : '';
   const paths = [], fails = [];
   for (let i = 0; i < files.length; i++) {
     if (mediaMultiBtn) mediaMultiBtn.textContent = `PROCESSING ${i + 1}/${files.length}…`;
     try {
       const { base64, mime, name } = await prepareMedia(files[i]);
+      if (content !== targetContent) { setStatus('The draft changed during upload. Add that media again to the current draft.', 'err'); break; }
       const path = 'assets/' + name;
       pendingAssets[path] = { base64, mime };
       paths.push(path);
@@ -378,7 +224,7 @@ $('mediaPickerMulti').onchange = async e => {
     }
   }
   if (mediaMultiBtn) mediaMultiBtn.textContent = label;
-  if (paths.length) mediaMultiTarget(paths);
+  if (paths.length && content === targetContent) target(paths);
   if (fails.length) alert('SKIPPED ' + fails.length + ' FILE(S)\n\n' + fails.join('\n\n'));
   mediaMultiTarget = null; mediaMultiBtn = null;
   e.target.value = '';
@@ -449,11 +295,11 @@ function previewSrc(path) {
 function embedPreview(path) {
   if (/(?:youtube\.com\/(?:watch|shorts|embed)|youtu\.be\/)/.test(path)) {
     const id = path.replace(/^.*(?:youtu\.be\/|v=|shorts\/|embed\/)([\w-]+).*$/, '$1');
-    return `<iframe src="https://www.youtube-nocookie.com/embed/${esc(id)}" allowfullscreen style="border:0;width:100%;height:100%;"></iframe>`;
+    return `<iframe src="https://www.youtube-nocookie.com/embed/${esc(id)}" title="Video preview" loading="lazy" allowfullscreen style="border:0;width:100%;height:100%;"></iframe>`;
   }
   if (/vimeo\.com\/(?:video\/)?\d+/.test(path)) {
     const id = path.replace(/^.*vimeo\.com\/(?:video\/)?(\d+).*$/, '$1');
-    return `<iframe src="https://player.vimeo.com/video/${esc(id)}" allowfullscreen style="border:0;width:100%;height:100%;"></iframe>`;
+    return `<iframe src="https://player.vimeo.com/video/${esc(id)}" title="Video preview" loading="lazy" allowfullscreen style="border:0;width:100%;height:100%;"></iframe>`;
   }
   return null;
 }
@@ -465,13 +311,13 @@ function mediaWidget(path, onPick, { wide } = {}) {
   return `
     <div class="media-row">
       <div class="tv-frame${wide ? ' wide' : ''}">
-        ${has ? (embed || (isVideo ? `<video src="${esc(src)}" muted loop autoplay playsinline></video>` : `<img src="${esc(src)}">`)) : `<span class="ns">NO SIGNAL</span>`}
+        ${has ? (embed || (isVideo ? `<video src="${esc(src)}" controls playsinline preload="metadata"></video>` : `<img src="${esc(src)}" alt="Media preview" loading="lazy">`)) : `<span class="ns">NO MEDIA YET</span>`}
       </div>
       <div class="media-meta">
         <button class="act small" data-media="${esc(onPick)}">${has ? 'REPLACE MEDIA' : 'UPLOAD MEDIA'}</button>
         <button class="act small" data-mediaurl="${esc(onPick)}">USE URL</button>
         ${has ? `<button class="act small danger" data-mediaclear="${esc(onPick)}">CLEAR</button>` : ''}
-        <div class="path">${esc(path || 'No file — shows NO SIGNAL on the site')}</div>
+        <div class="path">${esc(path || 'No media selected. The site uses a placeholder.')}</div>
       </div>
     </div>`;
 }
@@ -483,24 +329,14 @@ function mediaWidget(path, onPick, { wide } = {}) {
    survives re-renders and follows items when they're reordered — and never
    ends up in the published JSON. Not in the set = collapsed. */
 const EXPANDED = new WeakSet();
+const OPEN_FOLDS = new WeakMap();
 function isOpen(o) { return EXPANDED.has(o); }
 function openItem(o) { EXPANDED.add(o); }
 
 /* one collapsible card header: caret, number, title, summary, row buttons */
 function cardHead(item, i, kind, title, summary, num) {
-  const open = isOpen(item);
-  /* i may be a compound key like "2:0" (gallery), so the display number
-     is passed separately when it can't be derived from i */
-  const n = num != null ? num : Number(i) + 1;
-  return `<div class="card-head" data-toggle="${kind}:${i}">
-      <span class="caret">${open ? '▾' : '▸'}</span>
-      <span class="num">${String(n).padStart(2, '0')}</span>
-      <span class="grow">${esc(title || 'Untitled')}</span>
-      ${summary ? `<span class="sum">${summary}</span>` : ''}
-      <button data-${kind}-up="${i}" title="Move up">▲</button>
-      <button data-${kind}-down="${i}" title="Move down">▼</button>
-      <button data-${kind}-del="${i}" title="Remove">✕</button>
-    </div>`;
+  const open = isOpen(item), n = num != null ? num : Number(i) + 1;
+  return `<div class="card-head"><button class="card-toggle" data-toggle="${kind}:${i}" aria-expanded="${open}" aria-controls="body-${kind}-${String(i).replace(':','-')}"><span class="caret">${open ? '−' : '+'}</span><span class="num">${String(n).padStart(2,'0')}</span><span class="grow">${esc(title || 'Untitled')}</span>${summary ? `<span class="sum">${summary}</span>` : ''}</button><span class="card-actions"><button data-${kind}-up="${i}" aria-label="Move ${esc(title || 'item')} up" title="Move up">↑</button><button data-${kind}-down="${i}" aria-label="Move ${esc(title || 'item')} down" title="Move down">↓</button><button data-${kind}-del="${i}" aria-label="Remove ${esc(title || 'item')}" title="Remove">×</button></span></div>`;
 }
 /* short "what's in here" line for a collapsed card */
 function mediaSum(src) {
@@ -518,16 +354,20 @@ function listHead(title, count, kind) {
 }
 
 function field(label, id, value, kind = 'input') {
-  if (kind === 'textarea') return `<label class="f">${label}</label><textarea data-f="${id}">${esc(value)}</textarea>`;
-  return `<label class="f">${label}</label><input type="text" data-f="${id}" value="${esc(value)}">`;
+  const domId = 'field-' + id.replace(/[^a-zA-Z0-9_-]/g, '-');
+  return `<div class="field"><label class="f" for="${domId}">${label}</label>${kind === 'textarea' ? `<textarea id="${domId}" data-f="${id}">${esc(value)}</textarea>` : `<input id="${domId}" type="text" data-f="${id}" value="${esc(value)}">`}</div>`;
 }
+function fold(title, body, extra = '') { return `<details class="fold ${extra}"><summary>${title}<span aria-hidden="true">+</span></summary><div class="fold-body">${body}</div></details>`; }
+function legacy(body) { return fold('Legacy fields · not shown in Backlot', '<p class="hint">Kept for compatibility with the old CRT site. Editing these does not change the Backlot.</p>' + body, 'legacy-fold'); }
+function paragraphs(ch) { return (ch.paragraphs || []).map((p,i) => `<div class="card paragraph"><div class="card-head"><label class="grow" for="para-${i}">Paragraph ${i+1}</label><button data-del-para="${i}" aria-label="Remove paragraph ${i+1}">× Remove</button></div><textarea id="para-${i}" data-para="${i}">${esc(p)}</textarea></div>`).join('') + '<button class="act small" id="addPara">+ Add paragraph</button>'; }
+function structure(ch) { return fold('Section structure', `<p class="hint">ID: ${esc(ch.id)}. ${MAP_IDS.has(ch.id) ? 'This ID connects an existing map destination. Removing the section leaves its map location without content.' : ch.type === 'guide' ? 'Appears in Work index. Adding a physical building needs a code update.' : 'This section has no map destination.'}</p><div class="button-row"><button class="act small" data-section-up>Move earlier</button><button class="act small" data-section-down>Move later</button><button class="act small danger" data-section-remove>Remove section</button></div>`, 'structure-fold'); }
 
-const EDITORS = {
+const LEGACY_EDITORS = {
   hero(ch) {
     return field('Channel label (dial + OSD)', 'label', ch.label)
       + field('Subtitle', 'sub', ch.sub)
       + `<label class="f">Intro paragraphs (one per box)</label>`
-      + ch.paragraphs.map((p, i) => `
+      + (ch.paragraphs || []).map((p, i) => `
           <div class="card"><div class="card-head"><span class="grow">¶ ${i+1}</span>
             <button data-del-para="${i}">✕ remove</button></div>
             <textarea data-para="${i}">${esc(p)}</textarea></div>`).join('')
@@ -641,7 +481,7 @@ const EDITORS = {
       + field('Sign-off line', 'note', ch.note);
   },
   profile(ch) {
-    const por = ch.portrait || (ch.portrait = { src:'', caption:'' });
+    const por = ch.portrait || { src:'', caption:'' };
     return field('Channel label', 'label', ch.label)
       + field('Heading', 'title', ch.title)
       + field('Subheading', 'sub', ch.sub)
@@ -672,7 +512,7 @@ const EDITORS = {
       + field('Subheading', 'sub', ch.sub)
       + (ch.blocks || []).map((b, i) => `
         <div class="card">
-          <div class="card-head"><span class="grow">${b.kind.toUpperCase()} BLOCK</span>
+          <div class="card-head"><span class="grow">${esc(String(b.kind || 'unknown').toUpperCase())} BLOCK</span>
             <button data-blk-up="${i}">▲</button><button data-blk-down="${i}">▼</button>
             <button data-blk-del="${i}">✕ remove</button></div>
           ${b.kind === 'text' ? field('Text', `b.${i}.text`, b.text, 'textarea') : ''}
@@ -690,13 +530,69 @@ const EDITORS = {
   }
 };
 
+const EDITORS = {
+  hero(ch) {
+    return `<div class="identity-card"><span class="eyebrow">THE NAME ON THE GATE</span><div class="form-grid"><div class="field"><label class="f" for="siteHeroName">Display name</label><input type="text" id="siteHeroName" data-site="heroName" value="${esc(content.site.heroName)}"><p class="hint">Used in the title screen and portfolio header.</p></div><div class="field"><label class="f" for="sitePageTitle">Browser tab title</label><input type="text" id="sitePageTitle" data-site="pageTitle" value="${esc(content.site.pageTitle)}"></div></div>${field('In-game header role', 'sub', ch.sub)}<p class="hint">The title-screen credit is Construction Coordinator. This role line appears in the in-game header.</p></div>`
+      + legacy(field('Old channel label', 'label', ch.label) + '<h3>Welcome paragraphs</h3>' + paragraphs(ch)
+        + listHead('Old carousel', (ch.carousel || []).length, 'car')
+        + (ch.carousel || []).map((item,i) => `<div class="card${isOpen(item) ? '' : ' collapsed'}">${cardHead(item,i,'car',item.caption || 'Slide',mediaSum(item.src))}<div class="card-body" id="body-car-${i}">${field('Caption',`c.${i}.caption`,item.caption)}${mediaWidget(item.src,'car:'+i,{wide:true})}</div></div>`).join('')
+        + '<button class="act small" id="addSlide">+ Slide</button> <button class="act small" data-batch-car="1">+ Batch upload</button>'
+        + `<label class="check"><input type="checkbox" data-f="showTestBars" ${ch.showTestBars ? 'checked' : ''}> Show old test-card color bars</label>`);
+  },
+  guide(ch) {
+    const reel = ch.reel || {kind:'none',src:'',caption:''};
+    const settings = `<div class="form-grid">${field('Category name', 'label', ch.label)}${field('Short description', 'sub', ch.sub)}</div>${field('Location eyebrow', 'title', ch.title)}<p class="hint">Name and description appear in the work index${MAP_IDS.has(ch.id) ? ' and at this map location' : ''}.</p>`;
+    const reelFields = `<label class="f" for="reel-kind">Reel source</label><select id="reel-kind" data-f="reel.kind">${['none','youtube','vimeo','file'].map(k=>`<option value="${k}" ${reel.kind === k ? 'selected' : ''}>${k === 'none' ? 'No category reel' : k === 'file' ? 'Video file' : k === 'youtube' ? 'YouTube' : 'Vimeo'}</option>`).join('')}</select>${reel.kind !== 'none' ? field('Reel URL or file path','reel.src',reel.src) + field('Link text','reel.caption',reel.caption) + (reel.kind === 'file' ? mediaWidget(reel.src,'reel',{wide:true}) : '') : '<p class="hint">Optional. Project videos belong in each project’s gallery below.</p>'}`;
+    return fold('Category settings', settings) + fold('Category reel · optional', reelFields)
+      + `<div class="project-toolbar"><label class="search-label" for="admin-project-search"><span aria-hidden="true">⌕</span><input id="admin-project-search" type="search" data-project-search placeholder="Find a project in this category…"></label><button class="act primary" id="addProject">+ Add project</button></div>`
+      + listHead('Projects', (ch.projects || []).length, 'proj')
+      + '<p class="list-note">First project is featured. Use ↑ ↓ to change the order.</p>'
+      + ((ch.projects || []).length ? (ch.projects || []).map((p,i) => {
+        const gallery = p.gallery || [];
+        const sum = [gallery.length ? gallery.length + ' media' : 'No gallery',i===0?'Featured':''].filter(Boolean).join(' · ');
+        return `<article data-project-card="${i}" class="card project-card${isOpen(p) ? '' : ' collapsed'}">${cardHead(p,i,'proj',p.title,sum)}<div class="card-body" id="body-proj-${i}">
+          <div class="form-grid">${field('Project title',`p.${i}.title`,p.title)}${field('Your role / credits',`p.${i}.tags`,p.tags)}</div>
+          ${field('Short description · optional',`p.${i}.desc`,p.desc,'textarea')}
+          <div class="section-label"><h3>Cover media</h3><span>Shown first in the project</span></div>${mediaWidget(p.image,'proj:'+i,{wide:true})}${field('Cover caption · optional',`p.${i}.caption`,p.caption)}
+          ${fold('Write-up & extra details · optional', field('Project story · blank line for a new paragraph',`p.${i}.writeup`,p.writeup,'textarea') + '<p class="hint">Extra facts such as year, client or director. Your role is already shown above.</p>' + (p.meta || []).map((m,mi) => `<div class="info-row"><div class="form-grid">${field('Label',`p.${i}.meta.${mi}.k`,m.k)}${field('Value',`p.${i}.meta.${mi}.v`,m.v)}</div><button class="icon-button" data-meta-del="${i}:${mi}" aria-label="Remove detail ${mi+1}">×</button></div>`).join('') + `<button class="act small" data-meta-add="${i}">+ Add detail</button>`)}
+          <div class="section-label"><h3>Gallery & film links <span class="count-pill">${gallery.length}</span></h3></div><p class="hint">Photos, MP4/WebM videos, or YouTube/Vimeo film links. Captions appear with the media; film-link captions label the watch button.</p>
+          ${gallery.map((g,gi) => `<div class="card gallery-card${isOpen(g) ? '' : ' collapsed'}">${cardHead(g,`${i}:${gi}`,'gal',g.caption || (/youtu\.?be|vimeo/.test(g.src || '') ? 'Film link' : 'Media '+(gi+1)),mediaSum(g.src),gi+1)}<div class="card-body" id="body-gal-${i}-${gi}">${mediaWidget(g.src,`gal:${i}:${gi}`,{wide:true})}${field('Caption / link text · optional',`p.${i}.gallery.${gi}.caption`,g.caption)}</div></div>`).join('')}
+          <div class="button-row"><button class="act small" data-add-gal="${i}">+ Add media or film link</button><button class="act small" data-batch-gal="${i}">+ Upload several</button></div>
+          ${p.time !== undefined ? legacy(field('Old TV timeslot',`p.${i}.time`,p.time)) : ''}
+        </div></article>`;
+      }).join('') : '<div class="empty-state"><span aria-hidden="true">▧</span><h3>The next build starts here.</h3><p>Add a project, give it a title and bring in your photos.</p></div>')
+      + structure(ch);
+  },
+  profile(ch) {
+    return `<div class="form-grid">${field('Name','name',ch.name)}${field('Role','role',ch.role)}</div>${field('About headline','sub',ch.sub)}<div class="section-label"><h3>Portrait</h3></div>${mediaWidget(ch.portrait?.src,'portrait',{wide:true})}<div class="section-label"><h3>Biography</h3></div>${paragraphs(ch)}`
+      + fold('At-a-glance details', (ch.slate || []).map((s,i)=>`<div class="info-row"><div class="form-grid">${field('Label · e.g. Based',`sl.${i}.k`,s.k)}${field('Value',`sl.${i}.v`,s.v)}</div><button class="icon-button" data-slate-del="${i}" aria-label="Remove detail ${i+1}">×</button></div>`).join('') + '<button class="act small" id="addSlate">+ Add detail</button>')
+      + fold('Map label',field('Location label','label',ch.label))
+      + legacy(field('Old heading','title',ch.title) + field('Old portrait caption','portrait.caption',ch.portrait?.caption)) + structure(ch);
+  },
+  contact(ch) {
+    return field('Contact eyebrow','sub',ch.sub)
+      + (ch.rows || []).map((r,i)=>`<div class="card contact-card"><div class="card-head"><h3 class="grow">${esc(r.k || 'Contact link')}</h3><button data-row-del="${i}" aria-label="Remove contact link ${i+1}">× Remove</button></div><div class="form-grid">${field('Label · e.g. Email',`r.${i}.k`,r.k)}${field('Display text',`r.${i}.label`,r.label)}</div>${field('Destination · mailto:, tel: or https://',`r.${i}.href`,r.href)}</div>`).join('')
+      + '<button class="act primary" id="addRow">+ Add contact link</button>'
+      + fold('Map label',field('Location label','label',ch.label))
+      + legacy(field('Old heading','title',ch.title) + (ch.tx || []).map((t,i)=>`<div class="info-row"><div class="form-grid">${field('Old transmitter label',`t.${i}.k`,t.k)}${field('Value',`t.${i}.v`,t.v)}</div><button class="icon-button" data-tx-del="${i}" aria-label="Remove transmitter row ${i+1}">×</button></div>`).join('') + '<button class="act small" id="addTx">+ Transmitter row</button>' + field('Old sign-off','note',ch.note)) + structure(ch);
+  }
+};
 function renderEditor() {
+  renderChannelList();
   const ch = content.channels[selected];
-  if (!ch) { $('editorBody').innerHTML = '<p class="hint">No channel selected.</p>'; return; }
-  $('editorTitle').textContent = `EDITOR — CH ${String(selected+1).padStart(2,'0')} ${ch.label} (${ch.type})`;
-  $('editorBody').innerHTML = (EDITORS[ch.type] || EDITORS.custom)(ch);
+  if (!ch) { $('editorTitle').textContent = 'A clean slate.'; $('editorNote').textContent = 'Add a work category to begin.'; $('editorBody').innerHTML = ''; return; }
+  const active = activeSection(ch), number = content.channels.filter(c=>c.type==='guide').indexOf(ch) + 1;
+  $('editorTitle').textContent = sectionName(ch) + '.';
+  $('editorKicker').textContent = ch.type === 'guide' ? 'THE WORK / ' + (MAP_IDS.has(ch.id) ? 'MAP LOCATION' : 'WORK INDEX') : active ? 'THE STUDIO / ' + sectionName(ch).toUpperCase() : 'THE ARCHIVE / LEGACY CONTENT';
+  $('editorStamp').textContent = ch.type === 'guide' ? String(number).padStart(2,'0') : ch.id === 'about' ? '05' : ch.id === 'contact' ? '06' : '✦';
+  $('editorNote').textContent = ch.type === 'guide' ? 'The finished worlds. The work behind them.' : ch.id === 'about' ? 'A little about the person behind the builds.' : ch.id === 'contact' ? 'Make it easy for the next project to find you.' : ch.id === 'signal' ? 'Your name and identity, across the portfolio.' : 'Preserved in your file. Not displayed by the Backlot.';
+  const editor = active ? (ch.id === 'signal' ? EDITORS.hero : ch.id === 'about' ? EDITORS.profile : ch.id === 'contact' ? EDITORS.contact : EDITORS.guide) : LEGACY_EDITORS[ch.type];
+  $('editorBody').innerHTML = editor ? (active ? '' : '<p class="notice">This section belongs to the old CRT portfolio. It is preserved for compatibility, but not shown in the Backlot.</p>') + editor(ch) + (active ? '' : structure(ch)) : '<p class="notice">This section type is not supported by this editor. Its data is preserved unchanged in import, export and publishing.</p>' + structure(ch);
+  const folds = OPEN_FOLDS.get(ch) || new Set();
+  $('editorBody').querySelectorAll('details').forEach((el,i) => { el.open = folds.has(i); el.addEventListener('toggle', () => { if (el.open) folds.add(i); else folds.delete(i); OPEN_FOLDS.set(ch,folds); }); });
   wireEditor(ch);
 }
+
 
 function setByPath(obj, path, val) {
   const parts = path.split('.');
@@ -718,12 +614,14 @@ function setByPath(obj, path, val) {
 
 function wireEditor(ch) {
   const body = $('editorBody');
+  body.querySelectorAll('[data-site]').forEach(el => el.addEventListener('input', () => { content.site[el.dataset.site] = el.value; }));
+  body.querySelectorAll('[data-project-search]').forEach(el => el.addEventListener('input', () => { const q = el.value.toLowerCase(); body.querySelectorAll('[data-project-card]').forEach(card => { const p = ch.projects[Number(card.dataset.projectCard)]; card.hidden = !((p.title || '') + ' ' + (p.tags || '')).toLowerCase().includes(q); }); }));
 
   body.querySelectorAll('[data-f]').forEach(el => {
     const apply = () => {
       const v = el.type === 'checkbox' ? el.checked : el.value;
       setByPath(ch, el.dataset.f, v);
-      if (el.dataset.f === 'label') renderChannelList();
+      if (el.dataset.f === 'label') { renderChannelList(); $('editorTitle').textContent = sectionName(ch) + '.'; }
       if (el.tagName === 'SELECT') renderEditor();
     };
     el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', apply);
@@ -735,7 +633,10 @@ function wireEditor(ch) {
      handler per element, always closing over the current channel */
   if (body._clickHandler) body.removeEventListener('click', body._clickHandler);
   body._clickHandler = e => {
-    const d = e.target.dataset;
+    const d = (e.target.closest('button') || e.target).dataset;
+    if (d.sectionUp !== undefined) { if (selected > 0) swap(selected, selected-1); return; }
+    if (d.sectionDown !== undefined) { if (selected < content.channels.length-1) swap(selected, selected+1); return; }
+    if (d.sectionRemove !== undefined) { if (confirm('Remove ' + sectionName(ch) + ' from this draft? It changes the live site only after publishing.')) { content.channels.splice(selected,1); selected = Math.max(0,selected-1); renderChannelList(); renderEditor(); } return; }
     const arr = { 'proj':'projects', 'step':'steps', 'blk':'blocks', 'car':'carousel' };
     // media pick / clear / direct URL
     if (d.media !== undefined) {
@@ -805,7 +706,7 @@ function wireEditor(ch) {
       renderEditor(); return;
     }
     if (d.delPara !== undefined) { ch.paragraphs.splice(Number(d.delPara), 1); renderEditor(); return; }
-    if (d.addBlk) { ch.blocks.push(d.addBlk === 'text' ? {kind:'text', text:''} : d.addBlk === 'image' ? {kind:'image', src:'', caption:''} : {kind:'video', videoKind:'file', src:'', caption:''}); renderEditor(); return; }
+    if (d.addBlk) { (ch.blocks = ch.blocks || []).push(d.addBlk === 'text' ? {kind:'text', text:''} : d.addBlk === 'image' ? {kind:'image', src:'', caption:''} : {kind:'video', videoKind:'file', src:'', caption:''}); renderEditor(); return; }
     /* expand / collapse every card of a kind */
     if (d.expand || d.collapse) {
       const kind = d.expand || d.collapse;
@@ -814,14 +715,14 @@ function wireEditor(ch) {
       renderEditor(); return;
     }
     if (e.target.id === 'addProject') {
-      const p = { time:'', title:'', desc:'', tags:'', image:'', caption:'CAM ' + (ch.projects.length + 1), writeup:'', meta:[], gallery:[] };
-      ch.projects.push(p); openItem(p); renderEditor(); return;
+      const p = { title:'', desc:'', tags:'', image:'', caption:'', writeup:'', meta:[], gallery:[] };
+      (ch.projects = ch.projects || []).push(p); openItem(p); renderEditor(); return;
     }
-    if (e.target.id === 'addStep') { ch.steps.push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); return; }
-    if (e.target.id === 'addRow') { ch.rows.push({ k:'', label:'', href:'' }); renderEditor(); return; }
+    if (e.target.id === 'addStep') { (ch.steps = ch.steps || []).push({ timecode:'', text:'', image:'', caption:'' }); renderEditor(); return; }
+    if (e.target.id === 'addRow') { (ch.rows = ch.rows || []).push({ k:'', label:'', href:'' }); renderEditor(); return; }
     if (e.target.id === 'addTx') { (ch.tx = ch.tx || []).push({ k:'', v:'' }); renderEditor(); return; }
     if (e.target.id === 'addSlate') { (ch.slate = ch.slate || []).push({ k:'', v:'' }); renderEditor(); return; }
-    if (e.target.id === 'addPara') { ch.paragraphs.push(''); renderEditor(); return; }
+    if (e.target.id === 'addPara') { (ch.paragraphs = ch.paragraphs || []).push(''); renderEditor(); return; }
     if (e.target.id === 'addSlide') {
       if (!ch.carousel) ch.carousel = [];
       const s = { src:'', caption:'' };
@@ -829,7 +730,7 @@ function wireEditor(ch) {
     }
     /* card header click toggles that card (buttons inside it act normally) */
     const tog = e.target.closest('[data-toggle]');
-    if (tog && !e.target.closest('button')) {
+    if (tog) {
       const [kind, a, b] = tog.dataset.toggle.split(':');
       const obj = kind === 'proj' ? ch.projects[+a]
                 : kind === 'car'  ? (ch.carousel || [])[+a]
@@ -857,6 +758,7 @@ function applyMediaPath(ch, target, path) {
    EXPORT / PUBLISH
    ============================================================ */
 $('btnDownload').onclick = () => {
+  if (!content) return;
   const blob = new Blob([JSON.stringify(content, null, 2)], { type:'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -881,6 +783,7 @@ $('btnDownload').onclick = () => {
 };
 
 function renderPending() {
+  updateDraftStatus();
   const names = Object.keys(pendingAssets);
   $('pendingList').innerHTML = names.length
     ? '<b>Pending media:</b>' + names.map(n => `<div>${esc(n)}</div>`).join('')
@@ -968,7 +871,7 @@ $('btnPublish').onclick = async () => {
   if (!content) return;
   const owner = $('ghOwner').value.trim(), repo = $('ghRepo').value.trim(),
         branch = $('ghBranch').value.trim() || 'main', token = $('ghToken').value.trim();
-  if (!owner || !repo || !token) { setStatus('Fill in owner, repo, and token first.', 'err'); return; }
+  if (!owner || !repo || !token) { $('repoSettings').open = true; setStatus('Fill in owner, repository, and token first.', 'err'); (!owner ? $('ghOwner') : !repo ? $('ghRepo') : $('ghToken')).focus(); return; }
 
   const btn = $('btnPublish');
   btn.disabled = true;
@@ -986,7 +889,8 @@ $('btnPublish').onclick = async () => {
     await ghPut(owner, repo, branch, token, 'content.json', jsonB64, 'Update site content');
     pendingAssets = {};
     renderPending();
-    setStatus('⏵ TRANSMITTED. Live on Pages in ~1 minute.', 'ok');
+    loadedSnapshot = JSON.stringify(content); updateDraftStatus();
+    setStatus('Published to GitHub. Pages is rebuilding; give it a minute, then view the site.', 'ok');
   } catch (err) {
     setStatus('FAILED — ' + err.message + '\nRunning diagnostics…', 'err');
     const findings = await diagnose(owner, repo, branch, token);
