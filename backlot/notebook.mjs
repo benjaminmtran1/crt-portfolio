@@ -1,7 +1,7 @@
 // Bookmark identity is independent of the editor's project order.
 export const projectKey=p=>encodeURIComponent(p.category)+':'+encodeURIComponent(p.title.trim().toLowerCase());
 export const discoveryEntries=[
- ['take','Roll a take','Quiet on set. Camera rolling.'],['backstage','Behind the scenery','Timber, braces and the side the lens never sees.'],['cat','Crew approved','The shop cat has vouched for you.'],['lighting','Chase the light','Three looks, one backlot.'],['craft','Coffee break','The most important department.'],['build','From plan to set','Design. Mark out. Build. Shoot.'],['camera','Through the lens','Real builds, a few pixels at a time.'],['crew','On the crew','A few familiar faces between setups.'],['wrap','That’s a wrap','One last look before the lights go out.']
+ ['take','Roll a take','Quiet on set. Camera rolling.'],['backstage','Behind the scenery','Timber, braces and the side the lens never sees.'],['cat','Crew approved','The shop cat has vouched for you.'],['lighting','Chase the light','Three looks, one backlot.'],['craft','Coffee break','The most important department.'],['build','From plan to set','Design. Mark out. Build. Shoot.'],['camera','Through the lens','Real builds, a few pixels at a time.'],['crew','On the crew','A few familiar faces between setups.'],['wrap','That’s a wrap','One last look before the lights go out.'],['screw','Pocket hardware','A perfectly good screw. Its original job is a mystery.']
 ];
 export function resolveBookmark(record,projects){
  const exact=projects.find(p=>projectKey(p)===record.key);if(exact)return exact;

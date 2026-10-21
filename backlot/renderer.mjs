@@ -1,11 +1,11 @@
 import {drawCrew,drawCrewPortrait} from './crew-art.mjs?v=pocket2';
-import {drawLotCamera,drawWrapBell,drawWorkProps} from './props.mjs?v=cleanup1';
+import {drawLotCamera,drawWrapBell,drawWorkProps,drawFoundScrew} from './props.mjs?v=screw1';
 import {wrapActorsAt} from './wrap-motion.mjs?v=cleanup1';
 import {crew} from './encounters.mjs?v=cleanup1';
-import {WIDTH,HEIGHT,stages,clamp,craftCrew,craftCup,lotSlate,draftingTable,storageCrates,callBoard} from './world.mjs?v=cleanup1';
+import {WIDTH,HEIGHT,stages,clamp,craftCrew,craftCup,lotSlate,draftingTable,storageCrates,callBoard,foundScrew} from './world.mjs?v=screw1';
 import {pixelText} from './pixels.mjs?v=crew3';
 import {drawPlayer} from './player.mjs?v=coffee1';
-import {curiosities,catNook} from './life.mjs?v=cleanup1';
+import {curiosities,catNook} from './life.mjs?v=screw1';
 import {lightingLooks} from './departments.mjs?v=drafting1';
 import {drawConstructionScene} from './construction.mjs?v=drafting1';
 const factory=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
@@ -75,6 +75,7 @@ export class Renderer{
  worldToScreen(x,y){return{x:(x-this.camera.x+this.w/2)/this.w*this.cssW,y:(y-this.camera.y+this.h/2)/this.h*this.cssH};}
  actor(c,x,y,face,step=0,moving=false,coat='#dfb96b',npc=false,coffee=false,crewId=null,task='idle',time=0){if(npc&&crewId){drawCrew(c,x,y,crewId,face,step,moving,task,time);return;}if(!npc){drawPlayer(c,x,y,face,step,moving,coffee);return;}x=Math.round(x);y=Math.round(y);const bob=moving?Math.round(Math.sin(step)*1):0,feet=moving?Math.round(Math.sin(step)*2):0;oval(c,x+1,y+1,8,3,'#0916228f');y+=bob;rect(c,x-5,y-10,4,9+feet,'#203342');rect(c,x+1,y-10,4,9-feet,'#2c4552');rect(c,x-6,y-2+feet,5,3,'#172936');rect(c,x+1,y-2-feet,6,3,'#172936');rect(c,x-6,y-20,12,13,coat);rect(c,x-5,y-18,2,9,'#ebca8999');rect(c,x-8,y-18,3,9-feet,coat);rect(c,x+6,y-18,3,9+feet,coat);rect(c,x-8,y-10-feet,3,3,'#be9170');rect(c,x+6,y-10+feet,3,3,'#be9170');rect(c,x-5,y-29,10,10,'#c29c77');rect(c,x-6,y-31,11,6,'#293f49');rect(c,x-4,y-33,8,3,npc?'#8c7258':'#caa56a');rect(c,x-6,y-28,14,3,npc?'#8c7258':'#caa56a');if(face==='down'){rect(c,x-3,y-24,1,2,'#2d3337');rect(c,x+2,y-24,1,2,'#2d3337');rect(c,x-2,y-20,4,2,'#6c5749');}else if(face==='left')rect(c,x-6,y-24,2,3,'#dfb38a');else if(face==='right')rect(c,x+5,y-24,2,3,'#dfb38a');else{rect(c,x-5,y-24,10,5,'#39464a');rect(c,x-4,y-17,8,9,'#8d7659');}rect(c,x-6,y-9,13,2,'#6b5a40');rect(c,x+3,y-9,4,5,'#7c654b');}
  render(world,dt=1/60,life=null){const c=this.c,p=world.player,t=this.reduced?0:world.t,focus=life?.take?{x:235,y:224}:p;const targetX=clamp(focus.x,Math.min(WIDTH/2,this.w/2),Math.max(WIDTH/2,WIDTH-this.w/2)),targetY=clamp(focus.y,Math.min(HEIGHT/2,this.h/2),Math.max(HEIGHT/2,HEIGHT-this.h/2));const ease=this.reduced?1:1-Math.exp(-dt*(life?.take?3:6));this.camera.x+=(targetX-this.camera.x)*ease;this.camera.y+=(targetY-this.camera.y)*ease;const ox=Math.round(this.w/2-this.camera.x),oy=Math.round(this.h/2-this.camera.y);rect(c,0,0,this.w,this.h,'#182935');c.save();c.translate(ox,oy);c.drawImage(this.base,0,0);
+  if(life&&!life.found.has('screw'))drawFoundScrew(c,foundScrew.x,foundScrew.y,t,this.reduced);
   const rear=life?.take?null:life?.backstage(p);if(rear){const s=stages.find(s=>s.id===rear);c.drawImage(this.backings.get(rear),s.x,s.y);}
   if(life?.found.has('cat')){rect(c,804,639,29,9,'#263d3d');pixelText(c,'CREW',819,641,'#cfdbbc',1,true);}
   this.slate(c,lotSlate.x,lotSlate.y,!!life?.take,life?.nearby(p)?.id==='slate');
@@ -86,6 +87,7 @@ export class Renderer{
   const nearest=world.nearby();
   for(const s of stages){const near=nearest?.id===s.id,visited=world.visited.has(s.id);const py=s.door.y-8+(this.reduced?0:Math.round(Math.sin(t*2.5+Number(s.number))*1));oval(c,s.door.x,s.door.y+5,14,4,near?'#e6c98a50':'#b7c6ab15');rect(c,s.door.x-8,py-17,16,13,near?'#e5c68c':'#1d3241');rect(c,s.door.x-7,py-16,14,11,near?'#e5c68c':s.color+'33');pixelText(c,visited?'+' : s.number,s.door.x,py-14,near?'#26333c':s.color,1,true);if(visited){line(c,s.door.x-3,py-12,s.door.x-1,py-10,s.color);line(c,s.door.x-1,py-10,s.door.x+4,py-14,s.color);}poly(c,[[s.door.x-3,py-4],[s.door.x+3,py-4],[s.door.x,py-1]],near?'#e5c68c':s.color);}
   const actors=[{...craftCrew,id:'craft',face:'right',step:0,moving:false,coat:'#829786'},...(life?.routines.people||crew.map(person=>({...person.point,id:person.id,face:'down',step:0,moving:false,coat:person.coat}))),{...p,player:true}];actors.sort((a,b)=>a.y-b.y);for(const a of actors)this.actor(c,a.x,a.y,a.face,a.step,a.moving&&!this.reduced,a.coat,!a.player,a.player&&life?.hasCoffee,a.id,a.task,this.reduced?0:a.time);
+  if(life?.treasure>0)drawFoundScrew(c,p.x,p.y-47,t,this.reduced,true);
 
   // The shop cat and working red tally lights.
   this.catSprite(c,life?.cat||{x:416,y:240,face:'right',step:0},t);
