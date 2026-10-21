@@ -1,4 +1,4 @@
-import { titleBuilds, paintTitleBuild, showcaseAt, BUILD_CYCLE_MS } from './title-builds.mjs?v=beastcash1';
+import { titleBuilds, paintTitleBuild, showcaseAt, BUILD_CYCLE_MS } from './title-builds.mjs?v=cupra1';
 
 /**
  * An original, front-facing soundstage for the title, not a view of the game map.
