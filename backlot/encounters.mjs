@@ -1,4 +1,4 @@
-import {titleBuilds,paintTitleBuild} from './title-builds.mjs?v=beastcash1';
+import {titleBuilds,paintTitleBuild} from './title-builds.mjs?v=cupra1';
 import {scenicStation,carpenterStation} from './world.mjs?v=cleanup1';
 export const crew=[
  {id:'scenic',name:'Jules',role:'Scenic painter',point:scenicStation.mix,coat:'#a68078',lines:['If it looks like stone, please don’t lean on it until the paint dries.','My finest moss is three shades of green and a very tired sponge.','Look through the camera. That’s where all the separate bits become a place.']},
@@ -6,7 +6,7 @@ export const crew=[
  {id:'pa',name:'Kit',role:'Production assistant',point:{x:560,y:608},coat:'#859eaa',lines:['I have four walkies and somehow none of them are on the right channel.','They said one last setup. I’ve written that down for historical purposes.','See that bell by production? Ring it when you’re ready to call wrap.']}
 ];
 export const cameraBuilds=titleBuilds;
-export const projectTerms=['deathstalker','nintendo','beast games'];
+export const projectTerms=['deathstalker','nintendo','beast games','cupra'];
 export function drawViewfinder(canvas,index,wide=false){
  const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;
  const plate=document.createElement('canvas');plate.width=360;plate.height=180;paintTitleBuild(plate.getContext('2d'),index);

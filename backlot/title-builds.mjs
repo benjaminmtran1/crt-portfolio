@@ -1,15 +1,18 @@
+import {paintCupra} from './cupra-build.mjs?v=cupra1';
 /**
  * Hand-drawn pixel interpretations of Ben's own portfolio photographs.
  * This is scenic art, not a franchise logo or a generic game-world backdrop.
  * Deathstalker: assets/img_0809.jpg + img_0814.jpg + img_0773.jpg.
  * Nintendo x Donkey Kong: assets/img_3311.jpg + img_3337.jpg.
  * Beast Games: assets/img_7886.jpg (built) + img_0236.jpg (construction CAD).
+ * Cupra: curved stair + dark wooden hall; see cupra-build.mjs references.
  * A single 360 × 180 plate is drawn at a time. No photo data is loaded at runtime.
  */
 export const titleBuilds = Object.freeze([
   Object.freeze({ id: 'deathstalker', title: 'DEATHSTALKER', detail: 'THE GRAVEYARD', description: 'A mossy stone graveyard set with a peaked gatehouse, rusty iron gate, crooked bare trees and headstones.', accent: '#D6B88C' }),
   Object.freeze({ id: 'donkey-kong', title: 'NINTENDO × DONKEY KONG', detail: 'SUBWAY ENTRANCE', description: 'The green, rounded SUBWAY entrance build, with cream panels, hanging vines, globe lamps and dark green railings.', accent: '#A6CB9A' }),
-  Object.freeze({ id: 'beast-games', title: 'BEAST GAMES', detail: 'THE CASH BUILD', description: 'A black-and-silver square build grounded on the stage, with a giant stepped pile of green cash bundles in its centre.', accent: '#9DC9D8' })
+  Object.freeze({ id: 'beast-games', title: 'BEAST GAMES', detail: 'THE CASH BUILD', description: 'A black-and-silver square build grounded on the stage, with a giant stepped pile of green cash bundles in its centre.', accent: '#9DC9D8' }),
+  Object.freeze({ id: 'cupra', title: 'CUPRA', detail: 'THE STAIR & WOODEN HALL', description: 'The Cupra build: a sweeping concrete staircase beside warm display niches and a dark, wood-panelled hallway with an arched opening.', accent: '#D5BE92' })
 ]);
 export const BUILD_HOLD_MS = 8500;
 export const BUILD_FADE_MS = 650;
@@ -206,5 +209,6 @@ function beastGames(c){
 }
 export function paintTitleBuild(c,index){
   c.clearRect(0,0,360,180);
-  [deathstalker,donkeyKong,beastGames][((index%3)+3)%3](c);
+  const painters=[deathstalker,donkeyKong,beastGames,paintCupra];
+  painters[((Math.trunc(index)%painters.length)+painters.length)%painters.length](c);
 }

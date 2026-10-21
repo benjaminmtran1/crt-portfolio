@@ -166,7 +166,7 @@ The desktop featured-project monitor starts as a 94 px compact strip, retaining 
 
 ### Locked Decisions
 
-Keep the approved camera location in front of Commercial, the crew artwork and Carpenter title, three-page notebook, all discoveries and portfolio/admin data. All 20 projects, media and the approved biography match production. The relocated solid props use the same coordinates for drawing and collision; crew routines use their work-area anchors. This is a private review pending visual approval, following the project brief; production main has not been promoted.
+Keep the approved camera location in front of Commercial, the crew artwork and Carpenter title, three-page notebook, all discoveries and portfolio/admin data. All 20 projects, media and the approved biography match production. The relocated solid props use the same coordinates for drawing and collision; crew routines use their work-area anchors. Ben approved the spacing pass. It was published from PR #5 on October 21 as main commit `a3af0a4795bd7cf17fe4483dffde9328e01e88d1`; the matching GitHub Pages deployment succeeded.
 
 ### Validation
 
@@ -174,8 +174,31 @@ Passed existing doorway routing, life, living crew, wrap motion, encounters, cra
 
 ### Open Questions
 
-Ben's visual review of the new spacing; physical iPhone touch feel remains unverified. No video or admin behavior changed.
+Physical iPhone touch feel remains unverified. No video or admin behavior changed.
 
 ### Future Ideas
 
 Only consider widening the cross street if this placement pass still feels tight. Other ideas stay parked.
+
+
+## Cupra scenic plate — October 21 review
+
+### Current Build
+
+Cupra joins Deathstalker, Nintendo × Donkey Kong and Beast Games as the fourth selectable set in the title rotation and the physical camera. A single 360 × 180 pixel plate pairs the sweeping, concrete-finished staircase and warm wheel display wall with the arched, dark wood-panelled hallway on one grounded scenic platform. The illustration is drawn from the existing Cupra project photographs: `img_0131.jpg`, `img_0129.jpg`, `img_7148.dng.jpg`, `img_7107.dng.jpg` and `img_7176.dng.jpg`. The camera offers both framed and pulled-back views and opens the existing “Cupra - The Chosen One” project.
+
+### Locked Decisions
+
+Retain the original three scenic plates, soundstage, title, controls, 8.5-second holds, full-blackout transitions and reduced-motion behavior. No map objects or portfolio media are added or moved for this scene. The approved cleanup is live; this new artwork is presented privately for visual review under the project brief.
+
+### Validation
+
+Title rotation, menu and UI checks cover all four selections, forward/back wrapping, pause/resume, reduced motion, stage grounding and six viewport sizes. Drawing hashes preserve all three existing plates. Encounters checks cover eight camera compositions and verify the fourth selection links to the real Cupra project. Desktop Chromium verified the fourth title selection and stage placement, walked from the lot to the physical camera, selected Cupra, reviewed framed and pulled-back views, and opened the correct Cupra project (`commercial-02`) with its existing 11 gallery items.
+
+### Open Questions
+
+Ben's visual review of the Cupra interpretation. Physical iPhone touch feel remains unverified.
+
+### Future Ideas
+
+Other requested brainstorm ideas remain parked.

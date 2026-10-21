@@ -12,7 +12,8 @@ const titleScene=vm.runInNewContext(`(()=>{${source};return titleScene;})()`,{do
 const get=s=>nodes.get(s);
 get('#title-set-next').click();assert.equal(get('#title-set-name').textContent,'NINTENDO × DONKEY KONG');assert.match(get('#title-set-description').textContent,/SUBWAY/);assert.equal(get('#title-set-number').textContent,'ON STAGE / 02');
 get('#title-set-prev').click();assert.equal(titleScene.activeBuild,0);
-get('#title-set-prev').click();assert.equal(get('#title-set-name').textContent,'BEAST GAMES');
+get('#title-set-prev').click();assert.equal(get('#title-set-name').textContent,'CUPRA');
+assert.equal(get('#title-set-number').textContent,'ON STAGE / 04');assert.match(get('#title-set-description').textContent,/wood-panelled hallway/);
 get('#title-set-pause').click();assert.equal(titleScene.paused,true);assert.equal(get('#title-set-pause').getAttribute('aria-pressed'),'true');assert.equal(get('#title-set-pause').getAttribute('aria-label'),'Resume the set changes');
 get('#title-set-next').click();assert.equal(titleScene.activeBuild,0);assert.equal(titleScene.paused,true,'Manual choice does not restart a paused set');
 get('#title-set-pause').click();assert.equal(titleScene.paused,false);
