@@ -6,10 +6,10 @@ export const lightingLooks=[
  {id:'night',name:'Night shoot',note:'Blue moonlight, warm practicals. The lot stays awake.',color:'#9aade0'}
 ];
 export const buildSteps=[
- {title:'Mark out',note:'A chalk line makes the first promise. Everything starts on the floor.'},
- {title:'Frame',note:'Rails, stiles and toggles. A doorway takes shape; braces keep the illusion upright.'},
- {title:'Skin',note:'Plywood skins turn the skeleton into a wall. The doorway stays open.'},
- {title:'Dress',note:'Paint, trim and a practical light. Ready for its close-up.'}
+ {title:'Design',note:'Draw the plan. Dimensions, a doorway and every detail start on the drafting table.'},
+ {title:'Mark out',note:'Transfer the plan to the pad. Chalk lines and measured marks locate the walls and doorway.'},
+ {title:'Build',note:'Raise the frame, add the skins, then paint and dress the set. The plan becomes a place.'},
+ {title:'Shoot',note:'Bring in the camera, set the lights and roll. A little world, ready for its close-up.'}
 ];
 export const BUILD_LENGTH=12;
 export class BuildSequence{

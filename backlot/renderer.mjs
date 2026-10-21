@@ -1,7 +1,8 @@
 import {WIDTH,HEIGHT,stages,clamp} from './world.mjs?v=truck1';
 import {pixelText} from './pixels.mjs?v=crew3';
 import {curiosities,catNook} from './life.mjs?v=truck1';
-import {lightingLooks} from './departments.mjs?v=crew3';
+import {lightingLooks} from './departments.mjs?v=drafting1';
+import {drawConstructionScene} from './construction.mjs?v=drafting1';
 const factory=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 function random(seed=18){return()=>{seed=(Math.imul(seed,1664525)+1013904223)|0;return(seed>>>0)/4294967296;};}
 const rect=(c,x,y,w,h,color)=>{c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),w,h);};
@@ -109,32 +110,8 @@ export class Renderer{
  }
  drawLighting(canvas,world,life){const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);this.slate(c,544,312);this.actor(c,world.player.x,world.player.y,world.player.face);this.actor(c,280,368,'right',0,false,'#829786',true);this.catSprite(c,life.cat,0);this.paintLook(c,life.lighting);c.restore();}
  drawCrewPortrait(canvas){const c=canvas.getContext('2d');rect(c,0,0,128,128,'#283e46');for(let y=5;y<128;y+=8)line(c,0,y,128,y,'#71816b18');c.save();c.translate(64,111);c.scale(3,3);this.actor(c,0,0,'down',0,false,'#829786',true);c.restore();rect(c,8,116,112,4,'#ccbb8e');}
- drawConstruction(canvas,sequence){
-  const c=canvas.getContext('2d'),mark=sequence.progress(0),frame=sequence.progress(1),skin=sequence.progress(2),dress=sequence.progress(3);
-  c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/720,canvas.height/340);rect(c,0,0,720,340,'#233842');
-  for(let y=30;y<340;y+=22)line(c,0,y,720,y,'#81998813');for(let x=-340;x<720;x+=40)line(c,x,340,x+340,0,'#81998813');
-  pixelText(c,'WORKSHOP / MINIATURE 01',28,22,'#93aca1');pixelText(c,'A WALL BECOMES A WORLD',552,22,'#c7b58c',1,true);
-  poly(c,[[123,263],[490,300],[638,227],[273,193]],'#122b36');poly(c,[[128,258],[490,294],[633,222],[272,188]],'#45605d');
-  c.save();c.beginPath();c.rect(150,40,470*mark,245);c.clip();line(c,180,257,540,257,'#d7d2ae',2);line(c,540,257,607,219,'#d7d2ae',2);for(let x=180;x<=540;x+=40){line(c,x,253,x,262,'#d7d2ae');}line(c,330,266,400,266,'#e1ba72',2);c.restore();
-  // Braces sit behind the wall, then rails, stiles and toggles rise from the chalk line.
-  c.save();c.beginPath();c.rect(140,257-210*frame,490,210*frame);c.clip();
-  line(c,216,116,145,275,'#bd9b68',7);line(c,505,116,576,275,'#bd9b68',7);rect(c,131,271,34,8,'#807e61');rect(c,560,271,34,8,'#807e61');
-  poly(c,[[540,91],[607,55],[607,219],[540,257]],'#6e775f');for(let x=540;x<=607;x+=22){const dy=(x-540)*.55;line(c,x,94-dy,x,254-dy,'#cfb379',5);}line(c,540,91,607,55,'#e0bd7d',6);line(c,540,255,607,219,'#c5a26d',6);line(c,540,176,607,140,'#b9a072',4);
-  rect(c,180,91,360,6,'#e2bd7e');rect(c,180,251,150,6,'#c8a573');rect(c,400,251,140,6,'#c8a573');
-  for(const x of [180,220,260,300,324,400,440,480,534])rect(c,x,97,6,154,'#c9a874');
-  for(const y of [144,198]){rect(c,186,y,138,5,'#c4a16d');rect(c,406,y,128,5,'#c4a16d');}
-  rect(c,330,139,70,8,'#e2bd7e');rect(c,361,97,6,42,'#c9a874');c.restore();
-  c.save();c.beginPath();c.rect(180,45,429*skin,213);c.clip();
-  poly(c,[[540,91],[607,55],[607,219],[540,257]],'#8f805c');rect(c,180,91,150,166,'#baa373');rect(c,400,91,140,166,'#baa373');rect(c,330,91,70,48,'#c6af80');
-  for(const x of [220,260,300,440,480,520])line(c,x,93,x,255,'#8d7d5e66');for(const y of [113,178,227]){line(c,184,y,325,y+4,'#8d7d5e44');line(c,404,y,536,y-4,'#8d7d5e44');}c.restore();
-  c.save();c.beginPath();c.rect(175,44,440*dress,243);c.clip();
-  poly(c,[[540,91],[607,55],[607,219],[540,257]],'#647b70');this.brick(c,180,91,150,166,'#a87761','#795b50');this.brick(c,400,91,140,166,'#a87761','#795b50');this.brick(c,330,91,70,48,'#a87761','#795b50');
-  rect(c,176,85,368,9,'#d9c4a0');rect(c,176,94,368,4,'#7d6754');rect(c,325,134,80,8,'#ded1a9');rect(c,324,142,7,115,'#cebc94');rect(c,399,142,7,115,'#cebc94');rect(c,331,142,68,115,'#1e343a');rect(c,338,150,54,107,'#3b6662');rect(c,343,155,44,46,'#a5bdaa');rect(c,363,155,4,46,'#3b6662');rect(c,343,176,44,4,'#3b6662');rect(c,345,211,40,36,'#2a514f');rect(c,381,207,3,4,'#e3c28a');
-  rect(c,433,133,3,24,'#2a3e40');rect(c,428,139,13,12,'#e3bd70');rect(c,431,141,7,7,'#ffdda0');poly(c,[[432,150],[438,150],[467,220],[404,220]],'#edcb7420');
-  rect(c,476,239,23,25,'#9e7661');this.tree(c,486,238,.48);rect(c,207,240,22,23,'#98725a');this.tree(c,218,239,.38);c.restore();
-  this.crate(c,75,259,33,23);rect(c,77,255,29,4,'#b0aa83');line(c,615,260,646,266,'#dbb178',4);rect(c,631,255,13,10,'#536d6d');
-  pixelText(c,'CHALK',212,284,'#b1bca3');pixelText(c,sequence.complete?'READY FOR CAMERA':'WORK IN PROGRESS',360,320,sequence.complete?'#e7c284':'#94aba0',1,true);c.restore();
- }
+ drawConstruction(canvas,sequence){drawConstructionScene(canvas,sequence);}
+
  flatBack(c,x,y,w,h){
   rect(c,x,y,w,h,'#826849');this.texture(c,x,y,w,h,'#b8a07135',47,.12);
   for(let yy=y+8;yy<y+h;yy+=12){line(c,x+8,yy,x+w-8,yy+3,'#a38a5a55');}

@@ -1,8 +1,8 @@
 import {TitleScene} from './title-scene.mjs?v=title4';
 import {World,stages,WIDTH,HEIGHT,distance} from './world.mjs?v=truck1';
-import {Renderer} from './renderer.mjs?v=truck1';
+import {Renderer} from './renderer.mjs?v=drafting1';
 import {LotLife} from './life.mjs?v=truck1';
-import {BuildSequence,buildSteps,lightingLooks} from './departments.mjs?v=crew3';
+import {BuildSequence,buildSteps,lightingLooks} from './departments.mjs?v=drafting1';
 import {normalizeContent,mediaURL,mediaKind,galleryFor,watchLinks,thumbnailFor,featuredProjects,plainText,safeURL} from './content.mjs?v=crew3';
 const $=s=>document.querySelector(s),world=new World(),renderer=new Renderer($('#world'));
 const titleScene=new TitleScene($('#title-scene'));
@@ -95,7 +95,7 @@ function openCraft(){
  openPanel('craft');renderer.drawCrewPortrait($('#crew-portrait'));focusHeading();
 }
 function openBuild(){
- panelInner.innerHTML=bar('THE WORKSHOP / DRAFTING TABLE')+heading('FROM CHALK LINE TO CLOSE-UP','Build a little world.','Watch it come together, or choose a step to take a closer look.')+`<div class="department-body"><canvas id="build-preview" class="department-scene" width="720" height="340" role="img" aria-label="A miniature set being built"></canvas><div class="build-steps" aria-label="Construction steps">${buildSteps.map((step,i)=>`<button data-build-step="${i}" aria-pressed="false"><span>0${i+1}</span>${step.title}</button>`).join('')}</div><p id="build-note" class="department-note" role="status"></p><div class="build-actions"><button id="build-play" class="department-return" data-build-play ${settings.reduced?'hidden':''}>PAUSE BUILD</button><button class="department-return" data-close>BACK TO THE LOT →</button></div>${settings.reduced?'<p class="department-footnote">Calmer motion is on. Use the four steps to explore the build.</p>':''}</div>`;
+ panelInner.innerHTML=bar('THE WORKSHOP / DRAFTING TABLE')+heading('FROM FIRST PLAN TO FINAL TAKE','Build a little world.','Watch it come together, or choose a step to take a closer look.')+`<div class="department-body"><canvas id="build-preview" class="department-scene" width="720" height="340" role="img" aria-label="A miniature set being built"></canvas><div class="build-steps" aria-label="Design to shoot steps">${buildSteps.map((step,i)=>`<button data-build-step="${i}" aria-pressed="false"><span>0${i+1}</span>${step.title}</button>`).join('')}</div><p id="build-note" class="department-note" role="status"></p><div class="build-actions"><button id="build-play" class="department-return" data-build-play ${settings.reduced?'hidden':''}>PAUSE BUILD</button><button class="department-return" data-close>BACK TO THE LOT →</button></div>${settings.reduced?'<p class="department-footnote">Calmer motion is on. Use the four steps to explore the build.</p>':''}</div>`;
  openPanel('build');buildSequence=new BuildSequence(settings.reduced);buildStep=-1;syncBuild();focusHeading();
 }
 function syncBuild(){if(!buildSequence||!$('#build-preview'))return;const step=buildSequence.step;if(step!==buildStep){buildStep=step;$('#build-note').textContent=buildSteps[step].note;$('#build-preview').setAttribute('aria-label','Miniature set, step '+(step+1)+': '+buildSteps[step].title+'. '+buildSteps[step].note);panelInner.querySelectorAll('[data-build-step]').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.buildStep)===step)));}$('#build-play').textContent=buildSequence.complete?'REPLAY BUILD':buildSequence.playing?'PAUSE BUILD':'PLAY BUILD';renderer.drawConstruction($('#build-preview'),buildSequence);if(buildSequence.complete){life.discover('build');handleLifeEvents();}}
