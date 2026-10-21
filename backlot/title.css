@@ -62,3 +62,70 @@ body.calm .scene-transition>span{transition:none}
  .title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(60px,min(16vw,23vh),120px);line-height:.95;margin:0;letter-spacing:0;transform:none}
  .title-screen .title-role{margin-top:18px}
 }
+
+/* Actual builds on the original soundstage. The approved red type/shadow is
+   unchanged; only its vertical composition makes room for the scenic plates. */
+.title-screen .title-content{justify-content:flex-start;padding-top:clamp(100px,12vh,125px);padding-bottom:0;min-height:600px}
+.title-screen .title-kicker{display:none}
+.title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(70px,min(15vw,18vh),180px)}
+.title-screen .title-role{margin-top:19px}
+.title-screen .title-menu{position:absolute;top:77%;margin:0;left:0;right:0}
+.title-screen .title-instruction{margin-top:14px;margin-bottom:4px}
+.title-screen .title-work{padding-top:6px;padding-bottom:6px}
+.title-showcase{position:absolute;top:69%;left:50%;transform:translateX(-50%);width:min(580px,80%);display:flex;align-items:center;justify-content:center;gap:22px;min-height:46px;color:#E1DCC2}
+.title-set-label{display:flex;flex-direction:column;gap:5px;text-align:left;font-family:var(--pixel);line-height:1.5}
+.title-set-label>span:first-child{font-size:7px;letter-spacing:1px;color:#89A9A7}
+.title-set-label strong{font-size:12px;letter-spacing:.5px;font-weight:normal;text-shadow:2px 2px #102137}
+.title-set-label>span:last-child{font-size:7px;letter-spacing:.7px;color:#ADC1B5}
+.title-set-buttons{display:flex;align-items:center;gap:3px}
+.title-screen .title-set-buttons button{min-width:40px;min-height:44px;padding:8px;background:#102B378C;border:1px solid #6E999340;color:#B8D0BD;font-family:var(--mono);font-size:17px;line-height:1}
+.title-screen .title-set-buttons button:hover{color:#FFD39A;border-color:#99BDA0;background:#183E49}
+.title-screen .title-set-buttons button[aria-pressed=true]{color:#35D6C5;border-color:#35D6C580}
+.title-screen .title-loading{position:absolute;top:78%;left:50%;transform:translateX(-50%);margin:0}
+@media(max-width:700px){
+ .title-screen .title-content{padding-top:clamp(96px,12vh,112px);min-height:590px}
+ .title-screen .title-kicker{margin-bottom:11px;font-size:5px}
+ .title-screen .title-logo .title-word{--title-size:clamp(61px,min(23vw,11vh),104px)}
+ .title-screen .title-logo .title-word:last-child{--title-size:clamp(84px,min(32vw,15vh),145px)}
+ .title-screen .title-content h1.title-logo{gap:0}
+ .title-screen .title-role{font-size:7px;margin-top:15px;letter-spacing:.7px}
+ .title-screen .title-menu{top:77%}
+ .title-screen .start-button{min-height:48px;font-size:10px;padding:11px 14px 10px;gap:12px}
+ .title-screen .title-instruction{margin-top:11px;margin-bottom:1px;font-size:4px}
+ .title-screen .title-work{font-size:8px;min-height:40px;padding:5px}
+ .title-work span{font-size:5px}
+ .title-showcase{top:69%;width:88%;gap:13px;min-height:47px}
+ .title-set-label{gap:3px}.title-set-label strong{font-size:9px;letter-spacing:0}.title-set-label>span:first-child,.title-set-label>span:last-child{font-size:6px;letter-spacing:.5px}
+ .title-screen .title-set-buttons button{min-width:34px;min-height:44px;padding:7px;font-size:15px}
+ .title-screen .crew-seal{right:14px;bottom:155px;font-size:4px;padding:5px 7px}
+}
+@media(max-height:740px){
+ .title-screen .title-content{padding-top:92px}
+ .title-screen .title-kicker{margin-bottom:8px}
+ .title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(56px,min(15vw,17vh),120px)}
+ .title-screen .title-role{font-size:7px;margin-top:12px}
+ .title-screen .title-menu{top:76%}
+ .title-screen .start-button{font-size:10px;min-height:44px;padding:9px 13px}
+ .title-screen .title-instruction{margin-top:10px;font-size:4px}
+ .title-screen .title-work{font-size:8px;min-height:34px;padding:4px}.title-work span{font-size:5px}
+ .title-screen .title-footer{bottom:10px}.title-screen .title-footer button{min-height:36px}
+ .title-showcase{top:68.5%;min-height:42px}
+}
+@media(max-height:540px) and (min-width:600px){
+ .title-screen .title-content{min-height:420px;padding-top:47px}
+ .title-screen .title-logo .title-word,.title-screen .title-logo .title-word:last-child{--title-size:clamp(50px,min(12vw,18vh),86px)}
+ .title-screen .title-role{margin-top:8px;font-size:6px}
+ .title-screen .title-menu{top:77%;align-items:center}
+ .title-screen .title-instruction{display:none}.title-screen .title-work{position:absolute;top:8px;left:calc(50% + 140px);white-space:nowrap;font-size:7px}
+ .title-work span{display:block;font-size:5px;margin-left:0}
+ .title-showcase{top:65%;gap:18px}
+ .title-set-label strong{font-size:6px}.title-set-label>span:first-child,.title-set-label>span:last-child{font-size:4px}
+ .title-screen .title-footer{bottom:6px;font-size:4px}.title-screen .title-footer button{min-height:30px}
+}
+
+/* Keep short viewports scrollable within the screen, not taller than it. */
+@media(max-height:620px) and (max-width:599px){
+ .title-screen .title-showcase{top:65%}
+ .title-screen .title-menu{top:74%}
+ .title-screen .title-work{min-height:30px;font-size:7px}
+}

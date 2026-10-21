@@ -1,3 +1,5 @@
+import { titleBuilds, paintTitleBuild, showcaseAt, BUILD_CYCLE_MS } from './title-builds.mjs?v=showcase1';
+
 /**
  * An original, front-facing soundstage for the title, not a view of the game map.
  * All scenery is drawn locally and cached at one native pixel per two CSS pixels.
@@ -53,9 +55,37 @@ export class TitleScene {
   constructor(canvas) {
     this.canvas = canvas;
     this.c = canvas.getContext('2d', { alpha: false });
-    this.reduced = false;
+    this._reduced = false;
+    this.paused = false;
+    this.showcaseTime = 0;
+    this.lastTime = 0;
+    this.activeBuild = 0;
+    this.buildState = showcaseAt(0);
+    this.onBuildChange = null;
     this.canvas.style.imageRendering = 'pixelated';
     this.resize(canvas.clientWidth || 960, canvas.clientHeight || 640);
+  }
+
+  get reduced() { return this._reduced; }
+  set reduced(value) {
+    const next = Boolean(value);
+    if (next === this._reduced) return;
+    this._reduced = next;
+    // Both motion modes always leave a fully lit, inspectable scenic piece.
+    this.showcaseTime = this.activeBuild * BUILD_CYCLE_MS;
+    this.render(this.lastTime);
+  }
+
+  stepBuild(direction) {
+    this.activeBuild = (this.activeBuild + (direction < 0 ? -1 : 1) + titleBuilds.length) % titleBuilds.length;
+    this.showcaseTime = this.activeBuild * BUILD_CYCLE_MS;
+    this.render(this.lastTime);
+  }
+
+  toggleBuilds() {
+    this.paused = !this.paused;
+    this.showcaseTime = this.activeBuild * BUILD_CYCLE_MS;
+    this.render(this.lastTime);
   }
 
   resize(width, height) {
@@ -67,7 +97,9 @@ export class TitleScene {
     this.portrait = this.w / this.h < 1.1;
     // Props remain legible, but narrower layouts get smaller, recomposed wings.
     this.unit = Math.max(.68, Math.min(1.3, this.w / 620));
-    this.floor = q(this.h * (this.portrait ? .755 : .73));
+    this.shortLandscape = this.w / this.h > 1.6 && this.h < 270;
+    this.shortPortrait = this.portrait && this.h < 310;
+    this.floor = q(this.h * (this.shortLandscape ? .54 : this.shortPortrait ? .55 : .59));
     this.rig = q(Math.min(this.h * .105, 39));
     const make = () => {
       const layer = this.canvas.ownerDocument.createElement('canvas');
@@ -78,10 +110,16 @@ export class TitleScene {
     this.back = make();
     this.wings = make();
     this.front = make();
+    // Tiny fixed-size transparent plates are cached once, not repainted per frame.
+    if (!this.buildPlates) this.buildPlates = titleBuilds.map((_, index) => {
+      const plate = make(); plate.width = 360; plate.height = 180;
+      paintTitleBuild(plate.getContext('2d'), index);
+      return plate;
+    });
     this.paintBackdrop(this.back.getContext('2d'));
     this.paintWings(this.wings.getContext('2d'));
     this.paintForeground(this.front.getContext('2d'));
-    this.render(0);
+    this.render(this.lastTime);
   }
 
   paintBackdrop(c) {
@@ -344,10 +382,54 @@ export class TitleScene {
     line(c, cx - cw, cy + 9, cx + cw, cy + 9, '#0B2632');
   }
 
+  paintShowcase(c, state) {
+    const { w, h, portrait } = this;
+    // The same quiet title-safe composition on desktop and phone. The set sits
+    // above the main menu, while the original stage floor stays in place.
+    const scale = Math.min(w * (portrait ? .9 : .67) / 360, h * (this.shortLandscape ? .29 : portrait ? .27 : .34) / 180);
+    const width = q(360 * scale), height = q(180 * scale);
+    // All scenic bases share one physical floor coordinate. It is deliberately
+    // downstage of the cyc seam, never on or above the background horizon.
+    const groundY = q(h * (this.shortLandscape ? .61 : this.shortPortrait ? .635 : .68));
+    const x = q((w - width) / 2), y = q(groundY - 174 * scale);
+    this.buildGround = { x: q(w / 2), y: groundY, floor: this.floor, scale, left: x, width };
+    // The stage's work lights go down while the HTML title and controls stay
+    // steady. This veil darkens the cyc, not a second image or a crossfade.
+    c.globalAlpha = (1 - state.light) * .88;
+    rect(c, 0, this.rig + 18, w, this.floor - this.rig - 5, P.ink);
+    if (state.light > 0) {
+      // Shared floor-projected cast shadow extends downstage/right, opposite
+      // the key light. A dense contact band joins each base to the planks.
+      c.globalAlpha = state.light * .30;
+      poly(c, [[x + width * .10, groundY - 14 * scale],
+        [x + width * .77, groundY - 18 * scale],
+        [x + width * .99, groundY + 7 * scale],
+        [x + width * .85, groundY + 13 * scale],
+        [x + width * .22, groundY + 6 * scale]], P.ink);
+      c.globalAlpha = state.light * .54;
+      ellipse(c, w / 2, groundY - 4 * scale, width * .40, Math.max(2, q(5 * scale)), '#071820');
+      c.globalAlpha = state.light;
+      c.drawImage(this.buildPlates[state.index], x, y, width, height);
+    }
+    c.globalAlpha = 1;
+  }
+
   render(time = 0) {
     const { c, w, h, rig, floor } = this;
     if (!c || !this.back) return;
-    const t = this.reduced ? 6200 : Number(time) || 0;
+    const now = Math.max(0, Number(time) || 0);
+    const delta = Math.max(0, now - this.lastTime);
+    this.lastTime = now;
+    if (!this.reduced && !this.paused) this.showcaseTime += delta;
+    const state = showcaseAt(this.showcaseTime, this.reduced || this.paused ? this.activeBuild : null);
+    this.activeBuild = state.index;
+    this.buildState = state;
+    const key = `${state.index}:${this.paused}:${this.reduced}`;
+    if (this._buildKey !== key) {
+      this._buildKey = key;
+      this.onBuildChange?.({ ...titleBuilds[state.index], index: state.index, paused: this.paused, reduced: this.reduced });
+    }
+    const t = this.reduced || this.paused ? 6200 : now;
     c.globalAlpha = 1;
     c.drawImage(this.back, 0, 0);
     // Slow sweeps are low contrast so the HTML title is always the brightest
@@ -358,9 +440,9 @@ export class TitleScene {
       { x: w * .85, target: w * .75 - drift, color: '#FFD39A', width: w * .13 }
     ];
     for (const lamp of lamps) {
-      c.globalAlpha = .045;
+      c.globalAlpha = .045 * (.25 + .75 * state.light);
       poly(c, [[lamp.x - 3, rig + 17], [lamp.x + 3, rig + 17], [lamp.target + lamp.width, floor + 12], [lamp.target - lamp.width, floor + 12]], lamp.color);
-      c.globalAlpha = .035;
+      c.globalAlpha = .035 * (.25 + .75 * state.light);
       poly(c, [[lamp.x - 2, rig + 17], [lamp.x + 2, rig + 17], [lamp.target + lamp.width * .55, floor + 12], [lamp.target - lamp.width * .55, floor + 12]], lamp.color);
       c.globalAlpha = .09;
       ellipse(c, lamp.target, floor + 13, lamp.width, 5, lamp.color);
@@ -368,6 +450,9 @@ export class TitleScene {
       ellipse(c, lamp.target, floor + 13, lamp.width * .62, 3, lamp.color);
     }
     c.globalAlpha = 1;
+    // A full lights-down interval clears the old scenic plate before the next
+    // appears. Never draw a second set over the first; the lettering stays lit.
+    this.paintShowcase(c, state);
     this.suspendedScenery(c, t);
     c.drawImage(this.wings, 0, 0);
     c.drawImage(this.front, 0, 0);

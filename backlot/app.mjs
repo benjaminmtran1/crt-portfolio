@@ -1,11 +1,21 @@
-import {TitleScene} from './title-scene.mjs?v=title4';
+import {TitleScene} from './title-scene.mjs?v=showcase1';
 import {World,stages,WIDTH,HEIGHT,distance} from './world.mjs?v=truck1';
-import {Renderer} from './renderer.mjs?v=drafting1';
+import {Renderer} from './renderer.mjs?v=likeness1';
 import {LotLife} from './life.mjs?v=truck1';
 import {BuildSequence,buildSteps,lightingLooks} from './departments.mjs?v=drafting1';
 import {normalizeContent,mediaURL,mediaKind,hostedVideo,galleryFor,watchLinks,thumbnailFor,featuredProjects,plainText,safeURL} from './content.mjs?v=video1';
 const $=s=>document.querySelector(s),world=new World(),renderer=new Renderer($('#world'));
 const titleScene=new TitleScene($('#title-scene'));
+function syncTitleBuild(build) {
+ $('#title-set-number').textContent=`ON STAGE / ${String(build.index+1).padStart(2,'0')}`;
+ $('#title-set-name').textContent=build.title;$('#title-set-detail').textContent=build.detail;
+ $('#title-set-description').textContent=build.description;
+ const pause=$('#title-set-pause');pause.hidden=build.reduced;pause.setAttribute('aria-pressed',String(build.paused));pause.textContent=build.paused?'▶':'II';pause.setAttribute('aria-label',build.paused?'Resume the set changes':'Pause the set changes');
+}
+titleScene.onBuildChange=syncTitleBuild;
+$('#title-set-prev').onclick=()=>titleScene.stepBuild(-1);
+$('#title-set-next').onclick=()=>titleScene.stepBuild(1);
+$('#title-set-pause').onclick=()=>titleScene.toggleBuilds();
 const panel=$('#panel'),panelInner=$('#panel-inner'),keys=new Set(),stick={x:0,y:0};
 let content,categories=[],revision='',projects=[],filter='all',galleryIndex=0,activeProject=null,previousFocus=null,feature=0,nearbyId='',last=0,mapClock=0,toastTimer,welcomed=false,titleClock=0,takePhase='',entering=false,enterTimer=0,revealTimer=0;
 const settings={rain:true,reduced:matchMedia('(prefers-reduced-motion: reduce)').matches,sound:false};

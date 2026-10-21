@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {TitleScene} from '../title-scene.mjs';
+const source=fs.readFileSync(new URL('../app.mjs',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').split("const panel=$('#panel')")[0];
+const nodes=new Map();
+const context=new Proxy({},{get:(o,k)=>k in o?o[k]:()=>{},set:(o,k,v)=>(o[k]=v,true)});
+let document;
+function element(){return {style:{},attributes:{},hidden:false,textContent:'',width:900,height:720,clientWidth:900,clientHeight:720,ownerDocument:document,getContext:()=>context,setAttribute(k,v){this.attributes[k]=v;},getAttribute(k){return this.attributes[k];},click(){this.onclick?.();}};}
+document={createElement:()=>element(),querySelector:s=>{if(!nodes.has(s))nodes.set(s,element());return nodes.get(s);}};
+const titleScene=vm.runInNewContext(`(()=>{${source};return titleScene;})()`,{document,World:class{},Renderer:class{},TitleScene});
+const get=s=>nodes.get(s);
+get('#title-set-next').click();assert.equal(get('#title-set-name').textContent,'NINTENDO × DONKEY KONG');assert.match(get('#title-set-description').textContent,/SUBWAY/);assert.equal(get('#title-set-number').textContent,'ON STAGE / 02');
+get('#title-set-prev').click();assert.equal(titleScene.activeBuild,0);
+get('#title-set-prev').click();assert.equal(get('#title-set-name').textContent,'BEAST GAMES');
+get('#title-set-pause').click();assert.equal(titleScene.paused,true);assert.equal(get('#title-set-pause').getAttribute('aria-pressed'),'true');assert.equal(get('#title-set-pause').getAttribute('aria-label'),'Resume the set changes');
+get('#title-set-next').click();assert.equal(titleScene.activeBuild,0);assert.equal(titleScene.paused,true,'Manual choice does not restart a paused set');
+get('#title-set-pause').click();assert.equal(titleScene.paused,false);
+titleScene.reduced=true;assert.equal(get('#title-set-pause').hidden,true,'Reduced motion has manual arrows, never autoplay');
+get('#title-set-next').click();assert.equal(titleScene.activeBuild,1);titleScene.render(999999);assert.equal(titleScene.activeBuild,1);
+titleScene.reduced=false;assert.equal(get('#title-set-pause').hidden,false);
+console.log('Title showcase UI passed: actual app button wiring, labels/descriptions, previous/next wrap, accessible pause/resume and reduced-motion manual selection.');
