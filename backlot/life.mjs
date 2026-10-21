@@ -26,10 +26,12 @@ export class LotLife{
   // Trust is persistent; location is not. Returning visitors can follow again.
   this.cat={...catHome,mode:'idle',face:'right',moving:false,step:0,heart:0,waiting:false,rest:0,idleTime:3,stroll:0};
   this.catPath=[];this.take=null;this.takeNumber=0;this.events=[];this.crewTime=0;this.lighting='work';this.chatCount=0;this.reduced=false;
+  // A fresh takeaway lasts for this visit, independently of the saved craft stamp.
+  this.hasCoffee=false;
  }
  discover(id){if(!this.found.has(id)){this.found.add(id);this.events.push({type:'discovery',id});}}
  selectLight(id){if(!lightingLooks.some(look=>look.id===id))return;this.lighting=id;this.discover('lighting');this.events.push({type:'lighting-change',id});}
- chat(topic){const reply=crewReply(topic,this.found,this.chatCount);if(topic==='day')this.chatCount++;this.discover('craft');return reply;}
+ chat(topic){const reply=crewReply(topic,this.found,this.chatCount);if(topic==='day')this.chatCount++;if(topic==='coffee')this.hasCoffee=true;this.discover('craft');return reply;}
  hotspot(id){return id==='cat'?{id,point:this.cat,label:'Pet the cat',caption:this.cat.mode==='trusted'?'CREW APPROVED':this.cat.mode==='nook'?'THE CAT’S SECRET SPOT':'THE SHOP CAT',radius:38}:curiosities.find(item=>item.id===id);}
  nearby(player){if(this.take)return null;return [...curiosities,this.hotspot('cat')].filter(item=>distance(item.point,player)<item.radius).sort((a,b)=>distance(a.point,player)-distance(b.point,player))[0]||null;}
  hit(point){if(this.take)return null;if(Object.values(craftHit).some(r=>point.x>=r.x&&point.x<r.x+r.w&&point.y>=r.y&&point.y<r.y+r.h))return this.hotspot('craft');return [...curiosities,this.hotspot('cat')].find(item=>Math.abs(point.x-item.point.x)<(item.id==='cat'?18:24)&&point.y>item.point.y-28&&point.y<item.point.y+12)||null;}

@@ -92,10 +92,11 @@ function legs(c,x,y,stride,side){
   rect(c,x-5,y-2+stride,3,1,p.K);rect(c,x+2,y-2-stride,4,1,p.K);
  }
 }
-function frontBody(c,x,y,stride,back){
+function frontBody(c,x,y,stride,back,coffee=false){
  const p=playerPalette;
  // Loose rolled sleeves and relaxed hands swing opposite the legs.
- for(const [sx,offset]of [[-8,-stride],[6,stride]]){
+ for(const [sx,swing]of [[-8,-stride],[6,stride]]){
+  const offset=coffee&&sx===(back?6:-8)?-5:swing;
   rect(c,x+sx,y-18,3,8+offset,p.B);
   rect(c,x+sx+(sx<0?1:0),y-17,2,7+offset,p.w);
   rect(c,x+sx,y-11+offset,3,2,p.b);
@@ -118,19 +119,35 @@ function frontBody(c,x,y,stride,back){
   rect(c,x+3,y-13,1,1,p.W);rect(c,x+3,y-10,1,1,p.W);
  }
 }
-function sideBody(c,x,y,stride,rightFacing){
+function sideBody(c,x,y,stride,rightFacing,coffee=false){
  const p=playerPalette,dir=rightFacing?1:-1;
  rect(c,x-4,y-20,9,13,p.B);rect(c,x-3,y-19,7,12,p.b);
  for(const xx of [-3,-1,1,3])rect(c,x+xx,y-19,1,11,p.w);
  rect(c,x+(rightFacing?4:-4),y-18,1,10,p.W);
  rect(c,x-3,y-8,7,1,p.B);
  // Forearm travels fore/aft; a stripe and rolled cuff keep the outfit legible.
+ if(coffee){
+  // Bend the carrying arm forward; only the free arm/legs keep their gait.
+  const armX=x+(rightFacing?-1:-3);
+  rect(c,armX,y-18,3,6,p.B);rect(c,armX+1,y-17,2,4,p.w);
+  rect(c,armX,y-13,3,2,p.b);rect(c,rightFacing?x+1:x-8,y-13,7,2,p.s);
+  rect(c,rightFacing?x+6:x-9,y-14,3,3,p.S);return;
+ }
  const armX=x-1-stride*dir;
  rect(c,armX,y-18,3,8,p.B);rect(c,armX+1,y-17,2,6,p.w);
  rect(c,armX,y-11,3,2,p.b);rect(c,armX,y-9,3,3,p.s);
  rect(c,armX+1,y-9,1,2,p.S);
 }
-export function drawPlayer(c,x,y,face='down',step=0,moving=false){
+function takeawayCup(c,x,y,face){
+ // Cream paper, a brown sleeve and dark lid read at the original sprite scale.
+ // Keep the cup upright and just outside the body so every facing remains clear.
+ const left=face==='down'||face==='left',cx=x+(left?-11:7),cy=y-18;
+ rect(c,cx-1,cy,7,2,'#273e43');rect(c,cx,cy,5,1,'#d8d9c0');
+ rect(c,cx,cy+2,5,5,'#f9efce');rect(c,cx+1,cy+7,3,1,'#c4b99a');
+ rect(c,cx,cy+4,5,2,'#624b35');rect(c,cx+1,cy+2,1,2,'#fff8df');
+ rect(c,cx+(left?4:-1),cy+5,2,2,playerPalette.S);
+}
+export function drawPlayer(c,x,y,face='down',step=0,moving=false,coffee=false){
  x=Math.round(x);y=Math.round(y);
  if(!Object.hasOwn(heads,face))face='down';
  const {stride,bob}=playerPose(step,moving),side=face==='left'||face==='right';
@@ -138,6 +155,7 @@ export function drawPlayer(c,x,y,face='down',step=0,moving=false){
  c.fillStyle='#0916228f';c.beginPath();c.ellipse(x+1,y+1,8,3,0,0,Math.PI*2);c.fill();
  legs(c,x,y,stride,side);
  const bodyY=y+bob;
- if(side)sideBody(c,x,bodyY,stride,face==='right');else frontBody(c,x,bodyY,stride,face==='up');
+ if(side)sideBody(c,x,bodyY,stride,face==='right',coffee);else frontBody(c,x,bodyY,stride,face==='up',coffee);
  stamp(c,heads[face],x-8,bodyY-34);
+ if(coffee)takeawayCup(c,x,bodyY,face);
 }

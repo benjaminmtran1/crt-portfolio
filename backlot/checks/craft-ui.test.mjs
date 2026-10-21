@@ -9,6 +9,7 @@ import {World,stages,WIDTH,HEIGHT,distance,blocked,craftTruck,craftHit,craftStop
 import {LotLife} from '../life.mjs';
 import {BuildSequence,buildSteps,lightingLooks} from '../departments.mjs';
 import * as contentAPI from '../content.mjs';
+import * as encounterAPI from '../encounters.mjs';
 const require=createRequire(import.meta.url),{parseHTML}=require(process.env.ADMIN_DOM_MODULE||'linkedom');
 const root=new URL('../../',import.meta.url);
 async function boot(reduced=false,saved={}){
@@ -20,7 +21,7 @@ async function boot(reduced=false,saved={}){
  for(const el of document.querySelectorAll('*')){el.getBoundingClientRect=()=>({left:0,top:0,right:900,bottom:720,width:900,height:720});el.focus=function(){document.activeElement=this;};}
  document.activeElement=document.body;
  const renderer=new Proxy({camera:{},drawCrewPortrait(){portraits++;},screenToWorld:(x,y)=>({x,y})},{get:(o,k)=>k in o?o[k]:()=>{}});
- const env={document,window:{addEventListener:(k,fn)=>listeners.set(k,fn)},getComputedStyle:()=>({flexDirection:'column',gap:'0'}),matchMedia:q=>({matches:q.includes('reduced-motion')?reduced:false}),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{storage.set(k,v);writes.push({key:k,value:v});}},location:{hash:'',pathname:'/',search:''},history:{replaceState(){}},ResizeObserver:class{observe(){}},requestAnimationFrame(){},setTimeout(){},clearTimeout(){},fetch:async()=>({ok:true,json:async()=>structuredClone(raw)}),console,URLSearchParams,World,stages,WIDTH,HEIGHT,distance,LotLife,BuildSequence,buildSteps,lightingLooks,...contentAPI,Renderer:class{constructor(){return renderer;}},TitleScene:class{resize(){}render(){}}};
+ const env={document,window:{addEventListener:(k,fn)=>listeners.set(k,fn)},getComputedStyle:()=>({flexDirection:'column',gap:'0'}),matchMedia:q=>({matches:q.includes('reduced-motion')?reduced:false}),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>{storage.set(k,v);writes.push({key:k,value:v});}},location:{hash:'',pathname:'/',search:''},history:{replaceState(){}},ResizeObserver:class{observe(){}},requestAnimationFrame(){},setTimeout(){},clearTimeout(){},fetch:async()=>({ok:true,json:async()=>structuredClone(raw)}),console,URLSearchParams,World,stages,WIDTH,HEIGHT,distance,LotLife,BuildSequence,buildSteps,lightingLooks,...contentAPI,...encounterAPI,Renderer:class{constructor(){return renderer;}},TitleScene:class{resize(){}render(){}}};
  const app=await vm.runInNewContext('(async()=>{'+source+'\nreturn {dismissIntro,closePanel,openIndex,handleLifeEvents,settings,life,world,frame};})()',env);app.dismissIntro();
  return{app,get,document,storage,writes,portraits:()=>portraits,
   frame(hz=60){app.frame(now+=1000/hz);},
@@ -44,7 +45,7 @@ for(const pointerType of ['mouse','touch']){
 // and body must walk to the serving apron and open the existing conversation.
 for(const hz of [30,60,120])for(const point of [body,sign])for(const pointerType of ['mouse','touch']){
  const t=await boot();t.pointer(point,pointerType);assert.equal(t.get('#panel').open,false);assert.equal(t.app.world.destination,'egg:craft');assert.ok(t.app.world.path.length);assert.ok(distance(t.app.world.path.at(-1),craftStop)<8);arrive(t,hz);
- assert.equal(t.app.life.found.has('craft'),false,'Opening the panel alone does not award a conversation stamp');
+ assert.equal(t.app.life.found.has('craft'),false,'Opening the panel alone does not award a conversation stamp');assert.equal(t.app.life.hasCoffee,false,'Walking up and opening the truck does not equip coffee');
  const before={...t.app.world.player},time=t.app.world.t;t.advance(1,hz);assert.deepEqual(t.app.world.player,before);assert.equal(t.app.world.t,time,'The craft conversation pauses the lot');
  t.click('.department-return');assert.equal(t.get('#panel').open,false);assert.equal(t.app.world.paused,false);assert.equal(t.document.activeElement,t.get('#world'));t.frame(hz);assert.ok(t.app.world.t>time);
 }
@@ -52,7 +53,7 @@ for(const hz of [30,60,120])for(const point of [body,sign])for(const pointerType
 {
  const t=await boot(),{app,get}=t;Object.assign(app.world.player,craftStop);t.frame();assert.equal(get('#interact-label').textContent,'Take a break');assert.equal(get('#interaction-caption').textContent,'CRAFT SERVICES');
  t.key('e');craftOpen(t);assert.equal(t.portraits(),1);
- t.click('[data-chat="coffee"]');assert.match(get('#crew-reply').textContent,/One coffee\. No quest attached\./);assert.ok(app.life.found.has('craft'));assert.deepEqual(JSON.parse(t.storage.get('backlot-crew-v1')),['craft']);
+ t.click('[data-chat="coffee"]');assert.match(get('#crew-reply').textContent,/One coffee\. No quest attached\./);assert.equal(app.life.hasCoffee,true,'The real coffee button equips the takeaway cup');assert.ok(app.life.found.has('craft'));assert.deepEqual(JSON.parse(t.storage.get('backlot-crew-v1')),['craft']);
  const gossip=[];for(let i=0;i<5;i++){t.click('[data-chat="day"]');gossip.push(get('#crew-reply').textContent);}
  assert.equal(new Set(gossip.slice(0,4)).size,4,'Crew chatter rotates through four replies');assert.equal(gossip[4],gossip[0],'Crew chatter loops safely');assert.equal(app.life.chatCount,5);
  t.click('[data-chat="rumour"]');assert.match(get('#crew-reply').textContent,/shop cat/);assert.equal(app.life.chatCount,5,'Coffee and hints do not consume gossip');
@@ -74,4 +75,31 @@ for(const reduced of [false,true]){
  t.key('Escape');assert.equal(app.life.take,null);assert.equal(app.life.found.has('take'),false,'Skipping does not give a take stamp');t.click('#touch-action');craftOpen(t);t.click('[data-chat="coffee"]');t.click('[data-close]');
  app.life.interact('slate',app.world);app.handleLifeEvents();t.advance(10.7);assert.equal(app.life.take,null);assert.ok(app.life.found.has('take'));t.key('e');craftOpen(t);assert.ok(app.life.found.has('craft'),'Completed takes preserve craft discoveries');
 }
-console.log('Craft DOM passed: mouse/touch body/sign auto-approach at 30/60/120 Hz, keyboard/Enter/touch nearby entry, coffee, looping gossip, progressive hints, unique saved stamps and reload, repeated close/reopen, index navigation, pause/resume, take isolation/skip/completion and reduced motion.');
+
+// Coffee is carried for this session, not inferred from an earned craft stamp.
+// Exercise the actual controls across interruption/navigation and calmer motion.
+for(const reduced of [false,true]){
+ const t=await boot(reduced,{'backlot-crew-v1':'["craft"]'}),{app,get}=t;
+ assert.equal(app.life.hasCoffee,false,'Reloading a saved craft stamp starts empty-handed');
+ Object.assign(app.world.player,craftStop);t.key('e');craftOpen(t);
+ for(const topic of ['day','rumour']){t.click(`[data-chat="${topic}"]`);assert.equal(app.life.hasCoffee,false,'Gossip and hints do not silently order a drink');}
+ const savedBefore=Object.fromEntries(t.storage),writesBefore=t.writes.length;
+ t.click('[data-chat="coffee"]');assert.equal(app.life.hasCoffee,true);
+ t.click('[data-chat="coffee"]');assert.equal(app.life.hasCoffee,true);
+ assert.equal(t.writes.length,writesBefore,'An already-earned stamp needs no write when ordering coffee');
+ assert.deepEqual(Object.fromEntries(t.storage),savedBefore,'Coffee is not written to persistent storage');
+ t.click('[data-close]');assert.equal(app.life.hasCoffee,true);
+ t.pointer({x:376,y:376});t.advance(2);assert.ok(distance(app.world.player,craftStop)>60);assert.equal(app.life.hasCoffee,true,'Walking away keeps the cup');
+ app.openIndex();assert.equal(app.life.hasCoffee,true);app.closePanel();assert.equal(app.life.hasCoffee,true,'Index navigation retains coffee');
+ app.life.interact('lighting',app.world);app.handleLifeEvents();assert.equal(get('#panel').dataset.kind,'lighting');
+ t.click('[data-light="night"]');assert.equal(app.life.lighting,'night');assert.equal(app.life.hasCoffee,true);t.click('[data-close]');
+ for(const skipped of [true,false]){
+  app.life.interact('slate',app.world);app.handleLifeEvents();assert.ok(app.life.take);assert.equal(app.life.hasCoffee,true);
+  if(skipped)t.key('Escape');else t.advance(10.7);
+  assert.equal(app.life.take,null);assert.equal(app.life.hasCoffee,true,'Skipped and completed takes both keep the cup');
+ }
+ t.click('#settings-button');t.click('[data-title]');assert.equal(get('#title-screen').hidden,false);assert.equal(app.life.hasCoffee,true,'Returning to the title is not a new session');
+ t.click('#title-work');assert.equal(get('#title-screen').hidden,true);assert.equal(app.life.hasCoffee,true,'Reentering through Work index retains coffee');app.closePanel();
+ const reloaded=await boot(reduced,Object.fromEntries(t.storage));assert.equal(reloaded.app.life.hasCoffee,false,'A real app reload drops the carried drink, not saved stamps');assert.ok(reloaded.app.life.found.has('craft'));
+}
+console.log('Craft DOM passed: mouse/touch body/sign auto-approach at 30/60/120 Hz, keyboard/Enter/touch nearby entry, explicit session-only coffee, looping gossip, progressive hints, unique saved stamps and reload, repeated close/reopen, index/title navigation, walking, lighting, pause/resume, take isolation/skip/completion and reduced motion.');
