@@ -94,3 +94,9 @@ Open Questions: Full browser and physical iPhone visual/input QA remain pending;
 Future Ideas: More bespoke camera builds need a chosen project and one or two clear reference images. Remaining brainstorm ideas stay parked.
 
 Validation: `node backlot/checks/encounters.test.mjs`, plus existing routes, life, departments, craft rendering and title showcase suites.
+
+### Wrap collision correction
+
+Crew departures now follow cached routes through the existing collision map, turn to face each segment, and walk through the raised entrance barrier. Movement is sampled by distance at a common speed; no straight-line interpolation through buildings remains. Absolute-time sampling preserves pause, chapter selection and replay without moving the live crew. All three leave before the credits.
+
+Regression: `node backlot/checks/wrap-motion.test.mjs` samples every crew route at 30/60/120 Hz against every obstacle, checks the gate-only exit, speed, direction changes and completion, and verifies that the renderer uses those routes for normal motion, calmer motion, seeking and replay.

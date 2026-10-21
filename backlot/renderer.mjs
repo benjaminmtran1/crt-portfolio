@@ -1,3 +1,4 @@
+import {wrapActorsAt} from './wrap-motion.mjs?v=wraproutes1';
 import {crew} from './encounters.mjs?v=encounters1';
 import {WIDTH,HEIGHT,stages,clamp,craftCrew,craftCup} from './world.mjs?v=craft2';
 import {pixelText} from './pixels.mjs?v=crew3';
@@ -105,7 +106,11 @@ export class Renderer{
  drawWrap(canvas,elapsed){
   const c=canvas.getContext('2d'),progress=clamp(elapsed/9,0,1);c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);
   for(const s of stages){rect(c,s.door.x-13,s.y+s.h-30,26,Math.round(30*progress),'#35464b');}
-  if(elapsed<9)for(const [i,person] of crew.entries()){const x=person.point.x+(472-person.point.x)*progress,y=person.point.y+(704-person.point.y)*progress;this.actor(c,x,y,'down',elapsed*6,!this.reduced,person.coat,true);}
+  // Lift the entrance barrier before the crew leave through the open gate.
+  c.drawImage(this.base,393,681,170,6,393,669,170,6);
+  rect(c,386,610,6,59,'#c1ac7b');for(let y=614;y<666;y+=12)rect(c,386,y,6,5,'#53544a');
+  const departing=wrapActorsAt(elapsed).filter(person=>!person.exited).sort((a,b)=>a.y-b.y);
+  for(const person of departing)this.actor(c,person.x,person.y,person.face,person.step,person.moving&&!this.reduced,person.coat,true);
   this.paintLook(c,'night');c.fillStyle=`rgba(5,14,28,${progress*.48})`;c.fillRect(0,0,WIDTH,HEIGHT);
   this.catSprite(c,{x:416,y:240,face:'right',step:0},0);if(elapsed>=6){rect(c,406,227,20,9,'#ac9574');pixelText(c,'Z',432,221,'#dac9a1',1);}
   c.restore();
