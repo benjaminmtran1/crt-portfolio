@@ -1,12 +1,13 @@
-import {distance,findPath,clamp,craftStop,craftHit} from './world.mjs?v=craft2';
+import {CrewRoutines} from './ambient.mjs?v=living1';
+import {distance,findPath,clamp,craftStop,craftHit} from './world.mjs?v=living1';
 import {lightingLooks,crewReply} from './departments.mjs?v=crew3';
 
-import {crew} from './encounters.mjs?v=encounters1';
+import {crew} from './encounters.mjs?v=living1';
 
 // These props share the same walkable space as the portfolio destinations.
 export const curiosities=[
- {id:'camera',point:{x:488,y:300},label:'Look through the camera',caption:'CAMERA / VIEWFINDER',radius:28},
- {id:'wrap',point:{x:392,y:632},label:'Call it a day',caption:'THE WRAP BELL',radius:30},
+ {id:'camera',point:{x:488,y:312},label:'Look through the camera',caption:'CAMERA / VIEWFINDER',radius:28},
+ {id:'wrap',point:{x:392,y:640},label:'Call it a day',caption:'THE WRAP BELL',radius:30},
  ...crew.map(person=>({id:person.id,point:person.point,label:'Talk to '+person.name,caption:person.role.toUpperCase(),radius:28})),
  {id:'slate',point:{x:544,y:312},label:'Roll a take',caption:'THE CLAPPERBOARD',radius:38},
  {id:'rear-narrative',point:{x:224,y:64},label:'Look behind the set',caption:'REAR OF STAGE 01',category:'narrative',radius:40},
@@ -27,14 +28,15 @@ export class LotLife{
   this.cat={...catHome,mode:'idle',face:'right',moving:false,step:0,heart:0,waiting:false,rest:0,idleTime:3,stroll:0};
   this.catPath=[];this.take=null;this.takeNumber=0;this.events=[];this.crewTime=0;this.lighting='work';this.chatCount=0;this.reduced=false;
   // A fresh takeaway lasts for this visit, independently of the saved craft stamp.
-  this.hasCoffee=false;
+  this.hasCoffee=false;this.routines=new CrewRoutines();
  }
  discover(id){if(!this.found.has(id)){this.found.add(id);this.events.push({type:'discovery',id});}}
  selectLight(id){if(!lightingLooks.some(look=>look.id===id))return;this.lighting=id;this.discover('lighting');this.events.push({type:'lighting-change',id});}
  chat(topic){const reply=crewReply(topic,this.found,this.chatCount);if(topic==='day')this.chatCount++;if(topic==='coffee')this.hasCoffee=true;this.discover('craft');return reply;}
- hotspot(id){return id==='cat'?{id,point:this.cat,label:'Pet the cat',caption:this.cat.mode==='trusted'?'CREW APPROVED':this.cat.mode==='nook'?'THE CAT’S SECRET SPOT':'THE SHOP CAT',radius:38}:curiosities.find(item=>item.id===id);}
- nearby(player){if(this.take)return null;return [...curiosities,this.hotspot('cat')].filter(item=>distance(item.point,player)<item.radius).sort((a,b)=>distance(a.point,player)-distance(b.point,player))[0]||null;}
- hit(point){if(this.take)return null;if(Object.values(craftHit).some(r=>point.x>=r.x&&point.x<r.x+r.w&&point.y>=r.y&&point.y<r.y+r.h))return this.hotspot('craft');return [...curiosities,this.hotspot('cat')].find(item=>Math.abs(point.x-item.point.x)<(item.id==='cat'?18:24)&&point.y>item.point.y-28&&point.y<item.point.y+12)||null;}
+ crewHotspots(){return curiosities.map(item=>this.routines.pose(item.id)?{...item,point:this.routines.pose(item.id)}:item);}
+ hotspot(id){return id==='cat'?{id,point:this.cat,label:'Pet the cat',caption:this.cat.mode==='trusted'?'CREW APPROVED':this.cat.mode==='nook'?'THE CAT’S SECRET SPOT':'THE SHOP CAT',radius:38}:this.crewHotspots().find(item=>item.id===id);}
+ nearby(player){if(this.take)return null;return [...this.crewHotspots(),this.hotspot('cat')].filter(item=>distance(item.point,player)<item.radius).sort((a,b)=>distance(a.point,player)-distance(b.point,player))[0]||null;}
+ hit(point){if(this.take)return null;if(point.x>=458&&point.x<=523&&point.y>=240&&point.y<=300)return this.hotspot('camera');if(point.x>=378&&point.x<=421&&point.y>=571&&point.y<=630)return this.hotspot('wrap');if(Object.values(craftHit).some(r=>point.x>=r.x&&point.x<r.x+r.w&&point.y>=r.y&&point.y<r.y+r.h))return this.hotspot('craft');return [...this.crewHotspots(),this.hotspot('cat')].find(item=>Math.abs(point.x-item.point.x)<(item.id==='cat'?18:24)&&point.y>item.point.y-28&&point.y<item.point.y+12)||null;}
  backstage(player){return player.y<94?curiosities.find(item=>item.category&&Math.abs(player.x-item.point.x)<125)?.category:null;}
  interact(id,world){
   if(this.take)return;
@@ -58,7 +60,7 @@ export class LotLife{
  update(dt,world){
   if(world.paused)return;dt=clamp(dt,0,.05);
   if(this.take){this.take.elapsed+=dt;if(this.take.elapsed>=TAKE_LENGTH)this.finishTake();return;}
-  this.crewTime=world.t;
+  this.crewTime=world.t;this.routines.update(dt,world,this.reduced);
   const cat=this.cat;cat.heart=Math.max(0,cat.heart-dt);cat.moving=false;
   cat.waiting=false;
   if(cat.mode==='nook')return; // The first reward never expires while exploring.

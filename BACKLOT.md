@@ -12,14 +12,14 @@ The homepage is now an explorable pixel-art film set. The rebuilt Backlot Studio
 - All project counts and category filters come from the current content. A new guide category appears in Work index automatically. The six physical map destinations keep their existing IDs.
 - A separate, full-screen theatrical title scene opens each visit: oversized red italic-pixel **Benjamin Tran** lettering with **Construction Coordinator**, original soundstage artwork, Enter Backlot, a direct Work index option and optional sound. A short curtain transition enters the playable lot; calmer motion skips it. The name follows `site.heroName`; the requested title-screen role is fixed. Settings can return to the title screen. Shared project links open the project directly.
 - Three pixel-art interpretations of actual portfolio builds rotate one at a time on the title soundstage: Deathstalker's mossy graveyard/gated ruin, Nintendo x Donkey Kong's rounded green SUBWAY entrance, and Beast Games' black-and-silver build filled with a stepped mound of green cash bundles. The two front-facing sets retain their original floor anchor; the isometric Beast build uses its own fitted placement and diamond-footprint contact shadow. Each holds for 8.5 seconds before a 650 ms lights-down, 240 ms fully hidden set swap and 650 ms relight. Previous/next and pause controls are optional; calmer motion keeps a static set with manual selection. Entry and Work index never wait on the scenic cycle.
-- The playable character uses a portrait-based original sprite: swept dark hair, beard, glasses, sage overshirt and dark trousers. Front, back and side facings and two walking steps preserve the existing actor scale, ground anchor, routes and collision. NPC artwork is unchanged.
+- The playable character uses the approved About-portrait likeness: wavy dark hair, moustache/light stubble, silver nose hoop, blue-and-white striped overshirt, white tank, work trousers and boots. Four facings and the walking cycle preserve the existing ground anchor and collision. Ordering a craft coffee adds a takeaway cup for the current visit.
 - The clapperboard beside the central avenue starts a 10.5-second scene: quiet on set, a lantern-carrying performer, a moving camera and a wrap. CUT or Escape skips it. Dialogs and background tabs pause it.
 - Walk behind stages 01 and 02 through the northern service lane to reveal the timber backs, braces and sandbags. Inspect the small rear placards to open an illustrated cutaway and links to the current project galleries.
 - Pet the gently strolling workshop cat, then follow it. It waits if you fall behind and leads to the white production cube truck beyond the prop garden, with its cargo bay open and lift gate lowered horizontally. Pet it there to earn a Crew Approved stamp. The stamp is saved, but the cat is free to roam: after a short rest it walks back to the workshop and can lead you again. Reloads start it at the workshop without resetting any discoveries. The truck and extended lift gate are solid scenery, with a clear interaction spot beside the rear.
 - The lighting desk beside the central avenue offers **Work lights**, **Golden hour** and **Night shoot**, with a preview of the whole lot. The selected look is saved in this browser. A filmed take uses its own lighting, then returns to your chosen look.
 - Stop at the white **Craft services** step-van on the western cross street for coffee, rotating crew chatter and hints that change with discoveries already found. The reference-inspired truck has a blank roof board, warm open serving hatch, fold-down counter and chrome-rimmed tyres. Click or tap anywhere on the truck to walk to its clear serving apron; the body, cab and counter are solid scenery. This is fictional in-game dialogue, separate from project credits and About content.
 - The drafting table outside the workshop opens a 12-second miniature build: **Design → Mark out → Build → Shoot**. Plans are drawn on the pad, transferred to chalk, assembled into a framed and finished set, then filmed with a dolly camera and key light. Pad, plans, chalk, walls and equipment use one axonometric projection. Pause, resume, replay or inspect any step. Calmer motion disables autoplay and keeps every step available. Closing the window or switching away stops progression.
-- Six optional crew discoveries now persist in the existing browser save; previous cat rewards remain valid. Settings shows a small discovery count. Projects remain available through Work index at all times.
+- Nine optional crew discoveries now persist in the existing browser save; previous cat rewards remain valid. Settings shows a small discovery count. Projects remain available through Work index at all times.
 
 ## Updating the site
 
@@ -85,7 +85,7 @@ The prior [HANDOFF.md](HANDOFF.md) describes the archived CRT interface. This do
 
 ## Camera, crew and wrap — October 21 update
 
-Current Build: A camera at (488,300) opens the three existing hand-drawn real-build plates (Deathstalker, Nintendo × Donkey Kong, Beast Games), with framed/pulled-back compositions and links resolved from current project titles. Jules the scenic painter, Frankie the grip and Kit the PA have three rotating fictional lines each. The bell at (392,632), or Kit’s dialogue, starts a 12-second dusk vignette with closing stage doors, departing crew, a resting cat and credits. Pause, manual next, replay, close and Work index remain available. Reduced motion starts on the final tableau without autoplay. New discoveries use the existing browser save (nine total).
+Current Build: A camera approached at (488,312) opens the three existing hand-drawn real-build plates (Deathstalker, Nintendo × Donkey Kong, Beast Games), with framed/pulled-back compositions and links resolved from current project titles. Jules the scenic painter, Frankie the grip and Kit the PA have three rotating fictional lines each. The bell approached at (392,640), or Kit’s dialogue, starts a 12-second dusk vignette with closing stage doors, departing crew, a resting cat and credits. Pause, manual next, replay, close and Work index remain available. Reduced motion starts on the final tableau without autoplay. New discoveries use the existing browser save (nine total).
 
 Locked Decisions: Reuse the existing real-build pixel art. Crew dialogue is explicitly fictional and does not change production credits. No changes to content.json or the admin editor. Wrap is reversible and does not alter saved lighting or cat progress.
 
@@ -100,3 +100,35 @@ Validation: `node backlot/checks/encounters.test.mjs`, plus existing routes, lif
 Crew departures now follow cached routes through the existing collision map, turn to face each segment, and walk through the raised entrance barrier. Movement is sampled by distance at a common speed; no straight-line interpolation through buildings remains. Absolute-time sampling preserves pause, chapter selection and replay without moving the live crew. All three leave before the credits.
 
 Regression: `node backlot/checks/wrap-motion.test.mjs` samples every crew route at 30/60/120 Hz against every obstacle, checks the gate-only exit, speed, direction changes and completion, and verifies that the renderer uses those routes for normal motion, calmer motion, seeking and replay.
+
+
+## Living backlot and field notebook — review branch
+
+### Current Build
+
+Prepared against production `d6ac006b86cdde0e710524cb4c56e916a31d04f2`. This revision is a private review and has not been promoted to the public site.
+
+- Jules mixes scenic paint and works on a braced practice flat; Frankie carries pine from his station toward the workshop; Kit makes walkie rounds beside production. They follow the existing collision grid, pause near visitors or when clicked, and resume after the visitor moves away. Dialogs, filming, background tabs and Calmer motion stop the routines.
+- Original crew sprites have distinct silhouettes, hair, skin tones, clothing and kit: Jules has a curly bun, paint apron, palette and brush; Frankie has a knit cap, beard, denim and tool belt; Kit has a ponytail, headset, clipboard and radio; Mara at craft has a copper headwrap, glasses, cream apron and coffee. Matching portraits appear in conversations and the notebook. Existing fictional dialogue and project credits remain separate.
+- The camera has a detailed film body, magazine, monitor, focus wheel, lens rings, matte box, support rails and tripod. The wrap bell has a weathered timber post, iron bracket, shaded brass, clapper and rope. Their ground footprints, the practice flat and lumber are part of the collision map. Static props remain visible in the lighting and wrap views.
+- **Notebook** in the header, or **N**, opens Field notes. Save a project from its detail page; reopen or remove it under Saved work. Lot notes collects six visited places and the nine existing discoveries. Crew records introductions. The browser-local save is separate from the existing discoveries and editor content. Bookmarks use category/title identity, with a unique image fallback for renamed projects, rather than position in the editor. Removed or ambiguous projects are shown as unavailable.
+- Wrap snapshots the crew's actual current positions, including mid-step, and routes everyone through the entrance without altering their live routine. Replay and chapter selection remain deterministic.
+
+### Locked Decisions
+
+The 20-project `content.json`, current media, “INSTALLS and Editorial” label, approved professional bio, title sequence, player likeness and admin are unchanged. No new production credits are invented. This review keeps the existing local-first save behavior. Approve the concrete visual revision before promoting it to main, per the project handoff.
+
+### Validation
+
+- `node backlot/checks/living.test.mjs`: 90-second routines at 30/60/120 Hz, collision and speed bounds, job poses, approach/click waiting, Calmer motion, 45 different mid-routine wrap starts and interaction arrival.
+- `node backlot/checks/notebook.test.mjs`: malformed storage, save/remove/reload, project reordering, deleted projects, rename recovery, ambiguous images and duplicates.
+- Existing routes, life, wrap-motion, encounters, coffee and craft-render suites passed. Native Canvas renders visually reviewed the four crew designs and whole lot.
+- Cloud Chromium checked the live title-to-lot entry, notebook empty state, project save and reload persistence, reopen, visited-place navigation, moving-crew conversation and introduction record, desktop layout and a 390 × 844 CSS viewport.
+
+### Open Questions
+
+Awaiting Ben's review of the crew artwork, prop fidelity and notebook. Physical iPhone touch feel and advancing hosted-video playback remain unverified; this revision does not change video code.
+
+### Future Ideas
+
+More camera builds need a selected real project and clear reference images. Other brainstorm ideas remain parked.

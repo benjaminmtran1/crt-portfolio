@@ -18,7 +18,8 @@ export const craftStop={x:280,y:380};
 export const craftHit={body:{x:200,y:304,w:150,h:65},sign:{x:212,y:275,w:104,h:29}};
 export const craftCrew={x:245,y:378};
 export const craftCup={x:279,y:345};
-export const obstacles=[...stages.map(s=>({x:s.x-4,y:s.y-4,w:s.w+8,h:s.h+8})),...Object.values(crewTruck),...Object.values(craftTruck),
+export const encounterProps={camera:{x:473,y:278,w:30,h:17},bell:{x:381,y:615,w:23,h:12},scenicFlat:{x:744,y:359,w:43,h:10},lumber:{x:446,y:263,w:40,h:14}};
+export const obstacles=[...Object.values(encounterProps),...stages.map(s=>({x:s.x-4,y:s.y-4,w:s.w+8,h:s.h+8})),...Object.values(crewTruck),...Object.values(craftTruck),
  {x:408,y:388,w:44,h:24},{x:512,y:388,w:40,h:24},
  {x:52,y:328,w:68,h:22},{x:832,y:328,w:68,h:22}];
 export const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));

@@ -1,9 +1,11 @@
-import {wrapActorsAt} from './wrap-motion.mjs?v=wraproutes1';
-import {crew} from './encounters.mjs?v=encounters1';
-import {WIDTH,HEIGHT,stages,clamp,craftCrew,craftCup} from './world.mjs?v=craft2';
+import {drawCrew,drawCrewPortrait} from './crew-art.mjs?v=living1';
+import {drawLotCamera,drawWrapBell,drawWorkProps} from './props.mjs?v=living1';
+import {wrapActorsAt} from './wrap-motion.mjs?v=living1';
+import {crew} from './encounters.mjs?v=living1';
+import {WIDTH,HEIGHT,stages,clamp,craftCrew,craftCup} from './world.mjs?v=living1';
 import {pixelText} from './pixels.mjs?v=crew3';
 import {drawPlayer} from './player.mjs?v=coffee1';
-import {curiosities,catNook} from './life.mjs?v=coffee1';
+import {curiosities,catNook} from './life.mjs?v=living1';
 import {lightingLooks} from './departments.mjs?v=drafting1';
 import {drawConstructionScene} from './construction.mjs?v=drafting1';
 const factory=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
@@ -59,7 +61,7 @@ export class Renderer{
   rect(c,385,667,8,30,'#83978d');rect(c,563,667,8,30,'#83978d');rect(c,393,669,170,6,'#c1ac7b');for(let x=397;x<560;x+=16)poly(c,[[x,669],[x+7,669],[x+1,675],[x-6,675]],'#53544a');pixelText(c,'BEN TRAN / STUDIO LOT',480,701,'#80928a',1,true);
   pixelText(c,'STAGE 01',217,324,'#c3b99065',1,true);pixelText(c,'STAGE 02',734,324,'#b9c7ad65',1,true);pixelText(c,'STAGE 03',216,624,'#c7b8a265',1,true);pixelText(c,'STAGE 04',736,624,'#b9b3c465',1,true);
   this.productionTruck(c);this.lightingDesk(c,568,440);this.draftingTable(c,560,248);
-  this.craftServicesTruck(c);
+  this.craftServicesTruck(c);drawWorkProps(c);drawLotCamera(c);drawWrapBell(c);
   for(const item of curiosities.filter(item=>item.category)){const{x,y}=item.point;rect(c,x-9,y-9,18,10,'#c5b487');rect(c,x-6,y-6,12,1,'#78664d');rect(c,x-3,y-3,6,1,'#78664d');line(c,x,y,x,y+5,'#6a775f',2);}
   // Painted details and dithered light are cached rather than rebuilt each frame.
   this.backings=new Map();for(const s of stages.filter(s=>s.id==='narrative'||s.id==='commercial')){const layer=this.make(s.w,s.h),g=layer.getContext('2d');this.flatBack(g,22,66,s.w-44,67);this.backings.set(s.id,layer);}
@@ -73,25 +75,21 @@ export class Renderer{
  resize(width,height){this.cssW=width;this.cssH=height;const scale=width<600?.9:height<400?1.15:1.65;this.w=Math.max(260,Math.round(width/scale));this.h=Math.round(height/scale);this.canvas.width=this.w;this.canvas.height=this.h;this.c.imageSmoothingEnabled=false;}
  screenToWorld(x,y){return{x:x/this.cssW*this.w+this.camera.x-this.w/2,y:y/this.cssH*this.h+this.camera.y-this.h/2};}
  worldToScreen(x,y){return{x:(x-this.camera.x+this.w/2)/this.w*this.cssW,y:(y-this.camera.y+this.h/2)/this.h*this.cssH};}
- actor(c,x,y,face,step=0,moving=false,coat='#dfb96b',npc=false,coffee=false){if(!npc){drawPlayer(c,x,y,face,step,moving,coffee);return;}x=Math.round(x);y=Math.round(y);const bob=moving?Math.round(Math.sin(step)*1):0,feet=moving?Math.round(Math.sin(step)*2):0;oval(c,x+1,y+1,8,3,'#0916228f');y+=bob;rect(c,x-5,y-10,4,9+feet,'#203342');rect(c,x+1,y-10,4,9-feet,'#2c4552');rect(c,x-6,y-2+feet,5,3,'#172936');rect(c,x+1,y-2-feet,6,3,'#172936');rect(c,x-6,y-20,12,13,coat);rect(c,x-5,y-18,2,9,'#ebca8999');rect(c,x-8,y-18,3,9-feet,coat);rect(c,x+6,y-18,3,9+feet,coat);rect(c,x-8,y-10-feet,3,3,'#be9170');rect(c,x+6,y-10+feet,3,3,'#be9170');rect(c,x-5,y-29,10,10,'#c29c77');rect(c,x-6,y-31,11,6,'#293f49');rect(c,x-4,y-33,8,3,npc?'#8c7258':'#caa56a');rect(c,x-6,y-28,14,3,npc?'#8c7258':'#caa56a');if(face==='down'){rect(c,x-3,y-24,1,2,'#2d3337');rect(c,x+2,y-24,1,2,'#2d3337');rect(c,x-2,y-20,4,2,'#6c5749');}else if(face==='left')rect(c,x-6,y-24,2,3,'#dfb38a');else if(face==='right')rect(c,x+5,y-24,2,3,'#dfb38a');else{rect(c,x-5,y-24,10,5,'#39464a');rect(c,x-4,y-17,8,9,'#8d7659');}rect(c,x-6,y-9,13,2,'#6b5a40');rect(c,x+3,y-9,4,5,'#7c654b');}
+ actor(c,x,y,face,step=0,moving=false,coat='#dfb96b',npc=false,coffee=false,crewId=null,task='idle',time=0){if(npc&&crewId){drawCrew(c,x,y,crewId,face,step,moving,task,time);return;}if(!npc){drawPlayer(c,x,y,face,step,moving,coffee);return;}x=Math.round(x);y=Math.round(y);const bob=moving?Math.round(Math.sin(step)*1):0,feet=moving?Math.round(Math.sin(step)*2):0;oval(c,x+1,y+1,8,3,'#0916228f');y+=bob;rect(c,x-5,y-10,4,9+feet,'#203342');rect(c,x+1,y-10,4,9-feet,'#2c4552');rect(c,x-6,y-2+feet,5,3,'#172936');rect(c,x+1,y-2-feet,6,3,'#172936');rect(c,x-6,y-20,12,13,coat);rect(c,x-5,y-18,2,9,'#ebca8999');rect(c,x-8,y-18,3,9-feet,coat);rect(c,x+6,y-18,3,9+feet,coat);rect(c,x-8,y-10-feet,3,3,'#be9170');rect(c,x+6,y-10+feet,3,3,'#be9170');rect(c,x-5,y-29,10,10,'#c29c77');rect(c,x-6,y-31,11,6,'#293f49');rect(c,x-4,y-33,8,3,npc?'#8c7258':'#caa56a');rect(c,x-6,y-28,14,3,npc?'#8c7258':'#caa56a');if(face==='down'){rect(c,x-3,y-24,1,2,'#2d3337');rect(c,x+2,y-24,1,2,'#2d3337');rect(c,x-2,y-20,4,2,'#6c5749');}else if(face==='left')rect(c,x-6,y-24,2,3,'#dfb38a');else if(face==='right')rect(c,x+5,y-24,2,3,'#dfb38a');else{rect(c,x-5,y-24,10,5,'#39464a');rect(c,x-4,y-17,8,9,'#8d7659');}rect(c,x-6,y-9,13,2,'#6b5a40');rect(c,x+3,y-9,4,5,'#7c654b');}
  render(world,dt=1/60,life=null){const c=this.c,p=world.player,t=this.reduced?0:world.t,focus=life?.take?{x:235,y:224}:p;const targetX=clamp(focus.x,Math.min(WIDTH/2,this.w/2),Math.max(WIDTH/2,WIDTH-this.w/2)),targetY=clamp(focus.y,Math.min(HEIGHT/2,this.h/2),Math.max(HEIGHT/2,HEIGHT-this.h/2));const ease=this.reduced?1:1-Math.exp(-dt*(life?.take?3:6));this.camera.x+=(targetX-this.camera.x)*ease;this.camera.y+=(targetY-this.camera.y)*ease;const ox=Math.round(this.w/2-this.camera.x),oy=Math.round(this.h/2-this.camera.y);rect(c,0,0,this.w,this.h,'#182935');c.save();c.translate(ox,oy);c.drawImage(this.base,0,0);
   const rear=life?.take?null:life?.backstage(p);if(rear){const s=stages.find(s=>s.id===rear);c.drawImage(this.backings.get(rear),s.x,s.y);}
   if(life?.found.has('cat')){rect(c,804,639,29,9,'#263d3d');pixelText(c,'CREW',819,641,'#cfdbbc',1,true);}
   this.slate(c,544,312,!!life?.take,life?.nearby(p)?.id==='slate');
   rect(c,558,415,19,4,lightingLooks.find(look=>look.id===life?.lighting)?.color||'#c4d3bb');
   this.craftSteam(c,t);
-  // Camera tripod and the little production wrap bell.
-  for(const end of [478,498])line(c,488,287,end,303,'#b2b9a0',2);
-  rect(c,477,275,20,13,'#152b38');rect(c,497,278,8,8,'#93b9ae');rect(c,481,271,8,4,'#c7ad79');
-  line(c,392,605,392,634,'#b39769',3);oval(c,392,612,9,8,'#d2ac60');rect(c,381,618,22,3,'#f3d28c');
-  for(const person of crew){if(life?.nearby(p)?.id===person.id)pixelText(c,'...',person.point.x,person.point.y-44,'#f3d28c',1,true);}
-
+  for(const person of life?.routines.people||crew.map(p=>({...p.point,id:p.id}))){if(life?.nearby(p)?.id===person.id)pixelText(c,'...',person.x,person.y-44,'#f3d28c',1,true);}
   if(life?.take)c.drawImage(this.takeLight,0,0);
   if(world.path.length){const dest=world.path[world.path.length-1];for(let i=4;i<world.path.length;i+=5){const q=world.path[i];rect(c,q.x-1,q.y-1,2,2,'#dfcd9477');}const pulse=this.reduced?0:Math.sin(t*5)*2;line(c,dest.x-6-pulse,dest.y,dest.x,dest.y-3,'#e7cc8d');line(c,dest.x,dest.y-3,dest.x+6+pulse,dest.y,'#e7cc8d');line(c,dest.x+6+pulse,dest.y,dest.x,dest.y+3,'#e7cc8d');line(c,dest.x,dest.y+3,dest.x-6-pulse,dest.y,'#e7cc8d');}
   const nearest=world.nearby();
   for(const s of stages){const near=nearest?.id===s.id,visited=world.visited.has(s.id);const py=s.door.y-8+(this.reduced?0:Math.round(Math.sin(t*2.5+Number(s.number))*1));oval(c,s.door.x,s.door.y+5,14,4,near?'#e6c98a50':'#b7c6ab15');rect(c,s.door.x-8,py-17,16,13,near?'#e5c68c':'#1d3241');rect(c,s.door.x-7,py-16,14,11,near?'#e5c68c':s.color+'33');pixelText(c,visited?'+' : s.number,s.door.x,py-14,near?'#26333c':s.color,1,true);if(visited){line(c,s.door.x-3,py-12,s.door.x-1,py-10,s.color);line(c,s.door.x-1,py-10,s.door.x+4,py-14,s.color);}poly(c,[[s.door.x-3,py-4],[s.door.x+3,py-4],[s.door.x,py-1]],near?'#e5c68c':s.color);}
   const ct=life?.take?(this.reduced?0:life.crewTime):t;
-  const actors=[{...craftCrew,face:'right',step:0,moving:false,coat:'#829786'},...crew.map(person=>({...person.point,face:'down',step:0,moving:false,coat:person.coat})),{...p,player:true}];actors.sort((a,b)=>a.y-b.y);for(const a of actors)this.actor(c,a.x,a.y,a.face,a.step,a.moving&&!this.reduced,a.coat,!a.player,a.player&&life?.hasCoffee);
+  const actors=[{...craftCrew,id:'craft',face:'right',step:0,moving:false,coat:'#829786'},...(life?.routines.people||crew.map(person=>({...person.point,id:person.id,face:'down',step:0,moving:false,coat:person.coat}))),{...p,player:true}];actors.sort((a,b)=>a.y-b.y);for(const a of actors)this.actor(c,a.x,a.y,a.face,a.step,a.moving&&!this.reduced,a.coat,!a.player,a.player&&life?.hasCoffee,a.id,a.task,this.reduced?0:a.time);
+
   // The shop cat, a gently moving boom, and the working red tally lights.
   this.catSprite(c,life?.cat||{x:416,y:240,face:'right',step:0},t);
   line(c,815,374,815,303,'#22333e',4);line(c,815,303,747+Math.sin(ct*.24)*3,285,'#91a198',2);rect(c,740+Math.sin(ct*.24)*3,281,16,6,'#1b2b38');line(c,810,370,828,370,'#a0ab9d',2);rect(c,206,213,2,2,life?.take?'#ffba92':Math.sin(t)>0?'#f3ac8d':'#b16559');rect(c,692,213,2,2,'#eab081');
@@ -103,14 +101,14 @@ export class Renderer{
   c.restore();
   if(this.rain&&!this.reduced){c.globalAlpha=.25;for(let i=0;i<100;i++){const x=((i*79.37-t*47)%this.w+this.w)%this.w,y=(i*47.3+t*(150+i%31))%this.h;line(c,x,y,x-2,y+6,'#b0c7c6');}c.globalAlpha=1;for(let i=0;i<13;i++){const x=(i*73.37)%this.w,y=(i*79.3)%this.h,phase=(t*1.2+i*.37)%1;if(phase<.28){c.globalAlpha=(.28-phase)*.6;oval(c,x,y,2+phase*10,1,'#b7d0c7');}}c.globalAlpha=1;}
  }
- drawWrap(canvas,elapsed){
+ drawWrap(canvas,elapsed,cast=null){
   const c=canvas.getContext('2d'),progress=clamp(elapsed/9,0,1);c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);
   for(const s of stages){rect(c,s.door.x-13,s.y+s.h-30,26,Math.round(30*progress),'#35464b');}
   // Lift the entrance barrier before the crew leave through the open gate.
   c.drawImage(this.base,393,681,170,6,393,669,170,6);
   rect(c,386,610,6,59,'#c1ac7b');for(let y=614;y<666;y+=12)rect(c,386,y,6,5,'#53544a');
-  const departing=wrapActorsAt(elapsed).filter(person=>!person.exited).sort((a,b)=>a.y-b.y);
-  for(const person of departing)this.actor(c,person.x,person.y,person.face,person.step,person.moving&&!this.reduced,person.coat,true);
+  const departing=wrapActorsAt(elapsed,cast).filter(person=>!person.exited).sort((a,b)=>a.y-b.y);
+  for(const person of departing)this.actor(c,person.x,person.y,person.face,person.step,person.moving&&!this.reduced,person.coat,true,false,person.id);
   this.paintLook(c,'night');c.fillStyle=`rgba(5,14,28,${progress*.48})`;c.fillRect(0,0,WIDTH,HEIGHT);
   this.catSprite(c,{x:416,y:240,face:'right',step:0},0);if(elapsed>=6){rect(c,406,227,20,9,'#ac9574');pixelText(c,'Z',432,221,'#dac9a1',1);}
   c.restore();
@@ -128,8 +126,8 @@ export class Renderer{
   for(let i=0;i<4;i++)line(c,x-18,y-23+i*3,x+17,y-23+i*3,'#c3d1b844');rect(c,x-10,y-23,19,10,'#cfddc4');rect(c,x-8,y-21,15,6,'#4f716e');rect(c,x-1,y-18,4,5,'#cfddc4');line(c,x+15,y-25,x+18,y-15,'#e3bd79',2);
   rect(c,x-18,y-8,36,6,'#5b5445');pixelText(c,'BUILD',x,y-6,'#d9c394',1,true);
  }
- drawLighting(canvas,world,life){const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);this.slate(c,544,312);this.actor(c,world.player.x,world.player.y,world.player.face,0,false,undefined,false,life.hasCoffee);this.actor(c,craftCrew.x,craftCrew.y,'right',0,false,'#829786',true);this.catSprite(c,life.cat,0);this.paintLook(c,life.lighting);c.restore();}
- drawCrewPortrait(canvas){const c=canvas.getContext('2d');rect(c,0,0,128,128,'#283e46');for(let y=5;y<128;y+=8)line(c,0,y,128,y,'#71816b18');c.save();c.translate(64,111);c.scale(3,3);this.actor(c,0,0,'down',0,false,'#829786',true);c.restore();rect(c,8,116,112,4,'#ccbb8e');}
+ drawLighting(canvas,world,life){const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);this.slate(c,544,312);this.actor(c,world.player.x,world.player.y,world.player.face,0,false,undefined,false,life.hasCoffee);this.actor(c,craftCrew.x,craftCrew.y,'right',0,false,'#829786',true,false,'craft');this.catSprite(c,life.cat,0);this.paintLook(c,life.lighting);c.restore();}
+ drawCrewPortrait(canvas,id='craft'){drawCrewPortrait(canvas,id);}
  drawConstruction(canvas,sequence){drawConstructionScene(canvas,sequence);}
 
  flatBack(c,x,y,w,h){

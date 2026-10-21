@@ -1,3 +1,5 @@
+import {FieldNotebook} from '../notebook.mjs';
+import {createWrapCast} from '../wrap-motion.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
@@ -21,7 +23,7 @@ const nodes=new Map();const get=s=>{if(!nodes.has(s))nodes.set(s,{...canvas(),te
 const raw=JSON.parse(fs.readFileSync(new URL('../../content.json',import.meta.url),'utf8'));
 const projects=raw.channels.flatMap(c=>(c.projects||[]).map((p,i)=>({...p,id:c.id+i})));
 let kind='',headingFocus=0;
-const env={crew,cameraBuilds,projectTerms,drawViewfinder,wrapChapters,wrapStep,projects,renderer,life,$:get,settings:{reduced:false},stopMedia(){},panelInner:{innerHTML:''},bar:()=>'',heading:()=>'',escape:s=>s,displayName:()=> 'Benjamin Tran',handleLifeEvents(){life.drain();},openPanel(k){kind=k;},focusHeading(){headingFocus++;}};
+const env={notebook:new FieldNotebook(),persistNotebook(){},createWrapCast,crew,cameraBuilds,projectTerms,drawViewfinder,wrapChapters,wrapStep,projects,renderer,life,$:get,settings:{reduced:false},stopMedia(){},panelInner:{innerHTML:''},bar:()=>'',heading:()=>'',escape:s=>s,displayName:()=> 'Benjamin Tran',handleLifeEvents(){life.drain();},openPanel(k){kind=k;},focusHeading(){headingFocus++;}};
 const functions=source.slice(source.indexOf('function openCamera()'),source.indexOf('function activateEgg('));
 const app=vm.runInNewContext(`let cameraIndex=0,cameraWide=false,wrapElapsed=null,wrapPlaying=false,wrapChapter=-1;const crewVisits={};${functions};({openCamera,openCrew,openWrap,syncWrap,setWrap:t=>wrapElapsed=t,state:()=>({wrapElapsed,wrapPlaying})})`,env);
 app.openCamera();assert.equal(kind,'camera');assert.ok(env.panelInner.innerHTML.includes('data-project'));assert.ok(life.found.has('camera'));
