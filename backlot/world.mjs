@@ -22,9 +22,16 @@ export const craftCup={x:279,y:345};
 export const lotCamera={x:736,y:304};
 export const cameraStop={x:lotCamera.x,y:lotCamera.y+24};
 export const cameraHit={x:lotCamera.x-30,y:lotCamera.y-48,w:65,h:60};
-export const encounterProps={camera:{x:lotCamera.x-15,y:lotCamera.y-10,w:30,h:17},bell:{x:381,y:615,w:23,h:12},scenicFlat:{x:744,y:359,w:43,h:10},lumber:{x:446,y:263,w:40,h:14}};
+// Work areas hug the buildings; the middle of both streets stays open.
+export const draftingTable={x:528,y:248},lotSlate={x:656,y:304};
+export const scenicStation={mix:{x:760,y:356},paint:{x:792,y:368},flat:{x:800,y:359,w:43,h:10}};
+export const workshopLumber={x:396,y:263,w:40,h:14};
+export const carpenterStation={measure:{x:392,y:296},stack:{x:448,y:264}};
+export const storageCrates=[{x:116,y:292,w:32,h:18},{x:154,y:292,w:32,h:18}];
+export const callBoard={x:510,y:608,w:44,h:21};
+export const encounterProps={camera:{x:lotCamera.x-15,y:lotCamera.y-10,w:30,h:17},bell:{x:381,y:615,w:23,h:12},scenicFlat:scenicStation.flat,lumber:workshopLumber,callBoard:{x:callBoard.x+5,y:callBoard.y+27,w:callBoard.w-10,h:5}};
 export const obstacles=[...Object.values(encounterProps),...stages.map(s=>({x:s.x-4,y:s.y-4,w:s.w+8,h:s.h+8})),...Object.values(crewTruck),...Object.values(craftTruck),
- {x:408,y:388,w:44,h:24},{x:512,y:388,w:40,h:24},
+ ...storageCrates,
  {x:52,y:328,w:68,h:22},{x:832,y:328,w:68,h:22}];
 export const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 export const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);

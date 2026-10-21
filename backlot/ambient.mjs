@@ -1,9 +1,9 @@
-import {crew} from './encounters.mjs?v=pocket1';
-import {findPath,distance,clamp,GRID} from './world.mjs?v=pocket2';
+import {crew} from './encounters.mjs?v=cleanup1';
+import {findPath,distance,clamp,GRID,scenicStation,carpenterStation} from './world.mjs?v=cleanup1';
 const stop=(x,y,hold,task,face,carry=false)=>({point:{x,y},hold,task,face,carry});
 const scripts={
- scenic:[stop(704,356,4,'mix','down'),stop(736,368,7,'paint','right')],
- grip:[stop(376,296,3,'measure','down',true),stop(432,264,4,'stack','right')],
+ scenic:[stop(scenicStation.mix.x,scenicStation.mix.y,4,'mix','down'),stop(scenicStation.paint.x,scenicStation.paint.y,7,'paint','right')],
+ grip:[stop(carpenterStation.measure.x,carpenterStation.measure.y,3,'measure','down',true),stop(carpenterStation.stack.x,carpenterStation.stack.y,4,'stack','left')],
  pa:[stop(560,608,4,'radio','left'),stop(576,480,5,'radio','left')]
 };
 function route(from,to){

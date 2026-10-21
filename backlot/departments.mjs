@@ -1,4 +1,4 @@
-import {clamp} from './world.mjs?v=crew3';
+import {clamp} from './world.mjs?v=cleanup1';
 
 export const lightingLooks=[
  {id:'work',name:'Work lights',note:'The usual studio glow. Ready for the next setup.',color:'#c4d3bb'},

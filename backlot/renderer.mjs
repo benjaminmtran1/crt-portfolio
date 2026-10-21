@@ -1,11 +1,11 @@
 import {drawCrew,drawCrewPortrait} from './crew-art.mjs?v=pocket2';
-import {drawLotCamera,drawWrapBell,drawWorkProps} from './props.mjs?v=pocket2';
-import {wrapActorsAt} from './wrap-motion.mjs?v=pocket2';
-import {crew} from './encounters.mjs?v=pocket1';
-import {WIDTH,HEIGHT,stages,clamp,craftCrew,craftCup} from './world.mjs?v=pocket2';
+import {drawLotCamera,drawWrapBell,drawWorkProps} from './props.mjs?v=cleanup1';
+import {wrapActorsAt} from './wrap-motion.mjs?v=cleanup1';
+import {crew} from './encounters.mjs?v=cleanup1';
+import {WIDTH,HEIGHT,stages,clamp,craftCrew,craftCup,lotSlate,draftingTable,storageCrates,callBoard} from './world.mjs?v=cleanup1';
 import {pixelText} from './pixels.mjs?v=crew3';
 import {drawPlayer} from './player.mjs?v=coffee1';
-import {curiosities,catNook} from './life.mjs?v=pocket2';
+import {curiosities,catNook} from './life.mjs?v=cleanup1';
 import {lightingLooks} from './departments.mjs?v=drafting1';
 import {drawConstructionScene} from './construction.mjs?v=drafting1';
 const factory=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
@@ -39,7 +39,7 @@ export class Renderer{
  trailer(c,s){const{x,y,w}=s;oval(c,x+w/2,y+85,w*.6,9,'#091828aa');rect(c,x+5,y+55,w-10,20,'#7d8f8e');rect(c,x,y+14,w,49,'#b2b9a4');rect(c,x+3,y+6,w-6,11,'#d0cbb3');rect(c,x+10,y+1,w-20,6,'#788e91');rect(c,x+1,y+44,w-2,8,'#5c7a78');rect(c,x+12,y+23,37,23,'#344e5b');rect(c,x+15,y+26,31,15,'#e3bc7a');rect(c,x+28,y+25,2,18,'#566a68');rect(c,x+91,y+23,38,23,'#344e5b');rect(c,x+94,y+26,32,15,'#e3bc7a');rect(c,x+107,y+25,2,18,'#566a68');rect(c,x+60,y+26,24,47,'#516b70');rect(c,x+64,y+29,16,20,'#a9c4b5');rect(c,x+78,y+54,2,3,'#e8d9b5');for(let xx of [x+23,x+w-29]){rect(c,xx,y+68,13,13,'#1c2b38');rect(c,xx+4,y+71,5,6,'#8e9c98');}rect(c,x+57,y+75,30,3,'#9cac9a');rect(c,x+54,y+80,36,3,'#617772');pixelText(c,'PRODUCTION',x+w/2,y+9,'#223b44',1,true);rect(c,x+w+10,y+34,2,33,'#617979');rect(c,x+w+5,y+31,14,11,'#e1bb74');this.light(c,x+73,y+86,60,27,'234,197,126',.28);}
  build(){const c=this.base.getContext('2d'),r=random(123);rect(c,0,0,WIDTH,HEIGHT,'#202f38');this.texture(c,0,0,WIDTH,HEIGHT,'#48606055',6,.22);
   // Gravel paths, central spine and painted studio road markings.
-  rect(c,67,267,825,130,'#3c4a50');rect(c,369,58,209,626,'#3c4a50');rect(c,67,573,825,66,'#3c4a50');for(let yy=72;yy<690;yy+=28){rect(c,476,yy,2,13,'#a8a18b70');rect(c,482,yy,2,13,'#a8a18b70');}this.texture(c,69,268,820,127,'#73807755',8,.12);this.texture(c,370,60,207,624,'#73807744',9,.14);
+  rect(c,67,267,825,130,'#3c4a50');rect(c,369,58,209,626,'#3c4a50');rect(c,67,573,825,66,'#3c4a50');for(let yy=72;yy<690;yy+=28){rect(c,476,yy,2,13,'#a8a18b55');rect(c,482,yy,2,13,'#a8a18b55');}this.texture(c,69,268,820,127,'#73807730',8,.065);this.texture(c,370,60,207,624,'#73807730',9,.075);
   for(const x of [65,365,579,891])line(c,x,267,x,638,'#8a938045',2);for(const y of [266,397,573,638]){line(c,65,y,365,y,'#83918055',2);line(c,579,y,891,y,'#83918055',2);}
   for(let i=0;i<15;i++){const x=80+r()*795,y=[287,374,603][i%3]+r()*16;oval(c,x,y,12+r()*30,2+r()*6,'#6c92923e');line(c,x-9,y,x+16,y,'#92aaa43e');}
   // Perimeter wire fence, distant warehouse silhouette and greenery.
@@ -48,19 +48,17 @@ export class Renderer{
   for(let i=0;i<32;i++){const x=i%2?18:938,y=65+Math.floor(i/2)*43;this.tree(c,x,y,.8+r()*.3);}for(const [x,y]of [[70,94],[885,98],[74,240],[886,238],[65,459],[891,462],[73,564],[884,567],[164,671],[253,685],[696,677]])this.tree(c,x,y,.7+r()*.25);
   for(let i=0;i<180;i++){const x=40+r()*875,y=50+r()*610;if((x>67&&x<892&&y>260&&y<400)||(x>363&&x<580))continue;rect(c,x,y,2,3,'#596b4f');rect(c,x-2,y+2,2,2,'#768369');}
   for(const s of stages){if(s.id==='about')this.workshop(c,s);else if(s.id==='contact')this.trailer(c,s);else{this.stageShell(c,s);this[s.id](c,s);}}
-  // Film-set details: cable runs, carts, stacks of flats, lumber and unit signage.
+  // Storage stays together beside Narrative, leaving the central avenue clear.
   for(const [x,y]of [[72,326],[850,326]]){rect(c,x-8,y-5,54,24,'#202c37');rect(c,x-5,y-10,48,16,'#607271');for(let xx=x;xx<x+40;xx+=7)rect(c,xx,y-8,3,14,'#ac9368');rect(c,x-8,y+17,7,4,'#0b1727');rect(c,x+39,y+17,7,4,'#0b1727');}
-  for(const x of [408,512]){this.crate(c,x,386,40,20);for(let i=0;i<4;i++)rect(c,x+2,383-i*3,36,2,'#ba9b69');}
-  for(const [x,y]of [[182,282],[772,282],[178,592],[774,592]]){for(let i=0;i<4;i++){rect(c,x+i*3,y-i*3,33,3,'#a7926b');rect(c,x+i*3+31,y-i*3,2,7,'#6a604d');}}
+  for(const {x,y,w,h} of storageCrates){this.crate(c,x,y,w,h);for(let i=0;i<3;i++)rect(c,x+2,y-3-i*3,w-4,2,'#a38c67');}
   for(const [x,y]of [[355,305],[591,305],[354,553],[591,553],[381,463],[560,463]])this.lamp(c,x,y);
-  for(const [x,y]of [[348,373],[605,373],[365,651],[585,651]]){oval(c,x,y+4,9,3,'#1a2731');rect(c,x-7,y+1,14,3,'#e5b081');poly(c,[[x-5,y],[x+5,y],[x+2,y-12],[x-2,y-12]],'#cb845f');rect(c,x-3,y-6,6,3,'#e5d6ad');}
+  for(const [x,y]of [[365,651],[585,651]]){oval(c,x,y+4,9,3,'#1a2731');rect(c,x-7,y+1,14,3,'#e5b081');poly(c,[[x-5,y],[x+5,y],[x+2,y-12],[x-2,y-12]],'#cb845f');rect(c,x-3,y-6,6,3,'#e5d6ad');}
   c.strokeStyle='#182733';c.lineWidth=2;c.beginPath();c.moveTo(174,267);c.bezierCurveTo(170,310,245,304,286,315);c.bezierCurveTo(327,327,347,300,344,277);c.stroke();c.beginPath();c.moveTo(780,569);c.bezierCurveTo(818,605,691,640,649,597);c.stroke();
-  for(const [x,y]of [[654,370]]){this.chair(c,x,y);rect(c,x+19,y-12,21,8,'#9b7e57');line(c,x+21,y-4,x+21,y+6,'#526464');line(c,x+37,y-4,x+37,y+6,'#526464');rect(c,x+26,y-17,4,5,'#d1c7a0');}
-  // Call-sheet noticeboard and an entrance with striped barrier.
-  rect(c,449,438,4,25,'#7e8d80');rect(c,492,438,4,25,'#7e8d80');rect(c,443,424,60,25,'#223945');rect(c,446,427,54,19,'#c5bd9a');pixelText(c,'CALL TIME',473,430,'#384c50',1,true);pixelText(c,'07.00',473,439,'#6b6757',1,true);
+  // A smaller call sheet belongs at Production, beside its clear doorway.
+  {const {x,y,w,h}=callBoard;rect(c,x+5,y+h,3,11,'#7e8d80');rect(c,x+w-8,y+h,3,11,'#7e8d80');rect(c,x,y,w,h,'#223945');rect(c,x+2,y+2,w-4,h-4,'#c5bd9a');pixelText(c,'CALL',x+w/2,y+4,'#384c50',1,true);pixelText(c,'07.00',x+w/2,y+12,'#6b6757',1,true);}
   rect(c,385,667,8,30,'#83978d');rect(c,563,667,8,30,'#83978d');rect(c,393,669,170,6,'#c1ac7b');for(let x=397;x<560;x+=16)poly(c,[[x,669],[x+7,669],[x+1,675],[x-6,675]],'#53544a');pixelText(c,'BEN TRAN / STUDIO LOT',480,701,'#80928a',1,true);
   pixelText(c,'STAGE 01',217,324,'#c3b99065',1,true);pixelText(c,'STAGE 02',734,324,'#b9c7ad65',1,true);pixelText(c,'STAGE 03',216,624,'#c7b8a265',1,true);pixelText(c,'STAGE 04',736,624,'#b9b3c465',1,true);
-  this.productionTruck(c);this.lightingDesk(c,568,440);this.draftingTable(c,560,248);
+  this.productionTruck(c);this.lightingDesk(c,568,440);this.draftingTable(c,draftingTable.x,draftingTable.y);
   this.craftServicesTruck(c);drawWorkProps(c);drawLotCamera(c);drawWrapBell(c);
   for(const item of curiosities.filter(item=>item.category)){const{x,y}=item.point;rect(c,x-9,y-9,18,10,'#c5b487');rect(c,x-6,y-6,12,1,'#78664d');rect(c,x-3,y-3,6,1,'#78664d');line(c,x,y,x,y+5,'#6a775f',2);}
   // Painted details and dithered light are cached rather than rebuilt each frame.
@@ -79,7 +77,7 @@ export class Renderer{
  render(world,dt=1/60,life=null){const c=this.c,p=world.player,t=this.reduced?0:world.t,focus=life?.take?{x:235,y:224}:p;const targetX=clamp(focus.x,Math.min(WIDTH/2,this.w/2),Math.max(WIDTH/2,WIDTH-this.w/2)),targetY=clamp(focus.y,Math.min(HEIGHT/2,this.h/2),Math.max(HEIGHT/2,HEIGHT-this.h/2));const ease=this.reduced?1:1-Math.exp(-dt*(life?.take?3:6));this.camera.x+=(targetX-this.camera.x)*ease;this.camera.y+=(targetY-this.camera.y)*ease;const ox=Math.round(this.w/2-this.camera.x),oy=Math.round(this.h/2-this.camera.y);rect(c,0,0,this.w,this.h,'#182935');c.save();c.translate(ox,oy);c.drawImage(this.base,0,0);
   const rear=life?.take?null:life?.backstage(p);if(rear){const s=stages.find(s=>s.id===rear);c.drawImage(this.backings.get(rear),s.x,s.y);}
   if(life?.found.has('cat')){rect(c,804,639,29,9,'#263d3d');pixelText(c,'CREW',819,641,'#cfdbbc',1,true);}
-  this.slate(c,544,312,!!life?.take,life?.nearby(p)?.id==='slate');
+  this.slate(c,lotSlate.x,lotSlate.y,!!life?.take,life?.nearby(p)?.id==='slate');
   rect(c,558,415,19,4,lightingLooks.find(look=>look.id===life?.lighting)?.color||'#c4d3bb');
   this.craftSteam(c,t);
   for(const person of life?.routines.people||crew.map(p=>({...p.point,id:p.id}))){if(life?.nearby(p)?.id===person.id)pixelText(c,'...',person.x,person.y-44,'#f3d28c',1,true);}
@@ -87,12 +85,11 @@ export class Renderer{
   if(world.path.length){const dest=world.path[world.path.length-1];for(let i=4;i<world.path.length;i+=5){const q=world.path[i];rect(c,q.x-1,q.y-1,2,2,'#dfcd9477');}const pulse=this.reduced?0:Math.sin(t*5)*2;line(c,dest.x-6-pulse,dest.y,dest.x,dest.y-3,'#e7cc8d');line(c,dest.x,dest.y-3,dest.x+6+pulse,dest.y,'#e7cc8d');line(c,dest.x+6+pulse,dest.y,dest.x,dest.y+3,'#e7cc8d');line(c,dest.x,dest.y+3,dest.x-6-pulse,dest.y,'#e7cc8d');}
   const nearest=world.nearby();
   for(const s of stages){const near=nearest?.id===s.id,visited=world.visited.has(s.id);const py=s.door.y-8+(this.reduced?0:Math.round(Math.sin(t*2.5+Number(s.number))*1));oval(c,s.door.x,s.door.y+5,14,4,near?'#e6c98a50':'#b7c6ab15');rect(c,s.door.x-8,py-17,16,13,near?'#e5c68c':'#1d3241');rect(c,s.door.x-7,py-16,14,11,near?'#e5c68c':s.color+'33');pixelText(c,visited?'+' : s.number,s.door.x,py-14,near?'#26333c':s.color,1,true);if(visited){line(c,s.door.x-3,py-12,s.door.x-1,py-10,s.color);line(c,s.door.x-1,py-10,s.door.x+4,py-14,s.color);}poly(c,[[s.door.x-3,py-4],[s.door.x+3,py-4],[s.door.x,py-1]],near?'#e5c68c':s.color);}
-  const ct=life?.take?(this.reduced?0:life.crewTime):t;
   const actors=[{...craftCrew,id:'craft',face:'right',step:0,moving:false,coat:'#829786'},...(life?.routines.people||crew.map(person=>({...person.point,id:person.id,face:'down',step:0,moving:false,coat:person.coat}))),{...p,player:true}];actors.sort((a,b)=>a.y-b.y);for(const a of actors)this.actor(c,a.x,a.y,a.face,a.step,a.moving&&!this.reduced,a.coat,!a.player,a.player&&life?.hasCoffee,a.id,a.task,this.reduced?0:a.time);
 
-  // The shop cat, a gently moving boom, and the working red tally lights.
+  // The shop cat and working red tally lights.
   this.catSprite(c,life?.cat||{x:416,y:240,face:'right',step:0},t);
-  line(c,815,374,815,303,'#22333e',4);line(c,815,303,747+Math.sin(ct*.24)*3,285,'#91a198',2);rect(c,740+Math.sin(ct*.24)*3,281,16,6,'#1b2b38');line(c,810,370,828,370,'#a0ab9d',2);rect(c,206,213,2,2,life?.take?'#ffba92':Math.sin(t)>0?'#f3ac8d':'#b16559');rect(c,692,213,2,2,'#eab081');
+  rect(c,206,213,2,2,life?.take?'#ffba92':Math.sin(t)>0?'#f3ac8d':'#b16559');rect(c,692,213,2,2,'#eab081');
   if(life?.take)this.filmScene(c,life);
   // Wires and festoon lamps across the central avenue.
   for(const yy of [69,477]){c.beginPath();c.moveTo(359,yy);c.quadraticCurveTo(480,yy+30,592,yy);c.strokeStyle='#152c3a';c.lineWidth=2;c.stroke();for(let x=378;x<580;x+=22){const y=yy+15*(1-((x-476)/117)**2);rect(c,x,y,2,4,'#d6ba7f');rect(c,x-1,y+3,4,3,'#f4daa2');}}
@@ -126,7 +123,7 @@ export class Renderer{
   for(let i=0;i<4;i++)line(c,x-18,y-23+i*3,x+17,y-23+i*3,'#c3d1b844');rect(c,x-10,y-23,19,10,'#cfddc4');rect(c,x-8,y-21,15,6,'#4f716e');rect(c,x-1,y-18,4,5,'#cfddc4');line(c,x+15,y-25,x+18,y-15,'#e3bd79',2);
   rect(c,x-18,y-8,36,6,'#5b5445');pixelText(c,'BUILD',x,y-6,'#d9c394',1,true);
  }
- drawLighting(canvas,world,life){const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);this.slate(c,544,312);this.actor(c,world.player.x,world.player.y,world.player.face,0,false,undefined,false,life.hasCoffee);this.actor(c,craftCrew.x,craftCrew.y,'right',0,false,'#829786',true,false,'craft');this.catSprite(c,life.cat,0);this.paintLook(c,life.lighting);c.restore();}
+ drawLighting(canvas,world,life){const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.save();c.scale(canvas.width/WIDTH,canvas.height/HEIGHT);c.drawImage(this.base,0,0);this.slate(c,lotSlate.x,lotSlate.y);this.actor(c,world.player.x,world.player.y,world.player.face,0,false,undefined,false,life.hasCoffee);this.actor(c,craftCrew.x,craftCrew.y,'right',0,false,'#829786',true,false,'craft');this.catSprite(c,life.cat,0);this.paintLook(c,life.lighting);c.restore();}
  drawCrewPortrait(canvas,id='craft'){drawCrewPortrait(canvas,id);}
  drawConstruction(canvas,sequence){drawConstructionScene(canvas,sequence);}
 
@@ -279,7 +276,7 @@ export class Renderer{
   c.imageSmoothingEnabled=false;rect(c,0,0,w,h,'#142635');
   const scale=Math.max(w/WIDTH,h/HEIGHT)*1.12,pan=this.reduced?0:Math.sin(t*.055)*32;
   c.save();c.translate(Math.round((w-WIDTH*scale)/2+pan),Math.round((h-HEIGHT*scale)/2+35));c.scale(scale,scale);c.drawImage(this.base,0,0);
-  this.actor(c,472,342,'down',0,false,'#d9b573');this.catSprite(c,{x:414,y:240,face:'right',step:0},t);this.slate(c,544,312);c.restore();
+  this.actor(c,472,342,'down',0,false,'#d9b573');this.catSprite(c,{x:414,y:240,face:'right',step:0},t);this.slate(c,lotSlate.x,lotSlate.y);c.restore();
   if(this.rain&&!this.reduced){for(let i=0;i<45;i++){const x=((i*79-t*12)%w+w)%w,y=(i*43+t*42)%h;line(c,x,y,x-1,y+4,'#b5c9be24');}}
  }
  drawMap(canvas,world){const c=canvas.getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(this.base,0,0,canvas.width,canvas.height);const sx=canvas.width/WIDTH,sy=canvas.height/HEIGHT;for(const s of stages){rect(c,s.door.x*sx-2,s.door.y*sy-2,4,4,s.color);}rect(c,world.player.x*sx-2,world.player.y*sy-2,5,5,'#fff2c6');rect(c,world.player.x*sx-1,world.player.y*sy-1,3,3,'#d98d5e');}

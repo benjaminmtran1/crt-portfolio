@@ -155,3 +155,27 @@ Validation: Notebook pagination and persistence suites passed, including three p
 Open Questions: Physical iPhone touch and advancing hosted-video playback remain unverified. No video code changed.
 
 Future Ideas: Unchanged; other brainstorm ideas remain parked.
+
+## Lot cleanup — October 21 review
+
+### Current Build
+
+This review starts from production commit `409c566dda862bf4b370fe0fa5584de52f4c21fd`. It opens the main avenue without changing the 960 × 720 map or the viewing scale. The two central crates form a storage cluster beside Narrative; the call sheet is smaller and stands beside Production. Lumber, drafting and Frankie share the workshop apron. The clapper joins the Commercial camera area, and Jules's mixing pot and practice flat sit farther along the eastern edge. Redundant loose stacks, two cross-street cones, the freestanding chair/table and the decorative boom have been removed. Road texture has lower contrast and density.
+
+The desktop featured-project monitor starts as a 94 px compact strip, retaining its image, project name, cycling and direct project entry. Its labelled +/− button restores or collapses the 200 px preview. The existing touch-device behavior remains in place.
+
+### Locked Decisions
+
+Keep the approved camera location in front of Commercial, the crew artwork and Carpenter title, three-page notebook, all discoveries and portfolio/admin data. All 20 projects, media and the approved biography match production. The relocated solid props use the same coordinates for drawing and collision; crew routines use their work-area anchors. This is a private review pending visual approval, following the project brief; production main has not been promoted.
+
+### Validation
+
+Passed existing doorway routing, life, living crew, wrap motion, encounters, craft truck and craft rendering suites, plus application syntax. Checks cover all six destinations, relocated prop approaches, cat loops, 90-second crew routines and 45 mid-routine wrap starts, including 30/60/120 Hz collision checks. Desktop Chromium reviewed the open avenue and grouped work areas, monitor expansion/collapse, featured-project cycling and opening a project. Preview files were compared with source, and portfolio content/media were compared with production.
+
+### Open Questions
+
+Ben's visual review of the new spacing; physical iPhone touch feel remains unverified. No video or admin behavior changed.
+
+### Future Ideas
+
+Only consider widening the cross street if this placement pass still feels tight. Other ideas stay parked.

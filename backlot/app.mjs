@@ -1,12 +1,12 @@
 import {drawCrewPortrait} from './crew-art.mjs?v=pocket2';
 import {FieldNotebook,discoveryEntries,resolveBookmark,notebookLeaves} from './notebook.mjs?v=pocket2';
 import {NotebookPageTurn} from './notebook-motion.mjs?v=pocket1';
-import {createWrapCast} from './wrap-motion.mjs?v=pocket2';
-import {crew,cameraBuilds,projectTerms,drawViewfinder,wrapChapters,wrapStep} from './encounters.mjs?v=pocket1';
+import {createWrapCast} from './wrap-motion.mjs?v=cleanup1';
+import {crew,cameraBuilds,projectTerms,drawViewfinder,wrapChapters,wrapStep} from './encounters.mjs?v=cleanup1';
 import {TitleScene} from './title-scene.mjs?v=titlemenu2';
-import {World,stages,WIDTH,HEIGHT,distance} from './world.mjs?v=pocket2';
-import {Renderer} from './renderer.mjs?v=pocket2';
-import {LotLife} from './life.mjs?v=pocket2';
+import {World,stages,WIDTH,HEIGHT,distance} from './world.mjs?v=cleanup1';
+import {Renderer} from './renderer.mjs?v=cleanup1';
+import {LotLife} from './life.mjs?v=cleanup1';
 import {BuildSequence,buildSteps,lightingLooks} from './departments.mjs?v=drafting1';
 import {normalizeContent,mediaURL,mediaKind,hostedVideo,galleryFor,watchLinks,thumbnailFor,featuredProjects,plainText,safeURL} from './content.mjs?v=video1';
 const $=s=>document.querySelector(s),world=new World(),renderer=new Renderer($('#world'));
@@ -232,7 +232,8 @@ const ambience={ctx:null,master:null,
  cue(kind){if(!settings.sound||!this.ctx||this.ctx.state!=='running')return;const notes=kind==='clap'?[140,60]:kind==='reward'?[523.25,659.25,783.99]:[261.63,392,523.25];notes.forEach((frequency,i)=>{const osc=this.ctx.createOscillator(),gain=this.ctx.createGain(),at=this.ctx.currentTime+i*.1;osc.type=kind==='clap'?'triangle':'square';osc.frequency.value=frequency;gain.gain.setValueAtTime(0,at);gain.gain.linearRampToValueAtTime(.025,at+.008);gain.gain.exponentialRampToValueAtTime(.001,at+.14);osc.connect(gain);gain.connect(this.ctx.destination);osc.start(at);osc.stop(at+.15);osc.onended=()=>{osc.disconnect();gain.disconnect();};});}
 };
 function applySettings(){renderer.rain=settings.rain;renderer.reduced=settings.reduced;life.reduced=settings.reduced;titleScene.reduced=settings.reduced;document.body.classList.toggle('calm',settings.reduced);save('backlot-display-v1',JSON.stringify({rain:settings.rain,reduced:settings.reduced}));$('#weather-button').setAttribute('aria-pressed',String(settings.rain));$('#weather-button').textContent=settings.rain?'☂ LIGHT RAIN':'☀ CLEAR SKIES';$('#title-sound').setAttribute('aria-pressed',String(settings.sound));$('#title-sound').textContent=settings.sound?'SOUND ON':'SOUND OFF';}
-function updateFeature(){const choices=featuredProjects(projects,categories);$('#monitor').hidden=!choices.length;if(!choices.length)return;feature=(feature+choices.length)%choices.length;const p=choices[feature],gallery=photos(p).filter(im=>im.kind==='image'),img=gallery[1]||gallery[0];$('#feature-image').src=pic(img?.src)||placeholder;$('#feature-image').alt=`${p.title} — construction portfolio image`;$('#feature-title').textContent=p.title;$('#feature-category').textContent=`${stage(p.category).number} / ${stage(p.category).name}`;$('#feature-open').dataset.project=p.id;}
+function updateFeature(){const choices=featuredProjects(projects,categories);$('#monitor').hidden=!choices.length;if(!choices.length)return;feature=(feature+choices.length)%choices.length;const p=choices[feature],gallery=photos(p).filter(im=>im.kind==='image'),img=gallery[1]||gallery[0];$('#feature-image').src=pic(img?.src)||placeholder;$('#feature-image').alt=`${p.title} — construction portfolio image`;$('#feature-title').textContent=p.title;$('#feature-category').textContent=`${stage(p.category).number} / ${stage(p.category).name}`;$('#feature-open').dataset.project=p.id;$('#feature-open').setAttribute('aria-label','View '+p.title);$('#feature-title').title=p.title;}
+$('#feature-toggle').onclick=()=>{const compact=$('#monitor').classList.toggle('monitor-compact');const button=$('#feature-toggle');button.setAttribute('aria-expanded',String(!compact));button.setAttribute('aria-label',compact?'Expand featured project preview':'Collapse featured project preview');button.textContent=compact?'+':'−';};
 $('#feature-prev').onclick=()=>{feature--;updateFeature();};$('#feature-next').onclick=()=>{feature++;updateFeature();};$('#feature-open').onclick=()=>openProject($('#feature-open').dataset.project);
 $('#index-button').onclick=()=>openIndex();$('#map-button').onclick=$('#minimap-button').onclick=openMap;$('#contact-button').onclick=openContact;$('#settings-button').onclick=openSettings;
 $('#weather-button').onclick=()=>{settings.rain=!settings.rain;applySettings();};

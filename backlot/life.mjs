@@ -1,20 +1,20 @@
-import {CrewRoutines} from './ambient.mjs?v=pocket2';
-import {distance,findPath,clamp,craftStop,craftHit,cameraStop,cameraHit} from './world.mjs?v=pocket2';
+import {CrewRoutines} from './ambient.mjs?v=cleanup1';
+import {distance,findPath,clamp,craftStop,craftHit,cameraStop,cameraHit,lotSlate,draftingTable} from './world.mjs?v=cleanup1';
 import {lightingLooks,crewReply} from './departments.mjs?v=crew3';
 
-import {crew} from './encounters.mjs?v=pocket1';
+import {crew} from './encounters.mjs?v=cleanup1';
 
 // These props share the same walkable space as the portfolio destinations.
 export const curiosities=[
  {id:'camera',point:cameraStop,label:'Look through the camera',caption:'CAMERA / VIEWFINDER',radius:28},
  {id:'wrap',point:{x:392,y:640},label:'Call it a day',caption:'THE WRAP BELL',radius:30},
  ...crew.map(person=>({id:person.id,point:person.point,label:'Talk to '+person.name,caption:person.role.toUpperCase(),radius:28})),
- {id:'slate',point:{x:544,y:312},label:'Roll a take',caption:'THE CLAPPERBOARD',radius:38},
+ {id:'slate',point:lotSlate,label:'Roll a take',caption:'THE CLAPPERBOARD',radius:38},
  {id:'rear-narrative',point:{x:224,y:64},label:'Look behind the set',caption:'REAR OF STAGE 01',category:'narrative',radius:40},
  {id:'rear-commercial',point:{x:736,y:64},label:'Look behind the set',caption:'REAR OF STAGE 02',category:'commercial',radius:40},
  {id:'lighting',point:{x:568,y:440},label:'Try the lights',caption:'THE LIGHTING DESK',radius:36},
  {id:'craft',point:craftStop,label:'Take a break',caption:'CRAFT SERVICES',radius:36},
- {id:'build',point:{x:560,y:248},label:'Build a little set',caption:'THE DRAFTING TABLE',radius:34}
+ {id:'build',point:draftingTable,label:'Build a little set',caption:'THE DRAFTING TABLE',radius:34}
 ];
 export const catHome={x:416,y:240},catNook={x:736,y:640};
 export const CAT_REST=8;
