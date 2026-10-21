@@ -1,8 +1,8 @@
-import {CrewRoutines} from './ambient.mjs?v=living1';
+import {CrewRoutines} from './ambient.mjs?v=pocket1';
 import {distance,findPath,clamp,craftStop,craftHit} from './world.mjs?v=living1';
 import {lightingLooks,crewReply} from './departments.mjs?v=crew3';
 
-import {crew} from './encounters.mjs?v=living1';
+import {crew} from './encounters.mjs?v=pocket1';
 
 // These props share the same walkable space as the portfolio destinations.
 export const curiosities=[

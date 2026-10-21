@@ -1,4 +1,4 @@
-import {crew} from './encounters.mjs?v=living1';
+import {crew} from './encounters.mjs?v=pocket1';
 import {findPath,distance,clamp,GRID} from './world.mjs?v=living1';
 const stop=(x,y,hold,task,face,carry=false)=>({point:{x,y},hold,task,face,carry});
 const scripts={

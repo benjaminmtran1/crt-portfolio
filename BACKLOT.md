@@ -85,7 +85,7 @@ The prior [HANDOFF.md](HANDOFF.md) describes the archived CRT interface. This do
 
 ## Camera, crew and wrap — October 21 update
 
-Current Build: A camera approached at (488,312) opens the three existing hand-drawn real-build plates (Deathstalker, Nintendo × Donkey Kong, Beast Games), with framed/pulled-back compositions and links resolved from current project titles. Jules the scenic painter, Frankie the grip and Kit the PA have three rotating fictional lines each. The bell approached at (392,640), or Kit’s dialogue, starts a 12-second dusk vignette with closing stage doors, departing crew, a resting cat and credits. Pause, manual next, replay, close and Work index remain available. Reduced motion starts on the final tableau without autoplay. New discoveries use the existing browser save (nine total).
+Current Build: A camera approached at (488,312) opens the three existing hand-drawn real-build plates (Deathstalker, Nintendo × Donkey Kong, Beast Games), with framed/pulled-back compositions and links resolved from current project titles. Jules the scenic painter, Frankie the carpenter and Kit the PA have three rotating fictional lines each. The bell approached at (392,640), or Kit’s dialogue, starts a 12-second dusk vignette with closing stage doors, departing crew, a resting cat and credits. Pause, manual next, replay, close and Work index remain available. Reduced motion starts on the final tableau without autoplay. New discoveries use the existing browser save (nine total).
 
 Locked Decisions: Reuse the existing real-build pixel art. Crew dialogue is explicitly fictional and does not change production credits. No changes to content.json or the admin editor. Wrap is reversible and does not alter saved lighting or cat progress.
 
@@ -102,11 +102,11 @@ Crew departures now follow cached routes through the existing collision map, tur
 Regression: `node backlot/checks/wrap-motion.test.mjs` samples every crew route at 30/60/120 Hz against every obstacle, checks the gate-only exit, speed, direction changes and completion, and verifies that the renderer uses those routes for normal motion, calmer motion, seeking and replay.
 
 
-## Living backlot and field notebook — review branch
+## Living backlot and field notebook — October 21 release
 
 ### Current Build
 
-Prepared against production `d6ac006b86cdde0e710524cb4c56e916a31d04f2`. This revision is a private review and has not been promoted to the public site.
+Prepared against production `d6ac006b86cdde0e710524cb4c56e916a31d04f2`. Ben approved the character artwork and notebook content, requested the pocket-notebook refinements below, and explicitly authorized publishing this revision.
 
 - Jules mixes scenic paint and works on a braced practice flat; Frankie carries pine from his station toward the workshop; Kit makes walkie rounds beside production. They follow the existing collision grid, pause near visitors or when clicked, and resume after the visitor moves away. Dialogs, filming, background tabs and Calmer motion stop the routines.
 - Original crew sprites have distinct silhouettes, hair, skin tones, clothing and kit: Jules has a curly bun, paint apron, palette and brush; Frankie has a knit cap, beard, denim and tool belt; Kit has a ponytail, headset, clipboard and radio; Mara at craft has a copper headwrap, glasses, cream apron and coffee. Matching portraits appear in conversations and the notebook. Existing fictional dialogue and project credits remain separate.
@@ -116,7 +116,7 @@ Prepared against production `d6ac006b86cdde0e710524cb4c56e916a31d04f2`. This rev
 
 ### Locked Decisions
 
-The 20-project `content.json`, current media, “INSTALLS and Editorial” label, approved professional bio, title sequence, player likeness and admin are unchanged. No new production credits are invented. This review keeps the existing local-first save behavior. Approve the concrete visual revision before promoting it to main, per the project handoff.
+The 20-project `content.json`, current media, “INSTALLS and Editorial” label, approved professional bio, title sequence, player likeness and admin are unchanged. No new production credits are invented. This release keeps the existing local-first save behavior. Ben explicitly authorized promotion to main after the requested pocket-notebook, camera-choice and Carpenter-title changes.
 
 ### Validation
 
@@ -127,8 +127,18 @@ The 20-project `content.json`, current media, “INSTALLS and Editorial” label
 
 ### Open Questions
 
-Awaiting Ben's review of the crew artwork, prop fidelity and notebook. Physical iPhone touch feel and advancing hosted-video playback remain unverified; this revision does not change video code.
+Ben approved the crew artwork and the notebook content and structure. The pocket-notebook refinements below have automated coverage; a fresh visual browser check was blocked by the disconnected workspace. Physical iPhone touch feel and advancing hosted-video playback remain unverified; this revision does not change video code.
 
 ### Future Ideas
 
 More camera builds need a selected real project and clear reference images. Other brainstorm ideas remain parked.
+
+
+### Pocket notebook refinements
+
+- Field notes is now a compact cloth-covered book with a stitched spine, layered paper edges, ruled pages and a ribbon. Saved work, Lot notes and Crew retain their content and section structure. Saved builds appear two per leaf, discoveries three per leaf and crew two per leaf; the six places share a page.
+- Previous/Next controls, left/right arrow keys, section tabs and horizontal touch swipes change pages. Numbered leaves turn in the chosen direction. Calmer motion switches instantly, and older browsers without Web Animations fall back to an instant change.
+- Page turns cancel when closing the notebook, changing to a project or other dialog, or requesting another page. Page changes do not alter bookmarks or introductions. The existing browser save and internal crew IDs remain compatible.
+- Conversations no longer offer a camera-view button. The physical camera remains the way to look through the camera. Frankie's displayed title is **Carpenter**; his artwork and personality are unchanged.
+
+Validation: `node backlot/checks/notebook-pages.test.mjs` covers complete pagination, the actual application markup and section changes, portraits/title wiring, both turn directions, instant fallback, reduced motion, rapid requests and cancelled/closed transitions. Its assertions and the existing notebook persistence suite passed in the available JavaScript runtime; changed application modules also passed syntax and import-target checks. The local workspace disconnected during this pass, so the final pocket-notebook styling and native touch behavior have not been freshly reviewed in a browser. Earlier browser and Canvas checks above apply to the preceding living-backlot revision.
