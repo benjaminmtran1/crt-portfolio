@@ -1,4 +1,4 @@
-import {TitleScene} from './title-scene.mjs?v=showcase1';
+import {TitleScene} from './title-scene.mjs?v=beastcash1';
 import {World,stages,WIDTH,HEIGHT,distance} from './world.mjs?v=truck1';
 import {Renderer} from './renderer.mjs?v=likeness1';
 import {LotLife} from './life.mjs?v=truck1';

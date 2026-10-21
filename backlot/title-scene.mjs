@@ -1,4 +1,4 @@
-import { titleBuilds, paintTitleBuild, showcaseAt, BUILD_CYCLE_MS } from './title-builds.mjs?v=showcase1';
+import { titleBuilds, paintTitleBuild, showcaseAt, BUILD_CYCLE_MS } from './title-builds.mjs?v=beastcash1';
 
 /**
  * An original, front-facing soundstage for the title, not a view of the game map.
@@ -386,20 +386,35 @@ export class TitleScene {
     const { w, h, portrait } = this;
     // The same quiet title-safe composition on desktop and phone. The set sits
     // above the main menu, while the original stage floor stays in place.
-    const scale = Math.min(w * (portrait ? .9 : .67) / 360, h * (this.shortLandscape ? .29 : portrait ? .27 : .34) / 180);
+    const isBeast = titleBuilds[state.index].id === 'beast-games';
+    const baseScale = Math.min(w * (portrait ? .9 : .67) / 360, h * (this.shortLandscape ? .29 : portrait ? .27 : .34) / 180);
+    // Slightly reduce this deep box so its side feet move downstage without
+    // its nearest corner intruding into the unchanged selector/menu below.
+    const scale = baseScale * (isBeast ? (portrait ? .92 : .82) : 1);
     const width = q(360 * scale), height = q(180 * scale);
-    // All scenic bases share one physical floor coordinate. It is deliberately
-    // downstage of the cyc seam, never on or above the background horizon.
-    const groundY = q(h * (this.shortLandscape ? .61 : this.shortPortrait ? .635 : .68));
+    // The two front-facing sets retain their approved placement. The isometric
+    // Beast box needs its own near-corner anchor and sloping contact footprint.
+    const flatGroundY = q(h * (this.shortLandscape ? .61 : this.shortPortrait ? .635 : .68));
+    const captionTop = h * (this.shortLandscape || this.shortPortrait ? .65 : h <= 370 ? .685 : .69);
+    const groundY = isBeast ? Math.min(flatGroundY + q(5 * scale), Math.floor(captionTop - 2)) : flatGroundY;
     const x = q((w - width) / 2), y = q(groundY - 174 * scale);
-    this.buildGround = { x: q(w / 2), y: groundY, floor: this.floor, scale, left: x, width };
+    const footprint = isBeast ? [[44,126],[169,77],[314,117],[191,174]].map(([px,py])=>[x+px*scale,y+py*scale]) : null;
+    this.buildGround = { x: isBeast ? x+191*scale : q(w / 2), y: groundY, floor: this.floor, scale, left: x, width, flatGroundY, baseScale, captionTop, top: y, footprint };
     // The stage's work lights go down while the HTML title and controls stay
     // steady. This veil darkens the cyc, not a second image or a crossfade.
     c.globalAlpha = (1 - state.light) * .88;
     rect(c, 0, this.rig + 18, w, this.floor - this.rig - 5, P.ink);
     if (state.light > 0) {
-      // Shared floor-projected cast shadow extends downstage/right, opposite
-      // the key light. A dense contact band joins each base to the planks.
+      if (isBeast) {
+        const [a,b,cc,d]=footprint,cast=([xx,yy])=>[xx+14*scale,yy+7*scale];
+        c.globalAlpha=state.light*.30;
+        poly(c,[a,b,cc,cast(cc),cast(d),cast(a)],P.ink);
+        c.globalAlpha=state.light*.68;
+        poly(c,footprint,'#071820');
+        // Dense contact is directly attached to both visible sloping edges.
+        poly(c,[a,d,cc,[cc[0]+2*scale,cc[1]+3*scale],[d[0]+2*scale,d[1]+3*scale],[a[0]+2*scale,a[1]+3*scale]],'#06171C');
+      } else {
+      // Original cast shadow/contact band for the front-facing builds.
       c.globalAlpha = state.light * .30;
       poly(c, [[x + width * .10, groundY - 14 * scale],
         [x + width * .77, groundY - 18 * scale],
@@ -408,6 +423,7 @@ export class TitleScene {
         [x + width * .22, groundY + 6 * scale]], P.ink);
       c.globalAlpha = state.light * .54;
       ellipse(c, w / 2, groundY - 4 * scale, width * .40, Math.max(2, q(5 * scale)), '#071820');
+      }
       c.globalAlpha = state.light;
       c.drawImage(this.buildPlates[state.index], x, y, width, height);
     }

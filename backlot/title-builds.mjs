@@ -9,7 +9,7 @@
 export const titleBuilds = Object.freeze([
   Object.freeze({ id: 'deathstalker', title: 'DEATHSTALKER', detail: 'THE GRAVEYARD', description: 'A mossy stone graveyard set with a peaked gatehouse, rusty iron gate, crooked bare trees and headstones.', accent: '#D6B88C' }),
   Object.freeze({ id: 'donkey-kong', title: 'NINTENDO × DONKEY KONG', detail: 'SUBWAY ENTRANCE', description: 'The green, rounded SUBWAY entrance build, with cream panels, hanging vines, globe lamps and dark green railings.', accent: '#A6CB9A' }),
-  Object.freeze({ id: 'beast-games', title: 'BEAST GAMES', detail: 'THE MODULAR BUILD', description: 'A low, open-top square build with black walls, dark inset panels, silver perimeter framing and a recessed inner rim.', accent: '#9DC9D8' })
+  Object.freeze({ id: 'beast-games', title: 'BEAST GAMES', detail: 'THE CASH BUILD', description: 'A black-and-silver square build grounded on the stage, with a giant stepped pile of green cash bundles in its centre.', accent: '#9DC9D8' })
 ]);
 export const BUILD_HOLD_MS = 8500;
 export const BUILD_FADE_MS = 650;
@@ -44,6 +44,7 @@ const E = (c,x,y,rx,ry,color) => { for(let i=-ry;i<=ry;i++){const half=Math.roun
 const random = seed => () => { seed=(Math.imul(seed,1664525)+1013904223)|0;return (seed>>>0)/4294967296; };
 const ink='#091E27';
 const glyphs = {
+  '$':['111','110','111','011','111'], '1':['010','110','010','010','111'], '0':['111','101','101','101','111'], ',':['000','000','000','010','100'],
   S:['111','100','111','001','111'], U:['101','101','101','101','111'], B:['110','101','110','101','110'],
   W:['101','101','101','111','101'], A:['010','101','111','101','101'], Y:['101','101','010','010','010'],
   R:['110','101','110','101','101'], I:['111','010','010','010','111'], P:['110','101','110','100','100']
@@ -145,6 +146,30 @@ function donkeyKong(c){
   P(c,[[19,158],[39,149],[59,155],[39,166]],'#AEB7A4');P(c,[[19,158],[39,166],[39,174],[19,166]],'#6E8078');P(c,[[39,166],[59,155],[59,164],[39,174]],'#8D9D8B');
   P(c,[[303,160],[320,151],[339,159],[321,169]],'#C0C6AE');P(c,[[303,160],[321,169],[321,176],[303,167]],'#6A8077');P(c,[[321,169],[339,159],[339,166],[321,176]],'#91A391');
 }
+// The supplied cash-display reference uses a stepped, tightly packed mound.
+// This stays inside the existing construction-reference box, not a new set.
+function cashPile(c){
+  const project=(x,y,z)=>[177+x*2.9-y*2.45,80+x*.8+y*.9-z];
+  const faces=['#647847','#70854D','#788F55','#81995B','#93A66B'];
+  for(let tier=0;tier<5;tier++){
+    const half=14-tier*2.5,z=tier*15,height=13;
+    const A=project(-half,-half,z+height),B=project(half,-half,z+height),C=project(half,half,z+height),D=project(-half,half,z+height);
+    const b=project(half,-half,z),cc=project(half,half,z),d=project(-half,half,z);
+    P(c,[B,C,cc,b],'#4A6038');P(c,[D,C,cc,d],faces[tier]);
+    // Closely spaced bill edges and staggered bundle divisions on the faces.
+    for(let dz=2;dz<height;dz+=3){L(c,...project(half,-half,z+dz),...project(half,half,z+dz),'#80905C');L(c,...project(-half,half,z+dz),...project(half,half,z+dz),'#A0AE75');}
+    for(let n=-half+4;n<half;n+=5){L(c,...project(n,half,z+1),...project(n,half,z+height-1),'#3F5532');L(c,...project(half,n,z+1),...project(half,n,z+height-1),'#344D31');}
+    P(c,[A,B,C,D],'#B9C491');
+    // The visible top is made of individual notes/bundles, with pale bands.
+    for(let xx=-half+.8;xx<half-1;xx+=5)for(let yy=-half+.6;yy<half-1;yy+=4){
+      const ex=Math.min(half-.5,xx+4.4),ey=Math.min(half-.5,yy+3.3);
+      P(c,[project(xx,yy,z+height),project(ex,yy,z+height),project(ex,ey,z+height),project(xx,ey,z+height)],'#849D5C');
+      P(c,[project(xx+1.7,yy,z+height),project(xx+2.7,yy,z+height),project(xx+2.7,ey,z+height),project(xx+1.7,ey,z+height)],'#D5D2AB');
+      const mark=project((xx+ex)/2,(yy+ey)/2,z+height);R(c,mark[0]-1,mark[1],2,1,'#506B3E');
+    }
+    L(c,...D,...C,'#DBD9AF');L(c,...A,...D,'#CBCEA2');
+  }
+}
 function beastGames(c){
   // A three-quarter view follows the construction reference. The pale lines
   // are metal trim; the actual inset panel faces remain dark, never white.
@@ -172,6 +197,12 @@ function beastGames(c){
   L(c,44,76,169,27,'#B8CAC0',3);L(c,169,27,314,67,'#A8BCB3',3);L(c,44,76,191,120,'#D4D8BF',3);L(c,191,120,314,67,'#ADC3BA',3);
   L(c,44,126,191,174,'#63858B',4);L(c,191,174,314,117,'#6C9095',4);L(c,45,125,190,171,'#A8BDB0');
   for(const [x,y] of [[49,80],[185,122],[197,123],[309,75],[49,121],[185,164],[199,160],[307,111]])R(c,x,y,2,2,'#BAC8B8');
+  // The value plaque follows the left panel's perspective instead of floating.
+  let tx=68;for(const ch of '$1,000,000'){
+    for(let row=0;row<5;row++)for(let col=0;col<3;col++)if(glyphs[ch]?.[row]?.[col]==='1')R(c,tx+col*2,99+(tx-68+col*2)*.31+row*2,2,2,'#D0D5BD');
+    tx+=9;
+  }
+  cashPile(c);
 }
 export function paintTitleBuild(c,index){
   c.clearRect(0,0,360,180);
