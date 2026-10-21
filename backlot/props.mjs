@@ -1,5 +1,5 @@
 import {pixelText} from './pixels.mjs?v=crew3';
-import {lotCamera,scenicStation,workshopLumber} from './world.mjs?v=cleanup1';
+import {lotCamera,scenicStation,workshopLumber} from './world.mjs?v=screw1';
 const R=(c,x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(Math.round(x),Math.round(y),w,h);};
 const P=(c,pts,col)=>{c.fillStyle=col;c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();};
 const L=(c,x,y,xx,yy,col,w=1)=>{c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(Math.round(x)+.5,Math.round(y)+.5);c.lineTo(Math.round(xx)+.5,Math.round(yy)+.5);c.stroke();};
@@ -31,6 +31,20 @@ export function drawWrapBell(c){
  P(c,[[11,-32],[15,-32],[14,-21],[11,-18],[7,-18],[10,-23]],'#f0d18a');R(c,17,-28,2,9,'#8c622f');R(c,3,-17,23,3,'#e1b767');R(c,5,-14,19,2,'#765933');R(c,13,-12,4,4,'#d4ad66');
  L(c,14,-8,14,5,'#d9c694');L(c,14,5,11,9,'#d9c694');R(c,10,8,4,4,'#ad7b51');
  R(c,-12,-3,19,8,'#213944');pixelText(c,'WRAP',-3,-1,'#d6c59a',.5,true);c.restore();
+}
+export function drawFoundScrew(c,x,y,t=0,reduced=false,held=false){
+ c.save();c.translate(Math.round(x),Math.round(y));
+ if(held){
+  c.rotate(-.2);R(c,-8,-12,16,4,'#20323c');R(c,-7,-14,14,4,'#d6ddce');R(c,-5,-13,10,1,'#f8ecc5');
+  R(c,-3,-9,6,20,'#82989a');R(c,-2,-8,3,18,'#e1e1cb');
+  for(let yy=-5;yy<11;yy+=4){R(c,-5,yy,10,2,'#334b53');R(c,-3,yy,8,1,'#c5d2c6');}
+  P(c,[[-3,11],[3,11],[0,17]],'#d8decf');
+ }else{
+  c.rotate(-.72);R(c,-7,2,14,3,'#0a182666');R(c,-5,-2,10,3,'#a9b7ae');R(c,3,-4,5,6,'#dce1ce');R(c,4,-3,3,1,'#657a7c');
+  for(let xx=-4;xx<4;xx+=3)R(c,xx,-3,1,5,'#e6e6cf');
+  if(!reduced&&Math.sin(t*4)>-.1){R(c,9,-9,1,5,'#f7dfa0');R(c,7,-7,5,1,'#f7dfa0');}
+ }
+ c.restore();
 }
 export function drawWorkProps(c){
  // Scenic practice flat: braced timber back, mottled paint and a mixing pot.

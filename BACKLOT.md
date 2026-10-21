@@ -197,8 +197,31 @@ Title rotation, menu and UI checks cover all four selections, forward/back wrapp
 
 ### Open Questions
 
-Ben's visual review of the Cupra interpretation. Physical iPhone touch feel remains unverified.
+Cupra was approved and published from PR #6 as main commit `122fd2549fc67799db20a70db767645a5587e66f`. Physical iPhone touch feel remains unverified.
 
 ### Future Ideas
 
 Other requested brainstorm ideas remain parked.
+
+
+## Found screw treasure — October 21 review
+
+### Current Build
+
+A small silver screw now glints on the walkable workshop apron beside Frankie's lumber stack. Approaching or tapping it offers **Pick up the screw**. The first pickup stops the player, briefly holds an oversized pixel screw above their head and presents: **YOU FOUND A PERFECTLY GOOD SCREW** — “Put it in your pocket. You’ll need it the moment after you forget where it came from.” The hardware disappears from the lot and persists as the tenth discovery. Field notes records **Pocket hardware** with “A perfectly good screw. Its original job is a mystery.”
+
+### Locked Decisions
+
+The screw is tiny, walkable set dressing rather than a collision object. It is a one-time saved discovery using the existing `backlot-crew-v1` browser record. Sound stays opt-in; an enabled session gets the existing reward cue. Calmer motion removes the glint, card and held-screw animation. The notebook remains exactly three pages. All 20 projects, Cupra artwork, current character art, cleaned-up map, media, biography and admin workflow remain unchanged.
+
+### Validation
+
+Routing checks cover the screw approach from every destination and confirm the pickup spot is not blocked. Interaction checks cover pointer hit detection, take isolation, single discovery/reward events, the temporary hold-up state, disappearance after collection and restoration from the existing save. Notebook checks cover ten stamps while retaining the three-page count and Pocket hardware copy. Desktop browser review covers the ground prop, interaction prompt, treasure card, overhead sprite and notebook entry.
+
+### Open Questions
+
+Ben's visual and copy review of the private build. Physical iPhone touch feel remains unverified.
+
+### Future Ideas
+
+Other small pieces of mysteriously useful pocket hardware can stay parked until this one has had time to feel special.

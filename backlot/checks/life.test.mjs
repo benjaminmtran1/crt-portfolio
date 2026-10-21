@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {World,stages,blocked,distance} from '../world.mjs?v=crew3';
-import {LotLife,curiosities,catHome,catNook,CAT_REST,TAKE_LENGTH} from '../life.mjs?v=crew3';
+import {World,stages,blocked,distance,foundScrew} from '../world.mjs?v=screw1';
+import {LotLife,curiosities,catHome,catNook,CAT_REST,TAKE_LENGTH} from '../life.mjs?v=screw1';
 
 const catState=life=>structuredClone({cat:life.cat,path:life.catPath});
 const update=(life,world,dt=1/60)=>{
@@ -29,7 +29,7 @@ const paused=(life,world)=>{
 };
 const duringTake=(life,world,skipped)=>{
  life.interact('slate',world);life.drain();const before=catState(life);
- for(const id of ['cat','slate','lighting','craft','build'])life.interact(id,world);
+ for(const id of ['cat','slate','lighting','craft','build','screw'])life.interact(id,world);
  assert.equal(life.drain().length,0,'Interactions cannot interrupt a take');
  assert.equal(life.nearby(life.cat),null);assert.equal(life.hit(life.cat),null);
  if(skipped){advance(life,world,1);life.finishTake(true);}
@@ -61,6 +61,19 @@ for(const hz of [30,60,120]){
  const timed=new LotLife();timed.interact('slate',w);
  for(let i=0;i<(TAKE_LENGTH+.1)*hz;i++)timed.update(1/hz,w);
  assert.ok(timed.found.has('take'),'Take completion depends on seconds, not frame count');
+}
+
+// The dropped screw is a one-time, walkable discovery with its own short hold-up beat.
+{
+ const treasure=new LotLife(),treasureWorld=new World(),spot=treasure.hotspot('screw');
+ assert.deepEqual(spot.point,foundScrew.stop);assert.equal(blocked(spot.point.x,spot.point.y),false);
+ assert.equal(treasure.hit({x:foundScrew.x,y:foundScrew.y}).id,'screw');
+ treasure.interact('screw',treasureWorld);const found=treasure.drain();
+ assert.ok(treasure.found.has('screw'));assert.equal(found.filter(e=>e.type==='discovery'&&e.id==='screw').length,1);
+ assert.equal(found.filter(e=>e.type==='screw-found').length,1);assert.ok(treasure.treasure>0);
+ assert.equal(treasure.hotspot('screw'),undefined);assert.equal(treasure.hit({x:foundScrew.x,y:foundScrew.y}),null);
+ advance(treasure,treasureWorld,3);assert.equal(treasure.treasure,0);
+ const restored=new LotLife(['screw']);assert.ok(restored.found.has('screw'));assert.equal(restored.hotspot('screw'),undefined);
 }
 
 // Saved trust is a reward, not a permanent location or a one-shot state machine.
@@ -142,4 +155,4 @@ for(const id of ['rear-narrative','rear-commercial']){
  guide.interact(id,world);assert.ok(guide.drain().some(event=>event.type==='backstage'&&event.category===item.category));
 }
 assert.ok(guide.found.has('backstage'));assert.equal(guide.backstage({x:224,y:282}),null);
-console.log('Crew interactions passed: all prop routes, take timing/isolation, fresh and saved cat loops, idle approach, calmer-motion guide/return, wait/follow, first and repeated rewards, pause/rest/return, repeat pets, collision, 30/60/120 Hz replay, and rear-of-set discoveries.');
+console.log('Crew interactions passed: all prop routes, take timing/isolation, fresh and saved cat loops, found-screw persistence/hold-up, idle approach, calmer-motion guide/return, wait/follow, first and repeated rewards, pause/rest/return, repeat pets, collision, 30/60/120 Hz replay, and rear-of-set discoveries.');

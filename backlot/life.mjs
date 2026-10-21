@@ -1,5 +1,5 @@
 import {CrewRoutines} from './ambient.mjs?v=cleanup1';
-import {distance,findPath,clamp,craftStop,craftHit,cameraStop,cameraHit,lotSlate,draftingTable} from './world.mjs?v=cleanup1';
+import {distance,findPath,clamp,craftStop,craftHit,cameraStop,cameraHit,lotSlate,draftingTable,foundScrew} from './world.mjs?v=screw1';
 import {lightingLooks,crewReply} from './departments.mjs?v=crew3';
 
 import {crew} from './encounters.mjs?v=cleanup1';
@@ -14,32 +14,37 @@ export const curiosities=[
  {id:'rear-commercial',point:{x:736,y:64},label:'Look behind the set',caption:'REAR OF STAGE 02',category:'commercial',radius:40},
  {id:'lighting',point:{x:568,y:440},label:'Try the lights',caption:'THE LIGHTING DESK',radius:36},
  {id:'craft',point:craftStop,label:'Take a break',caption:'CRAFT SERVICES',radius:36},
- {id:'build',point:draftingTable,label:'Build a little set',caption:'THE DRAFTING TABLE',radius:34}
+ {id:'build',point:draftingTable,label:'Build a little set',caption:'THE DRAFTING TABLE',radius:34},
+ {id:'screw',point:foundScrew.stop,label:'Pick up the screw',caption:'SOMETHING SHINY',radius:26}
 ];
 export const catHome={x:416,y:240},catNook={x:736,y:640};
 export const CAT_REST=8;
 export const TAKE_LENGTH=10.5;
-const discoveries=new Set(['take','backstage','cat','lighting','craft','build','camera','crew','wrap']);
+const discoveries=new Set(['take','backstage','cat','lighting','craft','build','camera','crew','wrap','screw']);
 
 export class LotLife{
  constructor(saved=[]){
   this.found=new Set(Array.isArray(saved)?saved.filter(id=>discoveries.has(id)):[]);
   // Trust is persistent; location is not. Returning visitors can follow again.
   this.cat={...catHome,mode:'idle',face:'right',moving:false,step:0,heart:0,waiting:false,rest:0,idleTime:3,stroll:0};
-  this.catPath=[];this.take=null;this.takeNumber=0;this.events=[];this.crewTime=0;this.lighting='work';this.chatCount=0;this.reduced=false;
+  this.catPath=[];this.take=null;this.takeNumber=0;this.events=[];this.crewTime=0;this.lighting='work';this.chatCount=0;this.reduced=false;this.treasure=0;
   // A fresh takeaway lasts for this visit, independently of the saved craft stamp.
   this.hasCoffee=false;this.routines=new CrewRoutines();
  }
  discover(id){if(!this.found.has(id)){this.found.add(id);this.events.push({type:'discovery',id});}}
  selectLight(id){if(!lightingLooks.some(look=>look.id===id))return;this.lighting=id;this.discover('lighting');this.events.push({type:'lighting-change',id});}
  chat(topic){const reply=crewReply(topic,this.found,this.chatCount);if(topic==='day')this.chatCount++;if(topic==='coffee')this.hasCoffee=true;this.discover('craft');return reply;}
- crewHotspots(){return curiosities.map(item=>this.routines.pose(item.id)?{...item,point:this.routines.pose(item.id)}:item);}
+ crewHotspots(){return curiosities.filter(item=>item.id!=='screw'||!this.found.has('screw')).map(item=>this.routines.pose(item.id)?{...item,point:this.routines.pose(item.id)}:item);}
  hotspot(id){return id==='cat'?{id,point:this.cat,label:'Pet the cat',caption:this.cat.mode==='trusted'?'CREW APPROVED':this.cat.mode==='nook'?'THE CAT’S SECRET SPOT':'THE SHOP CAT',radius:38}:this.crewHotspots().find(item=>item.id===id);}
  nearby(player){if(this.take)return null;return [...this.crewHotspots(),this.hotspot('cat')].filter(item=>distance(item.point,player)<item.radius).sort((a,b)=>distance(a.point,player)-distance(b.point,player))[0]||null;}
  hit(point){if(this.take)return null;if(point.x>=cameraHit.x&&point.x<=cameraHit.x+cameraHit.w&&point.y>=cameraHit.y&&point.y<=cameraHit.y+cameraHit.h)return this.hotspot('camera');if(point.x>=378&&point.x<=421&&point.y>=571&&point.y<=630)return this.hotspot('wrap');if(Object.values(craftHit).some(r=>point.x>=r.x&&point.x<r.x+r.w&&point.y>=r.y&&point.y<r.y+r.h))return this.hotspot('craft');return [...this.crewHotspots(),this.hotspot('cat')].find(item=>Math.abs(point.x-item.point.x)<(item.id==='cat'?18:24)&&point.y>item.point.y-28&&point.y<item.point.y+12)||null;}
  backstage(player){return player.y<94?curiosities.find(item=>item.category&&Math.abs(player.x-item.point.x)<125)?.category:null;}
  interact(id,world){
   if(this.take)return;
+  if(id==='screw'&&!this.found.has('screw')){
+   world.path=[];world.destination=null;world.arrived=null;world.player.moving=false;
+   this.treasure=2.8;this.discover('screw');this.events.push({type:'screw-found'});return;
+  }
   if(id==='slate'){
    world.path=[];world.destination=null;world.arrived=null;world.player.moving=false;
    this.take={elapsed:0,number:++this.takeNumber};this.crewTime=world.t;this.events.push({type:'take-start'});return;
@@ -59,6 +64,7 @@ export class LotLife{
  finishTake(skipped=false){if(!this.take)return;this.take=null;if(!skipped)this.discover('take');this.events.push({type:'take-end',skipped});}
  update(dt,world){
   if(world.paused)return;dt=clamp(dt,0,.05);
+  this.treasure=Math.max(0,this.treasure-dt);
   if(this.take){this.take.elapsed+=dt;if(this.take.elapsed>=TAKE_LENGTH)this.finishTake();return;}
   this.crewTime=world.t;this.routines.update(dt,world,this.reduced);
   const cat=this.cat;cat.heart=Math.max(0,cat.heart-dt);cat.moving=false;

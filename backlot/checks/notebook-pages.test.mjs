@@ -45,7 +45,7 @@ for(const p of projects)notebook.toggle(p,projects);
 notebook.met.add('grip');const saved=notebook.serialize(),panel={open:false,dataset:{}},drawn=[];
 const panelInner={innerHTML:'',querySelectorAll(){return [...this.innerHTML.matchAll(/data-notebook-portrait="([^"]+)"/g)].map(m=>({dataset:{notebookPortrait:m[1]}}));}};
 const env={content:{},notebook,projects,notebookLeaves,NotebookPageTurn,resolveBookmark,discoveryEntries,crew,stages,panel,panelInner,
- world:{visited:new Set(['about'])},life:{found:new Set(['crew'])},settings:{reduced:true},
+ world:{visited:new Set(['about'])},life:{found:new Set(['crew','screw'])},settings:{reduced:true},
  drawCrewPortrait(canvas,id){drawn.push(id);},$:()=>({focus(){}}),requestAnimationFrame:fn=>fn(),focusHeading(){},stopMedia(){},
  escape:s=>String(s??'').replace(/[&<>"']/g,'_'),pic:s=>s,thumbnailFor:p=>p.image,placeholder:'placeholder.svg',stage:id=>stages.find(s=>s.id===id),
  openPanel(kind){panel.open=true;panel.dataset.kind=kind;}
@@ -58,7 +58,8 @@ assert.match(panelInner.innerHTML,/data-notebook-step="-1"[^>]*disabled/);
 app.openNotebook('saved',1,true);assert.equal(app.state().notebookTab,'lot');assert.match(panelInner.innerHTML,/Page 2 of 3/);
 assert.match(panelInner.innerHTML,/Places visited/);assert.match(panelInner.innerHTML,/Crew discoveries/);
 assert.equal((panelInner.innerHTML.match(/data-notebook-place=/g)||[]).length,6);
-assert.equal((panelInner.innerHTML.match(/class="notebook-stamp /g)||[]).length,9);
+assert.equal((panelInner.innerHTML.match(/class="notebook-stamp /g)||[]).length,10);
+assert.match(panelInner.innerHTML,/Pocket hardware/);
 app.openNotebook('lot',2,true);assert.equal(app.state().notebookTab,'crew');assert.match(panelInner.innerHTML,/Page 3 of 3/);
 for(const label of ['Carpenter','Frankie','Production assistant','Craft services'])assert.match(panelInner.innerHTML,new RegExp(label));
 assert.deepEqual(drawn,['scenic','grip','pa','craft'],'Every notebook portrait uses the matching new crew sprite');
