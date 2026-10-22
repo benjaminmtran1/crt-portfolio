@@ -8,6 +8,8 @@ import {World,stages,WIDTH,HEIGHT,distance} from '../world.mjs';
 import {LotLife} from '../life.mjs';
 import {BuildSequence,buildSteps,lightingLooks} from '../departments.mjs';
 import * as contentAPI from '../content.mjs';
+import * as notebookAPI from '../notebook.mjs';
+import {NotebookPageTurn} from '../notebook-motion.mjs';
 const require=createRequire(import.meta.url),{parseHTML}=require(process.env.ADMIN_DOM_MODULE||'linkedom');
 const root=new URL('../../',import.meta.url),html=fs.readFileSync(new URL('index.html',root),'utf8'),raw=JSON.parse(fs.readFileSync(new URL('content.json',root),'utf8'));
 const source=fs.readFileSync(new URL('backlot/app.mjs',root),'utf8').replace(/^import .*;\n/gm,'');
@@ -19,7 +21,7 @@ async function boot(reduced=false,saved={}){
  document.activeElement=document.body;
  const proto=Object.getPrototypeOf(document.createElement('div'));proto.scrollIntoView=function(){};proto.pause=function(){this.pausedByApp=true;};proto.load=function(){this.unloadedByApp=true;};
  const renderer=new Proxy({camera:{},drawConstruction(_c,s){drawn.push({elapsed:s.elapsed,step:s.step});},screenToWorld:(x,y)=>({x,y})},{get:(o,k)=>k in o?o[k]:()=>{}});
- const env={document,window:{addEventListener:(k,fn)=>listeners.set(k,fn)},getComputedStyle:()=>({flexDirection:'column',gap:'0'}),matchMedia:q=>({matches:q.includes('reduced-motion')?reduced:false}),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},location:{hash:'',pathname:'/',search:''},history:{replaceState(){}},ResizeObserver:class{observe(){}},requestAnimationFrame(){},setTimeout(){},clearTimeout(){},fetch:async()=>({ok:true,json:async()=>structuredClone(raw)}),console,URLSearchParams,World,stages,WIDTH,HEIGHT,distance,LotLife,BuildSequence,buildSteps,lightingLooks,...contentAPI,Renderer:class{constructor(){return renderer;}},TitleScene:class{resize(){}render(){}}};
+ const env={...notebookAPI,NotebookPageTurn,document,window:{addEventListener:(k,fn)=>listeners.set(k,fn)},getComputedStyle:()=>({flexDirection:'column',gap:'0'}),matchMedia:q=>({matches:q.includes('reduced-motion')?reduced:false}),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},location:{hash:'',pathname:'/',search:''},history:{replaceState(){}},ResizeObserver:class{observe(){}},requestAnimationFrame(){},setTimeout(){},clearTimeout(){},fetch:async()=>({ok:true,json:async()=>structuredClone(raw)}),console,URLSearchParams,World,stages,WIDTH,HEIGHT,distance,LotLife,BuildSequence,buildSteps,lightingLooks,...contentAPI,Renderer:class{constructor(){return renderer;}},TitleScene:class{resize(){}render(){}}};
  const app=await vm.runInNewContext('(async()=>{'+source+'\nreturn {dismissIntro,openProject,changePhoto,closePanel,openIndex,openAbout,openSettings,openBuild,contentLoaded};})()',env);
  app.dismissIntro();
  return{app,get,document,Event,storage,drawn,focus:v=>{focused=v;},advance(seconds){for(let i=0;i<seconds*60;i++)app.frame(now+=1000/60);},click(s){const b=get(s);assert.ok(b,s);b.dispatchEvent(new Event('click',{bubbles:true}));}};

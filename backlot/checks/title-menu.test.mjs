@@ -32,5 +32,14 @@ for(const [w,h] of [[1440,900],[1188,761],[390,844],[360,667],[844,390],[320,568
  const scene=new TitleScene(canvas(w,h));
  assert.ok(!scene.back.getContext('2d').paints.some(p=>p.color==='#FFD39A'),'No cream spike mark remains behind the title CTA');
 }
-assert.match(html,/title\.css\?v=titlemenu2/);assert.match(html,/app\.mjs\?v=[a-z0-9]+/);assert.match(app,/title-scene\.mjs\?v=cupra1/);
+assert.match(html,/title\.css\?v=titlemenu2/,'The approved title CSS stays unchanged');
+assert.match(html,/app\.mjs\?v=fivebuilds1/);
+assert.match(app,/title-scene\.mjs\?v=fivebuilds1/);
+assert.match(app,/encounters\.mjs\?v=fivebuilds1/);
+for(const file of ['title-scene.mjs','encounters.mjs']){
+ const module=fs.readFileSync(new URL('../'+file,import.meta.url),'utf8');
+ assert.match(module,/title-builds\.mjs\?v=fivebuilds1/,`${file} loads the current shared registry`);
+}
+const builds=fs.readFileSync(new URL('../title-builds.mjs',import.meta.url),'utf8');
+for(const file of ['console-photobooth-builds','laundry-diner-builds','yes-chef-build'])assert.ok(builds.includes(`${file}.mjs?v=fivebuilds1`),`${file} has a refreshed import`);
 console.log('Title menu passed: one entry label, no legacy frame, keyboard focus preserved without startup autofocus, larger work shortcut at every breakpoint, 44px touch target, removed Canvas spike at six viewport sizes, and cache refresh chain. Browser layout remains a separate check.');

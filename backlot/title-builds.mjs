@@ -1,4 +1,7 @@
 import {paintCupra} from './cupra-build.mjs?v=cupra1';
+import {paintInternet,paintRaptors} from './console-photobooth-builds.mjs?v=fivebuilds1';
+import {paintWicked,paintIhop} from './laundry-diner-builds.mjs?v=fivebuilds1';
+import {paintYesChef} from './yes-chef-build.mjs?v=fivebuilds1';
 /**
  * Hand-drawn pixel interpretations of Ben's own portfolio photographs.
  * This is scenic art, not a franchise logo or a generic game-world backdrop.
@@ -6,13 +9,21 @@ import {paintCupra} from './cupra-build.mjs?v=cupra1';
  * Nintendo x Donkey Kong: assets/img_3311.jpg + img_3337.jpg.
  * Beast Games: assets/img_7886.jpg (built) + img_0236.jpg (construction CAD).
  * Cupra: curved stair + dark wooden hall; see cupra-build.mjs references.
+ * Internet + Raptors: see console-photobooth-builds.mjs references.
+ * Wicked + IHOP: see laundry-diner-builds.mjs references.
+ * Yes, Chef!: assets/img_2634.dng.jpg + img_2629.jpg.
  * A single 360 × 180 plate is drawn at a time. No photo data is loaded at runtime.
  */
 export const titleBuilds = Object.freeze([
   Object.freeze({ id: 'deathstalker', title: 'DEATHSTALKER', detail: 'THE GRAVEYARD', description: 'A mossy stone graveyard set with a peaked gatehouse, rusty iron gate, crooked bare trees and headstones.', accent: '#D6B88C' }),
   Object.freeze({ id: 'donkey-kong', title: 'NINTENDO × DONKEY KONG', detail: 'SUBWAY ENTRANCE', description: 'The green, rounded SUBWAY entrance build, with cream panels, hanging vines, globe lamps and dark green railings.', accent: '#A6CB9A' }),
   Object.freeze({ id: 'beast-games', title: 'BEAST GAMES', detail: 'THE CASH BUILD', description: 'A black-and-silver square build grounded on the stage, with a giant stepped pile of green cash bundles in its centre.', accent: '#9DC9D8' }),
-  Object.freeze({ id: 'cupra', title: 'CUPRA', detail: 'THE STAIR & WOODEN HALL', description: 'The Cupra build: a sweeping concrete staircase beside warm display niches and a dark, wood-panelled hallway with an arched opening.', accent: '#D5BE92' })
+  Object.freeze({ id: 'cupra', title: 'CUPRA', detail: 'THE STAIR & WOODEN HALL', description: 'The Cupra build: a sweeping concrete staircase beside warm display niches and a dark, wood-panelled hallway with an arched opening.', accent: '#D5BE92' }),
+  Object.freeze({ id: 'internet', title: 'WE’RE FROM THE INTERNET', detail: 'THE CONTROL CONSOLE', description: 'The curved mustard-and-red-brown control console, with cream instrument panels, oversized coloured buttons and levers.', accent: '#DEB569' }),
+  Object.freeze({ id: 'raptors', title: 'RAPTORS × HÄAGEN-DAZS', detail: 'THE HEX PHOTOBOOTH', description: 'A freestanding charcoal hexagonal photobooth with deep nested frames, warm radial lighting and a solid threshold on the stage floor.', accent: '#E5BE82' }),
+  Object.freeze({ id: 'wicked', title: 'GAIN FLINGS × WICKED', detail: 'THE LAUNDRY ROOM', description: 'A sage-and-cream cutaway laundry room with a large arched window, smaller arched door, fitted cabinets, round washers and timber floor.', accent: '#BBC9A1' }),
+  Object.freeze({ id: 'yes-chef', title: 'YES, CHEF!', detail: 'THE CHALLENGE TABLE', description: 'A circular challenge table of segmented timber wedges around a centre disc, with glass jars, tins, a mixing bowl and cooking props on a metal pedestal.', accent: '#D6B07C' }),
+  Object.freeze({ id: 'ihop', title: 'IHOP', detail: 'THE DINER BOOTH', description: 'The blue-framed diner booth, with tall structural posts and beams, a rounded blue banquette, timber enclosure and circular dining table.', accent: '#91BACB' })
 ]);
 export const BUILD_HOLD_MS = 8500;
 export const BUILD_FADE_MS = 650;
@@ -209,6 +220,6 @@ function beastGames(c){
 }
 export function paintTitleBuild(c,index){
   c.clearRect(0,0,360,180);
-  const painters=[deathstalker,donkeyKong,beastGames,paintCupra];
+  const painters=[deathstalker,donkeyKong,beastGames,paintCupra,paintInternet,paintRaptors,paintWicked,paintYesChef,paintIhop];
   painters[((Math.trunc(index)%painters.length)+painters.length)%painters.length](c);
 }

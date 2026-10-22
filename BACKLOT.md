@@ -225,3 +225,22 @@ Ben's visual and copy review of the private build. Physical iPhone touch feel re
 ### Future Ideas
 
 Other small pieces of mysteriously useful pocket hardware can stay parked until this one has had time to feel special.
+
+
+## Five additional scenic builds — October 21 release
+
+### Current Build
+
+Five reference-led pixel builds join the four existing plates in both the title rotation and the physical camera: We’re From The Internet’s curved control console; Toronto Raptors × Häagen-Dazs’ nested hexagonal photobooth; Gain Flings × Wicked’s arched-window laundry room; the segmented Yes, Chef! challenge table; and IHOP’s blue-framed diner booth. Each uses the existing 360 × 180 native drawing system and a grounded contact edge. All nine camera selections retain framed and pulled-back views, and each opens its existing project and gallery. The five added wide camera compositions extend the floor plane behind their scenic bases and add a restrained contact shadow.
+
+### Locked Decisions
+
+Ben approved the reviewed five-build implementation for publication. The original four plate drawings, title typography, stage shell, controls, 8.5-second holds, full-blackout swaps, reduced-motion behavior, player, map, crew routines, coffee carry, three-page notebook, ten discoveries, media, content and admin are retained. Only one scenic plate is active at a time. No additional interaction or reward is introduced. Native previews are explicitly labelled as local renders, not live browser screenshots.
+
+### Reference Sources
+
+The console follows `img_4642.jpg` and `img_9344.jpg`; the photobooth follows `img_2242.dng.jpg`, `img_0336.jpg` and `screenshot-2026-08-20-at-2.09.04-pm.jpg`; the laundry room follows `img_3583.jpg` and `img_3586.jpg`; the challenge table follows `img_2634.dng.jpg` and `img_2629.jpg`; the diner booth follows `img_7360.dng.jpg` and `img_7349.dng.jpg`. Photographs are visual references only and are not loaded by these scenic renderers.
+
+### Validation
+
+Expanded title and camera checks cover nine selections, 18 camera framings, real normalized project links, full-cycle blackout isolation, forward/back wrapping, pause/resume, reduced motion, entry controls and six viewport sizes. Exact draw hashes lock all four original plates. Camera UI tests exercise repeated selection, framing, project/gallery opening, close/reopen, Escape and the unchanged single saved camera discovery. The final suite passes 25 of 26 checks. The remaining title-lifecycle failure reproduces on pristine `cf17fc92`: the moving cat can enter the drafting-table click hitbox, which wins hit testing. This unrelated baseline behavior is preserved and recorded, not hidden or fixed by this artwork change. Stale notebook imports and a dynamic-ID allowlist were repaired in test harnesses only. Native desktop/phone compositions and both camera framings were visually inspected; this is not a browser QA claim.
